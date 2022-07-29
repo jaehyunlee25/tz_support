@@ -1,5 +1,7 @@
 javascript:(() => {const log = console.log;
 const dir = console.dir;
+const doc = document;
+const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
@@ -96,12 +98,18 @@ function ajaxcallforgeneral() {
     }
   }
 }
-Array.prototype.trav = function (fnc) {
-  for (var i = 0, lng = this.length; i < lng; i++) {
-    var a = fnc(this[i], i);
-    if (a) break;
-  }
-};
+function lsg(str) {
+  return localStorage.getItem(str);
+}
+function lss(key, val) {
+  return localStorage.setItem(key, val);
+}
+function lsr(str) {
+  return localStorage.removeItem(str);
+}
+function lsc() {
+  return localStorage.clear();
+}
 String.prototype.gt = function (num) {
   return this.substring(this.length - num, this.length);
 };
@@ -118,10 +126,107 @@ String.prototype.addzero = function () {
   if (this.length == 1) return "0" + this;
   return this;
 };
-const clubId = 'a7fe6b1d-f05e-11ec-a93e-0242ac11000a';
+String.prototype.inparen = function () {
+  const regex = /.+?\((.+)\)/;
+  const str = this.toString();
+  const result = [];
+  regex
+    .exec(str)[1]
+    .split("'")
+    .join("")
+    .split(",")
+    .forEach((str) => {
+      result.push(str.trim());
+    });
+  return result;
+};
+String.prototype.datify = function (sign) {
+  const str = this.toString();
+  if (!sign) sign = "-";
+  return [str.gh(4), str.ch(4).gh(2), str.gt(2)].join(sign);
+};
+String.prototype.getFee = function () {
+  let str = this.toString();
+  str = str.replace(/[^0-9]/g, "");
+  return str * 1;
+};
+String.prototype.daySign = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  let sign;
+  if (num == 0) sign = 3;
+  else if (num == 6) sign = 2;
+  else sign = 1;
+  return sign.toString();
+};
+String.prototype.dayNum = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  return (num + 1).toString();
+};
+String.prototype.dayKor = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  const week = ["일", "월", "화", "수", "목", "금", "토"];
+
+  return week[num];
+};
+String.prototype.rm = function (str) {
+  return this.split(str).join("");
+};
+String.prototype.regex = function (regex) {
+  return this.replace(regex, "");
+};
+String.prototype.fillzero = function (sep) {
+  const ar = this.split(sep);
+  const result = [];
+  ar.forEach((el) => {
+    result.push(el.addzero());
+  });
+
+  return result.join("");
+};
+HTMLElement.prototype.str = function () {
+  return this.innerText;
+};
+HTMLElement.prototype.add = function (tag) {
+  const el = document.createElement(tag);
+  this.appendChild(el);
+  return el;
+};
+HTMLElement.prototype.attr = function (str) {
+  return this.getAttribute(str);
+};
+HTMLElement.prototype.gcn = function (str) {
+  const els = this.getElementsByClassName(str);
+  return Array.from(els);
+};
+HTMLElement.prototype.gtn = function (str) {
+  const els = this.getElementsByTagName(str);
+  return Array.from(els);
+};
+HTMLElement.prototype.str = function (str) {
+  return this.innerText;
+};
+document.gcn = function (str) {
+  const els = this.getElementsByClassName(str);
+  return Array.from(els);
+};
+document.gtn = function (str) {
+  const els = this.getElementsByTagName(str);
+  return Array.from(els);
+};
+document.clm = function (str) {
+  return document.createElement(str);
+};
+window.timer = function (time, callback) {
+  setTimeout(callback, time);
+};
+console.clear();
+const clubId = 'ae0b0349-7dce-11ec-b15c-0242ac110005';
 const courses = { 
-	'In': 'a8005001-f05e-11ec-a93e-0242ac11000a',
-	'Out': 'a8005112-f05e-11ec-a93e-0242ac11000a',
+	'서': 'd40844a1-7dce-11ec-b15c-0242ac110005',
+	'동': 'd408481c-7dce-11ec-b15c-0242ac110005',
 };const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
 const header = { "Content-Type": "application/json" };
 
@@ -149,7 +254,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      golf_club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
       message: "no empty tees!!",
       parameter: JSON.stringify({ order: 0, total: 0 }),
     };
@@ -167,7 +272,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      golf_club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
       message: "search",
       parameter: JSON.stringify({ order, total: lmt, date: arrDate[0] }),
     };
@@ -180,10 +285,13 @@ function procDate() {
 function procGolfSchedule() {
   golf_schedule.forEach((obj) => {
     let course_id = courses[obj.golf_course_id];
-    if(!course_id && Object.keys(courses).length === 1)  course_id = courses[Object.keys(courses)[0]];
+    if (!course_id && Object.keys(courses).length === 1)
+      course_id = courses[Object.keys(courses)[0]];
     obj.golf_course_id = course_id;
     obj.date =
       obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
+    if (obj.time.indexOf(":") == -1)
+      obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
   });
   /* console.log(golf_schedule); */
   const param = { golf_schedule, golf_club_id: clubId };
@@ -193,10 +301,65 @@ function procGolfSchedule() {
     if (ac) ac.message("end of procGolfSchedule!");
   });
 }
+function mneCall(thisdate, callback) {
+  const param = {};
+  const els = document.getElementsByClassName("can");
+  Array.from(els).forEach((el) => {
+    const href = el.getAttribute("href");
+    if (href === "#") return;
+    const date = thisdate + el.innerText.addzero();
+    dates.push([date, ""]);
+  });
+  callback();
+}
+
+/* <============line_div==========> */
+function mneCallDetail(arrDate) {
+  const [date, strParam] = arrDate;
+  const param = {
+    strReserveDate: date.gh(4) + "-" + date.ch(4).gh(2) + "-" + date.gt(2),
+    strGolfLgubun: 109,
+  };
+
+  get("/Mobile/Reservation/ReservationTimeList.aspx", param, {}, (data) => {
+    const ifr = document.createElement("div");
+    ifr.innerHTML = data;
+
+    const els = ifr.gcn("can");
+    Array.from(els).forEach((el, i) => {
+      const dictCourse = {
+          1: "동",
+          2: "서",
+        };
+        const param = el.attr("href").inparen();
+        let [, time, course, , , , , , , fee_discount] = param;
+        course = dictCourse[course];
+        fee_discount *= 1;
+        fee_normal = fee_discount;
+
+      golf_schedule.push({
+        golf_club_id: clubId,
+        golf_course_id: course,
+        date,
+        time,
+        in_out: "",
+        persons: "",
+        fee_normal,
+        fee_discount,
+        others: "9홀",
+      });
+    });
+    procDate();
+  });
+}
 
 /* <============line_div==========> */
 
 /* <============line_div==========> */
-
-/* <============line_div==========> */
+mneCall(thisdate, () => {
+  Update("CALENDAR|" + nextyear + "-" + nextmonth + "|");
+  setTimeout(() => {
+    mneCall(nextdate, procDate);
+  }, 1000);
+});
 })()

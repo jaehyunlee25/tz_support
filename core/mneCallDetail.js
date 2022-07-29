@@ -1,33 +1,45 @@
 function mneCallDetail(arrDate) {
-  const [date] = arrDate;
+  const [date, course] = arrDate;
   const param = {
-    method: "getTeeList",
-    coDiv: "76",
-    cos: "All",
-    part: "All",
-    date: date,
+    golfrestype: "real",
+    courseid: "0",
+    usrmemcd: "10",
+    pointdate: date,
+    openyn: "1",
+    dategbn: "2",
+    choice_time: "00",
+    cssncourseum: "",
+    inputtype: "I",
   };
-  post("/controller/ReservationController.asp", param, {}, (data) => {
-    const objResp = JSON.parse(data).rows;
-    const dict = { A: "Mountain", B: "Lake", C: "Valley" };
-    objResp.forEach((obj) => {
-      const course = dict[obj.BK_COS];
-      const time = obj.BK_TIME.gh(2) + ":" + obj.BK_TIME.gt(2);
-      const fee_normal = obj.BK_BASIC_CHARGE.replace(/\,/g, "") * 1;
-      const fee_discount = obj.BK_CHARGE.replace(/\,/g, "") * 1;
 
-      golf_schedule.push({
-        golf_club_id: clubId,
-        golf_course_id: course,
-        date,
-        time,
-        in_out: "",
-        persons: "",
-        fee_normal,
-        fee_discount,
-        others: "9홀",
+  post(
+    "/oldcourse/_mobile/GolfRes/onepage/real_timelist_ajax_list.asp",
+    param,
+    {},
+    (data) => {
+      const ifr = doc.clm("div");
+      ifr.innerHTML = data;
+
+      const els = ifr.gcn("cm_dPdir");
+      Array.from(els).forEach((el) => {
+        const param = el.children[0].attr("href").inparen();
+        let [, , time, course, , , , , fee_normal, fee_discount] = param;
+        fee_normal *= 1;
+        fee_discount *= 1;
+
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: "18홀",
+        });
       });
-    });
-    procDate();
-  });
+      procDate();
+    }
+  );
 }

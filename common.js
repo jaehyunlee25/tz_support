@@ -1,5 +1,10 @@
+const log = console.log;
+const dir = console.dir;
+const doc = document;
+const ls = localStorage;
+const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 function TZLOG(param, callback) {
-  const addr = "https://dev.mnemosyne.co.kr/api/reservation/newLog";
+  const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
   post(addr, param, { "Content-Type": "application/json" }, (data) => {
     callback(data);
   });
@@ -93,12 +98,18 @@ function ajaxcallforgeneral() {
     }
   }
 }
-Array.prototype.trav = function (fnc) {
-  for (var i = 0, lng = this.length; i < lng; i++) {
-    var a = fnc(this[i], i);
-    if (a) break;
-  }
-};
+function lsg(str) {
+  return localStorage.getItem(str);
+}
+function lss(key, val) {
+  return localStorage.setItem(key, val);
+}
+function lsr(str) {
+  return localStorage.removeItem(str);
+}
+function lsc() {
+  return localStorage.clear();
+}
 String.prototype.gt = function (num) {
   return this.substring(this.length - num, this.length);
 };
@@ -115,5 +126,100 @@ String.prototype.addzero = function () {
   if (this.length == 1) return "0" + this;
   return this;
 };
-const log = console.log;
-const dir = console.dir;
+String.prototype.inparen = function () {
+  const regex = /.+?\((.+)\)/;
+  const str = this.toString();
+  const result = [];
+  regex
+    .exec(str)[1]
+    .split("'")
+    .join("")
+    .split(",")
+    .forEach((str) => {
+      result.push(str.trim());
+    });
+  return result;
+};
+String.prototype.datify = function (sign) {
+  const str = this.toString();
+  if (!sign) sign = "-";
+  return [str.gh(4), str.ch(4).gh(2), str.gt(2)].join(sign);
+};
+String.prototype.getFee = function () {
+  let str = this.toString();
+  str = str.replace(/[^0-9]/g, "");
+  return str * 1;
+};
+String.prototype.daySign = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  let sign;
+  if (num == 0) sign = 3;
+  else if (num == 6) sign = 2;
+  else sign = 1;
+  return sign.toString();
+};
+String.prototype.dayNum = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  return (num + 1).toString();
+};
+String.prototype.dayKor = function () {
+  const str = this.getFee().toString();
+  const num = new Date(str.datify()).getDay();
+  const week = ["일", "월", "화", "수", "목", "금", "토"];
+
+  return week[num];
+};
+String.prototype.rm = function (str) {
+  return this.split(str).join("");
+};
+String.prototype.regex = function (regex) {
+  return this.replace(regex, "");
+};
+String.prototype.fillzero = function (sep) {
+  const ar = this.split(sep);
+  const result = [];
+  ar.forEach((el) => {
+    result.push(el.addzero());
+  });
+
+  return result.join("");
+};
+HTMLElement.prototype.str = function () {
+  return this.innerText;
+};
+HTMLElement.prototype.add = function (tag) {
+  const el = document.createElement(tag);
+  this.appendChild(el);
+  return el;
+};
+HTMLElement.prototype.attr = function (str) {
+  return this.getAttribute(str);
+};
+HTMLElement.prototype.gcn = function (str) {
+  const els = this.getElementsByClassName(str);
+  return Array.from(els);
+};
+HTMLElement.prototype.gtn = function (str) {
+  const els = this.getElementsByTagName(str);
+  return Array.from(els);
+};
+HTMLElement.prototype.str = function (str) {
+  return this.innerText;
+};
+document.gcn = function (str) {
+  const els = this.getElementsByClassName(str);
+  return Array.from(els);
+};
+document.gtn = function (str) {
+  const els = this.getElementsByTagName(str);
+  return Array.from(els);
+};
+document.clm = function (str) {
+  return document.createElement(str);
+};
+window.timer = function (time, callback) {
+  setTimeout(callback, time);
+};
+console.clear();

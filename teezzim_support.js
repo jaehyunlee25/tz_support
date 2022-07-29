@@ -5,9 +5,13 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "andonglake";
+// const golf_club_eng_name = "eodeungsan";
+const golf_club_eng_name = "paju_KMH";
 getLoginScript();
-// getSearchScript();
+getSearchScript();
+getReserveScript();
+getReserveSearchScript();
+getReserveCancelScript();
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
@@ -22,7 +26,55 @@ request.post(
   }
 );
 */
-
+function getReserveCancelScript() {
+  request.post(
+    "http://mnemosynesolutions.co.kr:8080/reserveCancelbot_admin",
+    {
+      json: {
+        club: golf_club_eng_name,
+        year: "2022",
+        month: "08",
+        date: "26",
+        course: "Challenge",
+        time: "0637",
+      },
+    },
+    function (error, response, body) {
+      fs.writeFileSync("reserveCancelResult.js", body.script);
+    }
+  );
+}
+function getReserveSearchScript() {
+  request.post(
+    "http://mnemosynesolutions.co.kr:8080/reserveSearchbot_admin",
+    {
+      json: {
+        club: golf_club_eng_name,
+      },
+    },
+    function (error, response, body) {
+      fs.writeFileSync("reserveSearchResult.js", body.script);
+    }
+  );
+}
+function getReserveScript() {
+  request.post(
+    "http://mnemosynesolutions.co.kr:8080/reservebot_admin",
+    {
+      json: {
+        club: golf_club_eng_name,
+        year: "2022",
+        month: "08",
+        date: "26",
+        course: "Challenge",
+        time: "0637",
+      },
+    },
+    function (error, response, body) {
+      fs.writeFileSync("reserveResult.js", body.script);
+    }
+  );
+}
 function getSearchScript() {
   request.post(
     "http://mnemosynesolutions.co.kr:8080/search",
