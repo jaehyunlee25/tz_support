@@ -6,7 +6,7 @@ const log = console.log;
 const dir = console.dir;
 
 // const golf_club_eng_name = "eodeungsan";
-const golf_club_eng_name = "paju_KMH";
+const golf_club_eng_name = "360cc";
 getLoginScript();
 getSearchScript();
 getReserveScript();

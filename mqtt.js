@@ -5,13 +5,13 @@ const log = console.log;
 client.on("connect", () => {
   log("connected!!");
   const param = {
-    club: "lavieestbelle_old",
-    club_id: "864dee33-ee26-11ec-a93e-0242ac11000a",
+    club: "360cc",
+    club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
     year: "2022",
     month: "08",
-    date: "01",
-    course: "OUT",
-    time: "1334",
+    date: "19",
+    course: "Out",
+    time: "0630",
     command: "reserveCancel", // reserve, reserveSearch, reserveCancel
   };
   client.publish(
