@@ -5,13 +5,15 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-// const golf_club_eng_name = "eodeungsan";
 const golf_club_eng_name = "360cc";
+//getDoneClubs();
+
 getLoginScript();
 getSearchScript();
 getReserveScript();
 getReserveSearchScript();
 getReserveCancelScript();
+
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
@@ -26,6 +28,17 @@ request.post(
   }
 );
 */
+function getDoneClubs() {
+  const query = gf("sql/done_clubs.sql");
+  const result = {};
+  const dbconn = jp(gf("db.json"));
+  const connection = mysql.createConnection(dbconn);
+  connection.connect();
+  connection.query(query, (err, rows, fields) => {
+    log(rows);
+  });
+  connection.end();
+}
 function getReserveCancelScript() {
   request.post(
     "http://mnemosynesolutions.co.kr:8080/reserveCancelbot_admin",
@@ -40,7 +53,7 @@ function getReserveCancelScript() {
       },
     },
     function (error, response, body) {
-      fs.writeFileSync("reserveCancelResult.js", body.script);
+      fs.writeFileSync("result/reserveCancelResult.js", body.script);
     }
   );
 }
@@ -53,7 +66,7 @@ function getReserveSearchScript() {
       },
     },
     function (error, response, body) {
-      fs.writeFileSync("reserveSearchResult.js", body.script);
+      fs.writeFileSync("result/reserveSearchResult.js", body.script);
     }
   );
 }
@@ -71,16 +84,16 @@ function getReserveScript() {
       },
     },
     function (error, response, body) {
-      fs.writeFileSync("reserveResult.js", body.script);
+      fs.writeFileSync("result/reserveResult.js", body.script);
     }
   );
 }
 function getSearchScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/search",
+    "http://mnemosynesolutions.co.kr:8080/searchbot",
     { json: { club: golf_club_eng_name } },
     function (error, response, body) {
-      fs.writeFileSync("searchResult.js", body.script);
+      fs.writeFileSync("result/searchResult.js", body.script);
     }
   );
 }
@@ -101,12 +114,12 @@ function getGolfClubInfoEx() {
     { json: { club: golf_club_eng_name } },
     function (error, response, body) {
       //console.log(body);
-      fs.writeFileSync("clubResult", body.script);
+      fs.writeFileSync("result/clubResult", body.script);
     }
   );
 }
 function getGolfClubInfo() {
-  const query = gf("golf_course.sql");
+  const query = gf("sql/golf_course.sql");
   const result = {};
   const dbconn = jp(gf("db.json"));
   const connection = mysql.createConnection(dbconn);
@@ -167,7 +180,7 @@ function getGolfClubInfo() {
   connection.end();
 }
 function getLoginScript() {
-  const query = gf("login.sql");
+  const query = gf("sql/login.sql");
   const result = {};
   const dbconn = jp(gf("db.json"));
   const connection = mysql.createConnection(dbconn);
@@ -191,7 +204,7 @@ function getLoginScript() {
             login_password:
               result[golf_club_eng_name].golf_club_login_url_admin_pw,
           };
-          fs.writeFileSync("loginResult", body.script.dp(param));
+          fs.writeFileSync("result/loginResult", body.script.dp(param));
         }
       }
     );

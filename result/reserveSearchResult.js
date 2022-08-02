@@ -227,68 +227,54 @@ console.clear();
 
   const logParam = {
     type: "command",
-    sub_type: "reserve/cancel",
+    sub_type: "reserve/reserve",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
-    message: "start reserve/cancel",
+    golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+    message: "start reserve/reserve",
     parameter: JSON.stringify({}),
   };
   const addr = location.href.split("?")[0];
-  const year = "2022";
-  const month = "08";
-  const date = "26";
-  const course = "Challenge";
-  const time = "0637";
   const dict = {
-    "https://paju.kmhleisure.com/Mobile/Member/LoginNew.aspx": funcLogin,
-    "https://paju.kmhleisure.com/Mobile/Reservation/ReservationList.aspx": funcReserve,
-    /* "https://www.dongchongc.co.kr:442/Mobile": funcMain, */
-    "https://paju.kmhleisure.com/Mobile/Member/LogOut.aspx": funcOut,
+    "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
+    "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do": funcReserve,
+    "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
+    "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut,
   };
   
   log("raw addr :: ", location.href);
   log("addr :: ", addr);
 
   const func = dict[addr];
+
   if (!func) funcOther();
   else func();
 
-  function funcOut() {
-    log("funcOut");
-    return;
-  }
   function funcMain() {
     log("funcMain");
-    const tag = localStorage.getItem("TZ_MAIN");
-    if (tag && new Date().getTime() - tag < 1000 * 5) {
-      funcEnd();
-      return;
-    }
-    localStorage.setItem("TZ_MAIN", new Date().getTime());
-
-    location.href = "https://paju.kmhleisure.com/Mobile/Reservation/ReservationList.aspx";
+    
+    funcEnd();
+    return;
+  }
+  function funcOut() {
+    log("funcOut");
+    funcEnd();
+    return;
   }
   function funcOther() {
     log("funcOther");
-    if(addr.split("#")[1] == "c") {
-      funcExec();
-      return;
-    }
-    const tag = localStorage.getItem("TZ_OTHER");
-    if (tag && new Date().getTime() - tag < 1000 * 5) {
-      funcEnd();
-      return;
-    }
-    localStorage.setItem("TZ_OTHER", new Date().getTime());
+    const tag = lsg("TZ_OTHER");
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
+    lss("TZ_OTHER", new Date().getTime());
 
-    location.href = "https://paju.kmhleisure.com/Mobile/Reservation/ReservationList.aspx";
+    location.href = "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do";
   }
   function funcLogin() {
-    
-    const tag = localStorage.getItem("TZ_LOGOUT");
+    log("funcLogin");
+
+    const tag = lsg("TZ_LOGIN");
     if (tag && new Date().getTime() - tag < 1000 * 10) return;
-    localStorage.setItem("TZ_LOGOUT", new Date().getTime());
+    lss("TZ_LOGIN", new Date().getTime());
 
     
 const param = {
@@ -296,84 +282,58 @@ const param = {
     sub_type: "login",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
+    golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
     message: "start login",
     parameter: JSON.stringify({}),
 };
 TZLOG(param, (data) => {
     log(data);
-    user_id.value = 'mnemosyne';
-user_pw.value = 'ya2ssarama!';
-login();
+    usrId2.value = "newrison";
+usrPwd2.value = "ya2ssarama!";
+fnLogin2();
+
 });  
-  }
+  }  
   function funcReserve() {
     log("funcReserve");
-
+    
     const tag = localStorage.getItem("TZ_RESERVE");
-    if (tag && new Date().getTime() - tag < 1000 * 5) {
-      funcEnd();
-      return;
-    }
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
     localStorage.setItem("TZ_RESERVE", new Date().getTime());
 
-    TZLOG(logParam, (data) => {
-      log(data);
-      setTimeout(funcCancel, 1000);
-    });
+    TZLOG(logParam, (data) => {});
+    funcSearch();
   }
-  function funcCancel() {
-    log("funcCancel");
+  function funcSearch() {
+    log("funcSearch");
 
-    const els = document.gcn("reserveList")[0].gtn("a");
-    log("els", els, els.length);
+    const els = doc.gcn("cm_time_list_tbl")[0].gtn("tbody")[0].gtn("tr");
     const dictCourse = {
-      11: "동",
-      22: "서",
+      OUT: "Out",
+      IN: "IN",
     };
-    let target;
-    Array.from(els).every((el) => {
-      if(el.str() != "취소") return true;
+    const result = [];
+    Array.from(els).forEach((el) => {
+      const param = el.children[3].children[0].attr("onclick").inparen();
+      const [time, , date, , , course] = param;
 
-      const param = el.attr("href").inparen();
-      const elCompany = param[9];
-      if(elCompany != "109") return true;
-
-      const elDate = param[0];
-      const elTime = param[1];
-      const elCourse = param[2];  
-
-      log("reserve cancel", dictCourse[elCourse], elDate, elTime);
-      const fulldate = [year, month, date].join("");
-
-      log(elDate, fulldate, course, elTime, time);
-      if (
-        elDate == fulldate &&
-        elTime == time &&
-        dictCourse[elCourse] == course
-      )
-        target = el;
-
-      return !target;  
+      log("reserve search", dictCourse[course], date, time);
+      result.push({ date, time, course: dictCourse[course] });
     });
-
-    log("target", target);
-    if (target) {
-      target.click();
-      timer(500, funcExec);
-    } else {
-      LOGOUT()
-    }
-  }
-  function funcExec() {
-    setTimeout(() => {
-      strCancelMsg.value = "cancel";
-      btnResveCancel.click();
-    }, 1000);
+    const param = {
+      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      device_id: "${deviceId}",
+      result,
+    };
+    const addr = OUTER_ADDR_HEADER + "/api/reservation/newReserveSearch";
+    post(addr, param, { "Content-Type": "application/json" }, (data) => {
+      console.log(data);
+      LOGOUT();
+    });
   }
   function funcEnd() {
     log("funcEnd");
-    const strEnd = "end of reserve/cancel";
+    const strEnd = "end of reserve/search";
     logParam.message = strEnd;
     TZLOG(logParam, (data) => {});
     const ac = window.AndroidController;
@@ -381,6 +341,6 @@ login();
   }
   function LOGOUT() {
     log("LOGOUT");
-    location.href = "/Mobile/Member/LogOut.aspx";
+    location.href = "/mobile/user/sign/Logout.do";
   }
 })();

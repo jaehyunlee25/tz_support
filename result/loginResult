@@ -230,14 +230,15 @@ const param = {
     sub_type: "login",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
+    golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
     message: "start login",
     parameter: JSON.stringify({}),
 };
 TZLOG(param, (data) => {
     log(data);
-    user_id.value = 'mnemosyne';
-user_pw.value = 'ya2ssarama!';
-login();
+    usrId2.value = "newrison";
+usrPwd2.value = "ya2ssarama!";
+fnLogin2();
+
 });    
 })();
