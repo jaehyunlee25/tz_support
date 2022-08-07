@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "360cc";
+const golf_club_eng_name = "bavista";
 //getDoneClubs();
 
 getLoginScript();

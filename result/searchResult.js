@@ -1,9 +1,20 @@
 javascript:(() => {
-    const log = console.log;
+    /* test */
+const log = console.log;
 const dir = console.dir;
 const doc = document;
 const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
+const logParam = {
+  type: "command",
+  sub_type: "reserve/reserve",
+  device_id: "${deviceId}",
+  device_token: "${deviceToken}",
+  golf_club_id: "${golfClubId}",
+  message: "start reserve/reserve",
+  parameter: JSON.stringify({}),
+};
+
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
   post(addr, param, { "Content-Type": "application/json" }, (data) => {
@@ -223,74 +234,34 @@ document.clm = function (str) {
 window.timer = function (time, callback) {
   setTimeout(callback, time);
 };
+/* 이 부분 자리 옮기지 마시오.*/
 console.clear();
 
-    const logParam = {
-      type: "command",
-      sub_type: "reserve/reserve",
-      device_id: "${deviceId}",
-      device_token: "${deviceToken}",
-      golf_club_id: "${golfClubId}",
-      message: "start reserve/reserve",
-      parameter: JSON.stringify({}),
-    };
-    const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-    const aDDr = location.href.split(splitter)[0];
-    const suffix = location.href.split(splitter)[1];
-    const dictSplitter = {"#": "?", "?": "#"};
-    let addr = aDDr;
-    if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
-        addr = aDDr.split(dictSplitter[splitter])[0];
-    
-    log("raw addr :: ", location.href);
-    log("aDDr :: ", aDDr);
-    log("addr :: ", addr);
-        
-    const dict = ${address_mapping};
-    
-    const func = dict[addr];
-    if (!func) funcOther();
-    else func();    
+    const addr = location.href;
+    if(addr == "https://www.bavista.co.kr/Mobile/Member/Login") {
+        const tag = localStorage.getItem("TZ_LOGIN");
+        if (tag && new Date().getTime() - tag < 1000 * 10) {
+            location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar";
+            return;
+        }
+        localStorage.setItem("TZ_LOGIN", new Date().getTime());
 
-    function funcList() {
-      log("funcList");
-      location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
-      return;
-    }
-    function funcMain() {
-      log("funcMain");
-      location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
-      return;
-    }
-    function funcOut() {
-      log("funcOut");
-
-      funcEnd();
-
-      return;
-    }
-    function funcOther() {
-      log("funcOther");
-        
-      location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
-
-      return;
-    }
-    function funcLogin() {
-      log("funcLogin");
-      
-      const tag = localStorage.getItem("TZ_LOGIN");
-      if (tag && new Date().getTime() - tag < 1000 * 5) {
-        location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
-        return;
-      }
-      localStorage.setItem("TZ_LOGIN", new Date().getTime());
-    
-      const log = console.log;
+        /* test */
+const log = console.log;
 const dir = console.dir;
 const doc = document;
 const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
+const logParam = {
+  type: "command",
+  sub_type: "reserve/reserve",
+  device_id: "${deviceId}",
+  device_token: "${deviceToken}",
+  golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
+  message: "start reserve/reserve",
+  parameter: JSON.stringify({}),
+};
+
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
   post(addr, param, { "Content-Type": "application/json" }, (data) => {
@@ -510,34 +481,74 @@ document.clm = function (str) {
 window.timer = function (time, callback) {
   setTimeout(callback, time);
 };
+/* 이 부분 자리 옮기지 마시오.*/
 console.clear();
 
-const param = {
-    type: "command", 
-    sub_type: "login",
-    device_id: "${deviceId}",
-    device_token: "${deviceToken}",
-    golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
-    message: "start login",
-    parameter: JSON.stringify({}),
-};
-TZLOG(param, (data) => {
-    log(data);
-    usrId2.value = "${login_id}";
-usrPwd2.value = "${login_password}";
-fnLogin2();
+logParam.sub_type = "login";
+message: "start login";
+TZLOG(logParam, (data) => {}); 
+id.value = '${login_id}';
+pwd.value = '${login_password}';
+login(); 
+    } else if (addr == "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar") {
+        /* begin blocking infinite call */
+let TZ_BOT_SAFETY = true;
+let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
+let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
+let curTimeforVisit = new Date().getTime();
+log(visitNumber, visitNumber == null);
+if(lsg("TZ_ADMIN_BLOCK_IC") != null) {
+	log(1);
+	if (curTimeforVisit - lastVistTime < 1000 * 15) {
+		log(2);
+		if (visitNumber > 9) {
+			log(3);
+			if(window.AndroidController) 
+				window.AndroidController.message("TZ_MSG_IC");
+			TZ_BOT_SAFETY = false;
+			/* 초기화 */
+			visitNumber = 0;
+			lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+			/* 로그아웃 */
+			if (LOGOUT) LOGOUT();
+		}
+	} else {
+		log(4);
+		visitNumber = 0;
+		lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+	}
+} else {
+	log(5);
+	visitNumber = 0;
+	lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+}
+visitNumber++;
+lss("TZ_ADMIN_BLOCK_IC", visitNumber);
+log("TZ_ADMIN_BLOCK_IC", lsg("TZ_ADMIN_BLOCK_IC"), lsg("TZ_ADMIN_BLOCK_IC_TIME"));
+/* end blocking infinite call */
 
-});  
-    
-      return;
-    }
-    function funcReserve() {
-      log("funcSearch");
+const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+const aDDr = location.href.split(splitter)[0];
+const suffix = location.href.split(splitter)[1];
+const dictSplitter = {"#": "?", "?": "#"};
+let addr = aDDr;
+if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
+    addr = aDDr.split(dictSplitter[splitter])[0];
 
-      const clubId = 'a7fe6b1d-f05e-11ec-a93e-0242ac11000a';
+log("raw addr :: ", location.href);
+log("aDDr :: ", aDDr);
+log("addr :: ", addr);
+
+const clubId = '9dd06332-f062-11ec-a93e-0242ac11000a';
 const courses = { 
-	'In': 'a8005001-f05e-11ec-a93e-0242ac11000a',
-	'Out': 'a8005112-f05e-11ec-a93e-0242ac11000a',
+	'Lago': 'd8262e2b-0dd6-11ed-a93e-0242ac11000a',
+	'Lago': '923c8402-0dd6-11ed-a93e-0242ac11000a',
+	'Lago': 'f3b92ace-09c0-11ed-a93e-0242ac11000a',
+	'Vista': '9dd46ae7-f062-11ec-a93e-0242ac11000a',
+	'Monti': '9dd46bd2-f062-11ec-a93e-0242ac11000a',
+	'Buona': '9dd46c12-f062-11ec-a93e-0242ac11000a',
+	'Bella': '9dd46c45-f062-11ec-a93e-0242ac11000a',
+	'Hopark': '9dd46c72-f062-11ec-a93e-0242ac11000a',
 };const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
 const header = { "Content-Type": "application/json" };
 
@@ -565,7 +576,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
       message: "no empty tees!!",
       parameter: JSON.stringify({ order: 0, total: 0 }),
     };
@@ -584,7 +595,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
       message: "search",
       parameter: JSON.stringify({ order, total: lmt, date: arrDate[0] }),
     };
@@ -613,53 +624,64 @@ function procGolfSchedule() {
     if (ac) ac.message("end of procGolfSchedule!");
   });
 }
-function mneCall(strdate, callback) {
-  const param = {};
-  const els = document.getElementsByClassName("cal_live");
-  Array.from(els).forEach((el) => {
-    const href = el.getAttribute("href");
-    if (href === "#") return;
-    const date = strdate + el.innerText.addzero();
-    dates.push([date, ""]);
+function mneCall(date, opt, callback) {
+  const param = {
+    coGubun: "M",
+    day: [date.gh(4), date.gt(2), "01"].join("/"),
+    type: opt,
+  };
+  post("/Mobile/Ajax/MobileCalendar", param, {}, (data) => {
+    const ifr = document.createElement("div");
+    ifr.innerHTML = data;
+    const els = ifr.getElementsByClassName("sel");
+    Array.from(els).forEach((el) => {
+      const param = el.getAttribute("onclick").inparen();
+      dates.push([param[0], param]);
+    });
+    callback();
   });
-  callback();
 }
 
 /* <============line_div==========> */
 function mneCallDetail(arrDate) {
-  const [date, strParam] = arrDate;
+  const [date, option] = arrDate;
   const param = {
-    golfResType: "real",
-    courseId: "0",
-    usrMemCd: "40",
-    pointDate: date,
-    openYn: "1",
-    dateGbn: "3",
-    choiceTime: "00",
-    cssncourseum: "",
-    inputType: "I",
+    coGubun: "M",
+    date: date,
+    type: "reserv",
+    chg_date: "",
+    chg_seq: "",
+    chg_time: "",
+    chg_course: "",
   };
-  const courseDict = {
-    IN: "In",
-    OUT: "Out",
-  };
-
-  post("/mobile/reservation/list/ajax_real_timeinfo_list.do", param, {}, (data) => {
+  post("/Mobile/Booking/SelectTime", param, {}, (data) => {
     const ifr = document.createElement("div");
     ifr.innerHTML = data;
 
-    const tbl = ifr
-      .getElementsByClassName("cm_time_list_tbl")[0]
-      .getElementsByTagName("tbody")[0];
-    const els = tbl.getElementsByTagName("tr");
+    const els = ifr.getElementsByTagName("tr");
 
-    const obTeams = {};
     Array.from(els).forEach((el, i) => {
       if (i === 0) return;
-      const course = courseDict[el.children[1].innerText];
-      const time = el.children[2].innerText;
-      const fee_discount = el.children[4].innerText.split(",").join("") * 1;
-      const fee_normal = el.children[4].innerText.split(",").join("") * 1;
+      const course = el.children[0].innerText;
+log(course);
+      const time = el.children[1].innerText.ch(2);
+      let fee_normal =
+        el.children[3].innerText
+          .trim()
+          .split("\n")[0]
+          .trim()
+          .split(",")
+          .join("") * 1;
+      let fee_discount =
+        el.children[3].innerText
+          .trim()
+          .split("\n")[1]
+          .trim()
+          .split(",")
+          .join("") * 1;
+
+      if (isNaN(fee_normal)) fee_normal = -1;
+      if (isNaN(fee_discount)) fee_discount = -1;
 
       golf_schedule.push({
         golf_club_id: clubId,
@@ -670,7 +692,7 @@ function mneCallDetail(arrDate) {
         persons: "",
         fee_normal,
         fee_discount,
-        others: "9홀",
+        others: "18홀",
       });
     });
     procDate();
@@ -680,17 +702,11 @@ function mneCallDetail(arrDate) {
 /* <============line_div==========> */
 
 /* <============line_div==========> */
-mneCall(thisdate, () => {
-  document.getElementsByClassName("right")[1].click();
-  setTimeout(() => {
-    mneCall(nextdate, procDate);
-  }, 1000);
+mneCall(nextdate, "prev", () => {
+  mneCall(thisdate, "next", procDate);
 });
 
-
-      return;
+    } else {
+        location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar";
     }
-    ${endoutScript}
-
 })();
-    

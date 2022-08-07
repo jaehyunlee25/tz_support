@@ -5,11 +5,11 @@ const log = console.log;
 client.on("connect", () => {
   log("connected!!");
   const param = {
-    club: "asecovalley",
-    club_id: "a0cffdd8-f12a-11ec-a93e-0242ac11000a",
+    club: "paju_KMH",
+    club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
     year: "2022",
     month: "08",
-    date: "29",
+    date: "28",
     course: "단일",
     time: "0500",
     command: "search", // reserve, reserveSearch, reserveCancel, search
