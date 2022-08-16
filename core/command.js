@@ -1,5 +1,5 @@
 mneCall(thisdate, () => {
-  doNextMonth();
+  change_calendar((thisdate + "01").datify("/"), "next");
   setTimeout(() => {
     mneCall(nextdate, procDate);
   }, 3000);

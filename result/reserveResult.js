@@ -292,20 +292,17 @@ const date = "26";
 const course = "Challenge";
 const time = "0637";
 const dict = {
-  "https://www.bavista.co.kr/Mobile/Member/Login": funcLogin,
-  "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar": funcReserve,
-  "https://www.bavista.co.kr/Mobile/Booking/SelectTime": funcTime,
-  "https://www.bavista.co.kr/Mobile/Booking/GolfProgress": funcExec,
-  "https://www.bavista.co.kr/Mobile": funcMain
+  "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
+  "http://www.360cc.co.kr/mobile/reservation/real_reservation.do": funcReserve,
+  "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
+  "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut,
+  "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do": funcList
 };
 
 const func = dict[addr];
 const dictCourse = {
-  Buona: "66",
-  Hopark: "77",
-  Lago: "33",
-  Bella: "22",
-  Monti: "11"
+  Out: "1",
+  In: "2"
 };
 const splitterDate = "";
 const fulldate = [year, month, date].join(splitterDate);
@@ -314,75 +311,95 @@ if (!func) funcOther();
 else func();
 
 
-  function funcDate() {
-
-    const tag = localStorage.getItem("TZ_Date");
-    if (tag && new Date().getTime() - tag < 1000 * 5) return;
-    localStorage.setItem("TZ_Date", new Date().getTime());
-
-    TZLOG(logParam, (data) => {
-      reservation(fulldate, "reserv");
-    });
-  }
-  function funcExec() {
-    const strEnd = "end of reserve/reserve";
-    setTimeout(() => {
-      logParam.message = strEnd;
-      TZLOG(logParam, (data) => {});
-      const ac = window.AndroidController;
-      if (ac) ac.message(strEnd);
-      location.href = "/Mobile/Member/Logout";
-    }, 1000);
-  }
-  function funcLogin() {
-    log("funcLogin");
-  
-  const tag = localStorage.getItem("TZ_LOGIN");
-  if (tag && new Date().getTime() - tag < 1000 * 5) return;
-  localStorage.setItem("TZ_LOGIN", new Date().getTime());
-
-TZLOG(logParam, (data) => {}); 
-id.value = '${login_id}';
-pwd.value = '${login_password}';
-login(); 
+  function funcList() {
+    log("funcList");
+    LOGOUT();
+    return;
   }
   function funcMain() {
-    const tag = localStorage.getItem("TZ_MAIN");
-    if (tag && new Date().getTime() - tag < 1000 * 5) return;
-    localStorage.setItem("TZ_MAIN", new Date().getTime());
+    log("funcMain");
+    
+    funcEnd();
+    return;
+  }
+  function funcOut() {
+    log("funcOut");
+    funcEnd();
+    return;
+  }
+  function funcOther() {
+    log("funcOther");
+    const tag = lsg("TZ_OTHER");
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
+    lss("TZ_OTHER", new Date().getTime());
 
-    location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar";
+    location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
   }
   function funcReserve() {
     log("funcReserve");
 
-    if(suffix == "coGubun=P")  funcDate();
-
-    const tag = localStorage.getItem("TZ_LOGOUT");
-    if (tag && new Date().getTime() - tag < 1000 * 5) return;
-    localStorage.setItem("TZ_LOGOUT", new Date().getTime());
-
+    const signCourse = { Out: "1", In: "2" };
     TZLOG(logParam, (data) => {});
-    location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar?coGubun=P";
+    timefrom_change(fulldate, "2", "1", "", "00", "T");
+    timer(2000, funcTime);
   }
   function funcTime() {
-    const els = document
-      .getElementsByClassName("tbl02")[0]
-      .getElementsByTagName("tbody")[0]
-      .getElementsByTagName("tr");
+    log("funcTime");
+
+    const els = doc.gcn("cm_time_list_tbl")[0].gtn("tbody")[0].gtn("tr");
+    log("els", els, els.length);
+    
     let target;
-    Array.from(els).forEach((el) => {
-      const param = el.children[4].children[0]
-        .getAttribute("onclick")
-        .inparen();
-      const elDate = param[1];
-      const elCourse = el.children[0].innerText;
-      const elTime = el.children[1].innerText.getFee().toString().gt(4);
-      log(elDate, elCourse, elTime);
-      log(elDate == fulldate, elCourse, mCourse, elTime == time);
-      if (elDate == fulldate && elCourse == mCourse && elTime == time)
-        target = el.getElementsByTagName("a")[0];
+    Array.from(els).every((el) => {
+      const param = el.attr("onclick").inparen();
+      const [ , elCourse, elTime] = param;
+
+      log(dictCourse[course] == elCourse, time == elTime);
+      log(dictCourse[course], elCourse, time, elTime);
+      
+      if (dictCourse[course] == elCourse && time == elTime) 
+        target = el;
+      
+      return !target;
     });
-    if (target) target.click();
+
+    log("target", target);
+    if (target) {
+      target.click();
+      timer(500, funcExec);
+    } else {
+      LOGOUT();
+    }
+  }
+  function funcExec() {
+    log("funcExec");
+
+    agree_chk.checked = true;
+    golfsubcmd("R");
+  }
+  function funcEnd() {
+    log("funcEnd");
+    const strEnd = "end of reserve/reserve";
+    logParam.message = strEnd;
+    TZLOG(logParam, (data) => {});
+    const ac = window.AndroidController;
+    if (ac) ac.message(strEnd);
+  }
+  function LOGOUT() {
+    log("LOGOUT");
+    location.href = "/mobile/user/sign/Logout.do";
+  }
+  function funcLogin() {
+    log("funcLogin");
+
+    const tag = lsg("TZ_LOGIN");
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
+    lss("TZ_LOGIN", new Date().getTime());
+    
+TZLOG(logParam, (data) => {}); 
+usrId2.value = "${login_id}";
+usrPwd2.value = "${login_password}";
+fnLogin2();
+ 
   }
 })();

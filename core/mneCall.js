@@ -1,9 +1,21 @@
 function mneCall(date, callback) {
-  const els = doc.gcn("reserved");
-  Array.from(els).forEach((el) => {
-    const param = el.gcn("cm_day_box")[0].children[0].attr("href").inparen();
-    const [date] = param;
-    dates.push([date, ""]);
+  const param = {
+    golfrestype: "real",
+    schDate: date,
+    usrmemcd: "11",
+    toDay: date + "01",
+    calnum: "1",
+  };
+  post("real_calendar_ajax_view.asp", param, {}, (data) => {
+    const ifr = document.createElement("div");
+    ifr.innerHTML = data;
+
+    const as = Array.from(ifr.gcn("cal_live"));
+    as.forEach((a) => {
+      const param = a.attr("href").inparen();
+      const [elDate] = param;
+      dates.push([elDate, 0]);
+    });
+    callback();
   });
-  callback();
 }

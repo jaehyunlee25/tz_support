@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "bavista";
+const golf_club_eng_name = "360cc";
 //getDoneClubs();
 
 getLoginScript();
@@ -19,7 +19,7 @@ getReserveCancelScript();
 // getCoreScript();
 /*
 request.post(
-  // "http://mnemosynesolutions.co.kr:8080/login",
+  // "http://dev.mnemosyne.co.kr:1009/login",
   "http://localhost:8080/control",
   // { clubId: "053d7baf-ce10-11ec-a93e-0242ac11000a" },
   { json: { club: "tani" } },
@@ -41,7 +41,7 @@ function getDoneClubs() {
 }
 function getReserveCancelScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/reserveCancelbot_admin",
+    "http://dev.mnemosyne.co.kr:1009/reserveCancelbot_admin",
     {
       json: {
         club: golf_club_eng_name,
@@ -59,7 +59,7 @@ function getReserveCancelScript() {
 }
 function getReserveSearchScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/reserveSearchbot_admin",
+    "http://dev.mnemosyne.co.kr:1009/reserveSearchbot_admin",
     {
       json: {
         club: golf_club_eng_name,
@@ -72,7 +72,7 @@ function getReserveSearchScript() {
 }
 function getReserveScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/reservebot_admin",
+    "http://dev.mnemosyne.co.kr:1009/reservebot_admin",
     {
       json: {
         club: golf_club_eng_name,
@@ -90,7 +90,7 @@ function getReserveScript() {
 }
 function getSearchScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/searchbot",
+    "http://dev.mnemosyne.co.kr:1009/searchbots_date",
     { json: { club: golf_club_eng_name } },
     function (error, response, body) {
       fs.writeFileSync("result/searchResult.js", body.script);
@@ -99,7 +99,7 @@ function getSearchScript() {
 }
 function getCoreScript() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/get_pure_search_core",
+    "http://dev.mnemosyne.co.kr:1009/get_pure_search_core",
     { json: { club: golf_club_eng_name } },
     function (error, response, body) {
       Object.keys(body.part).forEach((key) => {
@@ -110,7 +110,7 @@ function getCoreScript() {
 }
 function getGolfClubInfoEx() {
   request.post(
-    "http://mnemosynesolutions.co.kr:8080/searchbot",
+    "http://dev.mnemosyne.co.kr:1009/searchbot",
     { json: { club: golf_club_eng_name } },
     function (error, response, body) {
       //console.log(body);
@@ -195,7 +195,7 @@ function getLoginScript() {
     });
 
     request.post(
-      "http://mnemosynesolutions.co.kr:8080/" + golf_club_eng_name,
+      "http://dev.mnemosyne.co.kr:1009/" + golf_club_eng_name,
       { json: { key: "value" } },
       function (error, response, body) {
         if (!error && response.statusCode == 200) {
