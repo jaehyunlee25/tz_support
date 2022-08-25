@@ -5,13 +5,13 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "360cc";
+const golf_club_eng_name = "goldgreen";
 //getDoneClubs();
 
 //getLoginScript();
 getSearchScript();
 //getReserveScript();
-getReserveSearchScript();
+//getReserveSearchScript();
 //getReserveCancelScript();
 
 // getGolfClubInfo();
@@ -90,18 +90,12 @@ function getReserveScript() {
 }
 function getSearchScript() {
   request.post(
-<<<<<<< HEAD
-    "http://dev.mnemosyne.co.kr:1009/searchbots_time",
-    { json: { clubs: [golf_club_eng_name], date: "20220814" } },
-=======
-    "http://dev.mnemosyne.co.kr:1009/searchbots_date",
-    { json: { club: golf_club_eng_name } },
->>>>>>> 52f544c495a597f66310b71c16c2f6d7f6290eae
+    //"http://dev.mnemosyne.co.kr:1009/searchbots_date_admin",
+    "http://dev.mnemosyne.co.kr:1009/searchbot",
+    { json: { club: golf_club_eng_name, clubs: [golf_club_eng_name] } },
     function (error, response, body) {
-      log(error);
-      log(response);
-      // log(body);
-      fs.writeFileSync("result/searchResult.js", body.scripts[golf_club_eng_name]);
+      fs.writeFileSync("result/searchResult.js", body.script);
+      //fs.writeFileSync("result/searchResult.js", body.scripts[golf_club_eng_name]);
     }
   );
 }
