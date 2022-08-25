@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "players";
+const golf_club_eng_name = "360cc";
 //getDoneClubs();
 
 //getLoginScript();
@@ -90,8 +90,13 @@ function getReserveScript() {
 }
 function getSearchScript() {
   request.post(
+<<<<<<< HEAD
     "http://dev.mnemosyne.co.kr:1009/searchbots_time",
     { json: { clubs: [golf_club_eng_name], date: "20220814" } },
+=======
+    "http://dev.mnemosyne.co.kr:1009/searchbots_date",
+    { json: { club: golf_club_eng_name } },
+>>>>>>> 52f544c495a597f66310b71c16c2f6d7f6290eae
     function (error, response, body) {
       log(error);
       log(response);
