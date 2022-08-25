@@ -237,11 +237,23 @@ window.timer = function (time, callback) {
 /* 이 부분 자리 옮기지 마시오.*/
 console.clear();
 
-    const addr = location.href;
-    if(addr == "https://www.bavista.co.kr/Mobile/Member/Login") {
+    
+    const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+    const aDDr = location.href.split(splitter)[0];
+    const suffix = location.href.split(splitter)[1];
+    const dictSplitter = {"#": "?", "?": "#"};
+    let addr = aDDr;
+    if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
+        addr = aDDr.split(dictSplitter[splitter])[0];
+
+    log("raw addr :: ", location.href);
+    log("aDDr :: ", aDDr);
+    log("addr :: ", addr);
+        
+    if(addr == "https://m.playersgc.com/_mobile/login/login.asp") {
         const tag = localStorage.getItem("TZ_LOGIN");
         if (tag && new Date().getTime() - tag < 1000 * 10) {
-            location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar";
+            location.href = "https://m.playersgc.com/_mobile/reservation/real_calendar.asp";
             return;
         }
         localStorage.setItem("TZ_LOGIN", new Date().getTime());
@@ -257,7 +269,7 @@ const logParam = {
   sub_type: "reserve/reserve",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
-  golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
+  golf_club_id: "fccb4e5e-bf95-11ec-a93e-0242ac11000a",
   message: "start reserve/reserve",
   parameter: JSON.stringify({}),
 };
@@ -487,10 +499,16 @@ console.clear();
 logParam.sub_type = "login";
 message: "start login";
 TZLOG(logParam, (data) => {}); 
-id.value = '${login_id}';
-pwd.value = '${login_password}';
-login(); 
-    } else if (addr == "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar") {
+const ipts = subcontent.getElementsByTagName("input");
+ipts[0].value = "${login_id}";
+ipts[2].value = "${login_password}";
+ipts[1].click();
+ 
+    } else if (addr == "https://m.playersgc.com/_mobile/reservation/real_calendar.asp") {
+        const tag = lsg("TZ_SEARCH_DATETIME");
+        if (tag && new Date().getTime() - tag < 1000 * 1) return;
+        lss("TZ_SEARCH_DATETIME", new Date().getTime());
+        
         /* begin blocking infinite call */
 let TZ_BOT_SAFETY = true;
 let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
@@ -527,29 +545,26 @@ lss("TZ_ADMIN_BLOCK_IC", visitNumber);
 log("TZ_ADMIN_BLOCK_IC", lsg("TZ_ADMIN_BLOCK_IC"), lsg("TZ_ADMIN_BLOCK_IC_TIME"));
 /* end blocking infinite call */
 
-const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-const aDDr = location.href.split(splitter)[0];
-const suffix = location.href.split(splitter)[1];
-const dictSplitter = {"#": "?", "?": "#"};
-let addr = aDDr;
+/* var splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+var aDDr = location.href.split(splitter)[0];
+var suffix = location.href.split(splitter)[1];
+var dictSplitter = {"#": "?", "?": "#"};
+var addr = aDDr;
 if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
     addr = aDDr.split(dictSplitter[splitter])[0];
 
 log("raw addr :: ", location.href);
 log("aDDr :: ", aDDr);
-log("addr :: ", addr);
+log("addr :: ", addr); */
 
-const clubId = '9dd06332-f062-11ec-a93e-0242ac11000a';
+const COMMAND = "GET_TIME";
+const clubId = 'fccb4e5e-bf95-11ec-a93e-0242ac11000a';
 const courses = { 
-	'Lago': 'd8262e2b-0dd6-11ed-a93e-0242ac11000a',
-	'Lago': '923c8402-0dd6-11ed-a93e-0242ac11000a',
-	'Lago': 'f3b92ace-09c0-11ed-a93e-0242ac11000a',
-	'Vista': '9dd46ae7-f062-11ec-a93e-0242ac11000a',
-	'Monti': '9dd46bd2-f062-11ec-a93e-0242ac11000a',
-	'Buona': '9dd46c12-f062-11ec-a93e-0242ac11000a',
-	'Bella': '9dd46c45-f062-11ec-a93e-0242ac11000a',
-	'Hopark': '9dd46c72-f062-11ec-a93e-0242ac11000a',
-};const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
+	'VALLEY': '83703462-bf96-11ec-a93e-0242ac11000a',
+	'LAKE': '837037a5-bf96-11ec-a93e-0242ac11000a',
+	'MOUNTAIN': '837037e3-bf96-11ec-a93e-0242ac11000a',
+};
+log("step::", 1);const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
 const header = { "Content-Type": "application/json" };
 
 const now = new Date();
@@ -563,9 +578,9 @@ const nextyear = now.getFullYear() + "";
 const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
 const nextdate = nextyear + nextmonth;
 
-console.log(thisdate, nextdate);
+log(thisdate, nextdate);
 
-const dates = [];
+let dates = [];
 const result = [];
 const golf_schedule = [];
 let lmt;
@@ -576,12 +591,47 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
+      golf_club_id: "fccb4e5e-bf95-11ec-a93e-0242ac11000a",
       message: "no empty tees!!",
       parameter: JSON.stringify({ order: 0, total: 0 }),
     };
     TZLOG(param, (data) => {});
     return;
+  }
+
+  if(COMMAND == "GET_DATE") {
+    if(dates.length > 0) {
+      const golf_date = [];
+      dates.forEach(([date]) => {
+        log(clubId, "date", date, typeof date);
+        golf_date.push(date.datify("-"));
+      });
+      const param = { golf_date, golf_club_id: clubId };
+      post(OUTER_ADDR_HEADER + "/api/reservation/golfDate", param, header, (data) => {
+        log(data);
+        const json = JSON.parse(data);
+        const ac = window.AndroidController;
+        if(json.resultCode == 200) {
+          if (ac) ac.message("SUCCESS_OF_GET_DATE");
+        } else {
+          if (ac) ac.message("FAIL_OF_GET_DATE");
+        }
+      });
+    }
+    return;
+  }
+
+  if(COMMAND == "GET_TIME") {
+    const result = [];
+    dates.every((arr) => {
+      const [date] = arr;
+      if(date == "20220814") {
+        result.push(arr);
+        return false;
+      }
+      return true;
+    });
+    dates = result;
   }
 
   if (lmt === undefined) lmt = dates.length - 1;
@@ -595,7 +645,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "9dd06332-f062-11ec-a93e-0242ac11000a",
+      golf_club_id: "fccb4e5e-bf95-11ec-a93e-0242ac11000a",
       message: "search",
       parameter: JSON.stringify({ order, total: lmt, date: arrDate[0] }),
     };
@@ -619,69 +669,58 @@ function procGolfSchedule() {
   /* console.log(golf_schedule); */
   const param = { golf_schedule, golf_club_id: clubId };
   post(addrOuter, param, header, (data) => {
-    console.log(data);
+    log(data);
+    const json = JSON.parse(data);
     const ac = window.AndroidController;
-    if (ac) ac.message("end of procGolfSchedule!");
+    if(json.resultCode == 200) {
+      if (ac) ac.message("end of procGolfSchedule!");
+    } else {
+      if (ac) ac.message("FAIL_OF_GET_SCHEDULE");
+    }
   });
 }
-function mneCall(date, opt, callback) {
+function mneCall(date, callback) {
   const param = {
-    coGubun: "M",
-    day: [date.gh(4), date.gt(2), "01"].join("/"),
-    type: opt,
+    layout: 3,
+    membership: "",
+    year: date.gh(4),
+    month: date.gt(2) * 1,
+    timezone: "",
+    course: "",
+    date: "",
   };
-  post("/Mobile/Ajax/MobileCalendar", param, {}, (data) => {
-    const ifr = document.createElement("div");
-    ifr.innerHTML = data;
-    const els = ifr.getElementsByClassName("sel");
-    Array.from(els).forEach((el) => {
-      const param = el.getAttribute("onclick").inparen();
-      dates.push([param[0], param]);
+  post("/_cm_core/reservation/ajax/calendar.asp", param, {}, (data) => {
+    const json = JSON.parse(data);
+    const result = {};
+    Object.keys(json.time_count).forEach((key) => {
+      if (key === "_") return;
+      const [strDate, div, number] = key.split("_");
+      if (number != "0") result[strDate] = true;
+    });
+    Object.keys(result).forEach((strDate) => {
+      dates.push([strDate, 0]);
     });
     callback();
   });
 }
 
-/* <============line_div==========> */
 function mneCallDetail(arrDate) {
-  const [date, option] = arrDate;
+  const [date] = arrDate;
   const param = {
-    coGubun: "M",
+    type: "Real",
+    membership: "",
+    timezone: "",
+    course: "",
     date: date,
-    type: "reserv",
-    chg_date: "",
-    chg_seq: "",
-    chg_time: "",
-    chg_course: "",
   };
-  post("/Mobile/Booking/SelectTime", param, {}, (data) => {
-    const ifr = document.createElement("div");
-    ifr.innerHTML = data;
-
-    const els = ifr.getElementsByTagName("tr");
-
-    Array.from(els).forEach((el, i) => {
-      if (i === 0) return;
-      const course = el.children[0].innerText;
-log(course);
-      const time = el.children[1].innerText.ch(2);
-      let fee_normal =
-        el.children[3].innerText
-          .trim()
-          .split("\n")[0]
-          .trim()
-          .split(",")
-          .join("") * 1;
-      let fee_discount =
-        el.children[3].innerText
-          .trim()
-          .split("\n")[1]
-          .trim()
-          .split(",")
-          .join("") * 1;
-
-      if (isNaN(fee_normal)) fee_normal = -1;
-      if (isNaN(fee_discount)) fee_discount = -1;
+  post("/_cm_core/reservation/ajax/timelist.asp", param, {}, (data) => {
+    const objResp = JSON.parse(data).timelist;
+    const dict = { 1: "VALLEY", 2: "LAKE", 3: "MOUNTAIN" };
+    objResp.forEach((obj) => {
+      const course = dict[obj.course];
+      const time = obj.time.gh(2) + ":" + obj.time.gt(2);
+      const fee_normal = obj.gf_ori * 1;
+      const fee_discount = obj.gf_dis * 1;
 
       golf_schedule.push({
         golf_club_id: clubId,
@@ -692,21 +731,18 @@ log(course);
         persons: "",
         fee_normal,
         fee_discount,
-        others: "18홀",
+        others: "9홀",
       });
     });
     procDate();
   });
 }
 
-/* <============line_div==========> */
-
-/* <============line_div==========> */
-mneCall(nextdate, "prev", () => {
-  mneCall(thisdate, "next", procDate);
+mneCall(thisdate, () => {
+  mneCall(nextdate, procDate);
 });
 
     } else {
-        location.href = "https://www.bavista.co.kr/Mobile/Booking/GolfCalendar";
+        location.href = "https://m.playersgc.com/_mobile/reservation/real_calendar.asp";
     }
 })();
