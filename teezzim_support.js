@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "goldgreen";
+const golf_club_eng_name = "sungmunan";
 //getDoneClubs();
 
 //getLoginScript();
@@ -89,13 +89,17 @@ function getReserveScript() {
   );
 }
 function getSearchScript() {
+  const flg = false;
   request.post(
-    //"http://dev.mnemosyne.co.kr:1009/searchbots_date_admin",
-    "http://dev.mnemosyne.co.kr:1009/searchbot",
+    //,
+    flg ?
+      "http://dev.mnemosyne.co.kr:1009/searchbot"
+      :"http://dev.mnemosyne.co.kr:1009/searchbots_date_admin",
     { json: { club: golf_club_eng_name, clubs: [golf_club_eng_name] } },
     function (error, response, body) {
-      fs.writeFileSync("result/searchResult.js", body.script);
-      //fs.writeFileSync("result/searchResult.js", body.scripts[golf_club_eng_name]);
+      flg ?
+        fs.writeFileSync("result/searchResult.js", body.script)
+        :fs.writeFileSync("result/searchResult.js", body.scripts[golf_club_eng_name]);
     }
   );
 }

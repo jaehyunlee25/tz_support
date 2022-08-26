@@ -1,4 +1,5 @@
-javascript:(() => {
+javascript:(() => {   
+  
     /* test */
 const log = console.log;
 const dir = console.dir;
@@ -7,11 +8,11 @@ const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 const logParam = {
   type: "command",
-  sub_type: "start",
+  sub_type: "",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
   golf_club_id: "${golfClubId}",
-  message: "start reserve/reserve",
+  message: "",
   parameter: JSON.stringify({}),
 };
 let ac = false; 
@@ -22,10 +23,33 @@ try {
 	ac = false;
 }
 
+const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+const aDDr = location.href.split(splitter)[0];
+const suffix = location.href.split(splitter)[1];
+const dictSplitter = { "#": "?", "?": "#" };
+let addr = aDDr;
+if (aDDr.indexOf(dictSplitter[splitter]) != -1)
+  addr = aDDr.split(dictSplitter[splitter])[0];
+
+logParam.sub_type = "url";
+logParam.message = "raw addr :: " + location.href;
+TZLOG(logParam);
+logParam.message = "aDDr :: " + aDDr;
+TZLOG(logParam);
+logParam.message = "addr :: " + addr;
+TZLOG(logParam);
+log("addr", addr);
+
+function LSCHK(str, sec) {
+  const tag = lsg(str);
+  if (tag && new Date().getTime() - tag < 1000 * sec) return false;
+  lss(str, new Date().getTime());
+  return true;
+}
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
   post(addr, param, { "Content-Type": "application/json" }, (data) => {
-    callback(data);
+    if (callback) callback(data);
   });
 }
 function post(addr, param, header, callback) {
@@ -244,290 +268,26 @@ window.timer = function (time, callback) {
 /* 이 부분 자리 옮기지 마시오.*/
 console.clear();
 
-    
-    const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-    const aDDr = location.href.split(splitter)[0];
-    const suffix = location.href.split(splitter)[1];
-    const dictSplitter = {"#": "?", "?": "#"};
-    let addr = aDDr;
-    if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
-        addr = aDDr.split(dictSplitter[splitter])[0];
+ 
+    const dict = {"http://www.oakvalley.co.kr/oak_new/login.asp": funcLogin,"https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp": funcCalendar,"https://reservation.oakvalley.co.kr/frontoffice/golf/g_100.jsp": funcReserve};   
 
-    log("raw addr :: ", location.href);
-    log("aDDr :: ", aDDr);
-    log("addr :: ", addr);
-        
-    if(location.href == "https://www.goldenbay.kr/mobile/join/login.asp") {
-        const tag = localStorage.getItem("TZ_LOGIN");
-        if (tag && new Date().getTime() - tag < 1000 * 10) {
-            if(lsg("tz_search_once")) {
-                lsr("tz_search_once");
-                return;
-              }
-              lss("tz_search_once", "true");
-            location.href = "https://www.goldenbay.kr/mobile/reservation/golf_reser.asp";
-            return;
-        }
-        localStorage.setItem("TZ_LOGIN", new Date().getTime());
-
-        /* test */
-const log = console.log;
-const dir = console.dir;
-const doc = document;
-const ls = localStorage;
-const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
-const logParam = {
-  type: "command",
-  sub_type: "start",
-  device_id: "${deviceId}",
-  device_token: "${deviceToken}",
-  golf_club_id: "dd17c84a-eec9-11ec-a93e-0242ac11000a",
-  message: "start reserve/reserve",
-  parameter: JSON.stringify({}),
-};
-let ac = false; 
-try {
-	ac = window.AndroidController || window.webkit.messageHandlers.iosController;
-	ac.message = ac.message || window.webkit.messageHandlers.iosController.postMessage;
-} catch(e) {
-	ac = false;
-}
-
-function TZLOG(param, callback) {
-  const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
-  post(addr, param, { "Content-Type": "application/json" }, (data) => {
-    callback(data);
-  });
-}
-function post(addr, param, header, callback) {
-  var a = new ajaxcallforgeneral(),
-    str = [];
-  if (header["Content-Type"] == "application/json") {
-    str = JSON.stringify(param);
-  } else {
-    for (var el in param) str.push(el + "=" + encodeURIComponent(param[el]));
-    str = str.join("&");
-  }
-  a.post(addr, str, header);
-  a.ajaxcallback = callback;
-}
-function get(addr, param, header, callback) {
-  var a = new ajaxcallforgeneral(),
-    str = [];
-  for (var el in param) {
-    str.push(el + "=" + param[el]);
-  }
-  str = str.join("&");
-  a.jAjax(addr + "?" + str, header);
-  a.ajaxcallback = callback;
-}
-function ajaxcallforgeneral() {
-  this.xmlHttp;
-  var j = this;
-  var HTTP = {};
-  var ADDR;
-  var PARAM;
-  var HEADER;
-  this.jAjax = function (address, header) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.onerror = onError;
-    j.xmlHttp.open("GET", address, true);
-    if (header) {
-      Object.keys(header).forEach((key) => {
-        var val = header[key];
-        j.xmlHttp.setRequestHeader(key, val);
-      });
-    }
-    j.xmlHttp.send(null);
-  };
-  this.post = function (addr, prm, header) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.onerror = onError;
-    j.xmlHttp.open("POST", addr, true);
-
-    if (header) {
-      if (header["Content-Type"])
-        Object.keys(header).forEach((key) => {
-          var val = header[key];
-          j.xmlHttp.setRequestHeader(key, val);
-        });
-      else
-        j.xmlHttp.setRequestHeader(
-          "Content-Type",
-          "application/x-www-form-urlencoded"
-        );
-    } else {
-      j.xmlHttp.setRequestHeader(
-        "Content-Type",
-        "application/x-www-form-urlencoded"
-      );
-    }
-
-    ADDR = addr;
-    PARAM = prm;
-    HEADER = JSON.stringify(header);
-
-    j.xmlHttp.send(prm);
-  };
-  this.file = function (addr, prm) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.open("POST", addr, true);
-    j.xmlHttp.send(prm);
-  };
-  function onError() {}
-  function on_ReadyStateChange() {
-    if (j.xmlHttp.readyState == 4) {
-      if (j.xmlHttp.status == 200) {
-        var data = j.xmlHttp.responseText;
-        j.ajaxcallback(data);
-      } else {
+    function funcLogin() {
+      log("funcLogin");
+      
+      const chk = LSCHK("TZ_SEARCH_LOGIN", 5);
+      if(!chk) {
+        location.href = "https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp";
+        return;
       }
-    }
-  }
-}
-function lsg(str) {
-  return localStorage.getItem(str);
-}
-function lss(key, val) {
-  return localStorage.setItem(key, val);
-}
-function lsr(str) {
-  return localStorage.removeItem(str);
-}
-function lsc() {
-  return localStorage.clear();
-}
-String.prototype.gt = function (num) {
-  return this.substring(this.length - num, this.length);
-};
-String.prototype.gh = function (num) {
-  return this.substring(0, num);
-};
-String.prototype.ct = function (num) {
-  return this.substring(0, this.length - num);
-};
-String.prototype.ch = function (num) {
-  return this.substring(num, this.length);
-};
-String.prototype.addzero = function () {
-  if (this.length == 1) return "0" + this;
-  return this;
-};
-String.prototype.inparen = function () {
-  const regex = /.+?\((.+)\)/;
-  const str = this.toString();
-  const result = [];
-  regex
-    .exec(str)[1]
-    .split("'")
-    .join("")
-    .split(",")
-    .forEach((str) => {
-      result.push(str.trim());
-    });
-  return result;
-};
-String.prototype.datify = function (sign) {
-  const str = this.toString();
-  if (!sign) sign = "-";
-  return [str.gh(4), str.ch(4).gh(2), str.gt(2)].join(sign);
-};
-String.prototype.getFee = function () {
-  let str = this.toString();
-  str = str.replace(/[^0-9]/g, "");
-  return str * 1;
-};
-String.prototype.daySign = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  let sign;
-  if (num == 0) sign = 3;
-  else if (num == 6) sign = 2;
-  else sign = 1;
-  return sign.toString();
-};
-String.prototype.dayNum = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  return (num + 1).toString();
-};
-String.prototype.dayKor = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  const week = ["일", "월", "화", "수", "목", "금", "토"];
 
-  return week[num];
-};
-String.prototype.rm = function (str) {
-  return this.split(str).join("");
-};
-String.prototype.regex = function (regex) {
-  return this.replace(regex, "");
-};
-String.prototype.fillzero = function (sep) {
-  const ar = this.split(sep);
-  const result = [];
-  ar.forEach((el) => {
-    result.push(el.addzero());
-  });
-
-  return result.join("");
-};
-HTMLElement.prototype.str = function () {
-  return this.innerText;
-};
-HTMLElement.prototype.add = function (tag) {
-  const el = document.createElement(tag);
-  this.appendChild(el);
-  return el;
-};
-HTMLElement.prototype.attr = function (str) {
-  return this.getAttribute(str);
-};
-HTMLElement.prototype.gcn = function (str) {
-  const els = this.getElementsByClassName(str);
-  return Array.from(els);
-};
-HTMLElement.prototype.gtn = function (str) {
-  const els = this.getElementsByTagName(str);
-  return Array.from(els);
-};
-HTMLElement.prototype.str = function (str) {
-  return this.innerText;
-};
-document.gcn = function (str) {
-  const els = this.getElementsByClassName(str);
-  return Array.from(els);
-};
-document.gtn = function (str) {
-  const els = this.getElementsByTagName(str);
-  return Array.from(els);
-};
-document.clm = function (str) {
-  return document.createElement(str);
-};
-window.timer = function (time, callback) {
-  setTimeout(callback, time);
-};
-/* 이 부분 자리 옮기지 마시오.*/
-console.clear();
-
-
-logParam.sub_type = "login";
-message: "start login";
-TZLOG(logParam, (data) => {}); 
-txtId.value = '${login_id}';
-txtPw.value = '${login_password}';
+      idt.value = '${login_id}';
+pw.value = '${login_password}';
 doLogin();
-    } else if (location.href == "https://www.goldenbay.kr/mobile/reservation/golf_reser.asp") {
-        const tag = lsg("TZ_SEARCH_DATETIME");
-        if (tag && new Date().getTime() - tag < 1000 * 1) return;
-        lss("TZ_SEARCH_DATETIME", new Date().getTime());
-        
-        /* begin blocking infinite call */
+    
+      return;
+    }
+    
+    /* begin blocking infinite call */
 let TZ_BOT_SAFETY = true;
 let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
 let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
@@ -539,8 +299,7 @@ if(lsg("TZ_ADMIN_BLOCK_IC") != null) {
 		log(2);
 		if (visitNumber > 9) {
 			log(3);
-			if(window.Controller) 
-				window.AndroidController.message("TZ_MSG_IC");
+			if(ac) ac.message("TZ_MSG_IC");
 			TZ_BOT_SAFETY = false;
 			/* 초기화 */
 			visitNumber = 0;
@@ -575,12 +334,11 @@ log("raw addr :: ", location.href);
 log("aDDr :: ", aDDr);
 log("addr :: ", addr); */
 
-const COMMAND = "NORMAL";
-const clubId = 'dd17c84a-eec9-11ec-a93e-0242ac11000a';
+const COMMAND = "GET_DATE";
+const clubId = 'e5ece764-f8f4-11ec-a93e-0242ac11000a';
 const courses = { 
-	'Ocean': 'dd1bd371-eec9-11ec-a93e-0242ac11000a',
-	'Valley': 'dd1bd479-eec9-11ec-a93e-0242ac11000a',
-	'Mountain': 'dd1bd4bd-eec9-11ec-a93e-0242ac11000a',
+	'In': 'e5eebede-f8f4-11ec-a93e-0242ac11000a',
+	'Out': 'e5eebff1-f8f4-11ec-a93e-0242ac11000a',
 };
 log("step::", 1);const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
 const header = { "Content-Type": "application/json" };
@@ -604,17 +362,21 @@ const golf_schedule = [];
 let lmt;
 function procDate() {
   if (lmt === undefined && dates.length == 0) {
-    log("예약가능한 시간이 없습니다.");
-    if (ac) ac.message("NONE_OF_GET_SCHEDULE");
-    return;
-    return;
+    if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
   }
 
   if (COMMAND == "GET_DATE") {
     if (dates.length > 0) {
       const golf_date = [];
       dates.forEach(([date]) => {
-        log(clubId, "date", date, typeof date);
+        logParam.sub_type = "search";
+        logParam.message = date;
+        logParam.parameter = JSON.stringify({
+          clubId,
+          date,
+          type: typeof date,
+        });
+        TZLOG(logParam, (data) => {});
         golf_date.push(date.datify("-"));
       });
       const param = { golf_date, golf_club_id: clubId };
@@ -630,16 +392,20 @@ function procDate() {
           } else {
             if (ac) ac.message("FAIL_OF_GET_DATE");
           }
+          LOGOUT();
         }
       );
     } else {
       log("예약가능한 날짜가 없습니다.");
       if (ac) ac.message("NONE_OF_GET_DATE");
+      LOGOUT();
     }
     return;
   }
 
   if (COMMAND == "GET_TIME") {
+    log("target date", "${TARGET_DATE}", dates.length);
+    
     const result = [];
     dates.every((arr) => {
       const [date] = arr;
@@ -663,7 +429,7 @@ function procDate() {
       sub_type: "search",
       device_id: "${deviceId}",
       device_token: "${deviceToken}",
-      golf_club_id: "dd17c84a-eec9-11ec-a93e-0242ac11000a",
+      golf_club_id: "${golfClubId}",
       message: "search",
       parameter: JSON.stringify({ order, total: lmt, date: arrDate[0] }),
     };
@@ -688,6 +454,7 @@ function procGolfSchedule() {
   if (golf_schedule.length == 0) {
     log("예약가능한 시간이 없습니다.");
     if (ac) ac.message("NONE_OF_GET_SCHEDULE");
+    LOGOUT();
     return;
   }
   const param = { golf_schedule, golf_club_id: clubId };
@@ -699,60 +466,63 @@ function procGolfSchedule() {
     } else {
       if (ac) ac.message("FAIL_OF_GET_SCHEDULE");
     }
+    LOGOUT();
   });
 }
 function mneCall(date, callback) {
+  timer(3000, ()=>{
   const param = {
-    method: "getCalendar",
-    coDiv: "560",
-    selYm: date,
-    agcYn: "N",
-    agcNum: "",
-  };
-  post("/controller/ReservationController.asp", param, {}, (data) => {        
-    const els = JSON.parse(data).rows;
-    Array.from(els).forEach((el) => {
-      if(el.BK_TEAM == 0) return;
-      const fulldate = el.CL_SOLAR;
-      dates.push([fulldate, 0]);
+      V_IN_GOLF_ID: "S1",
+      V_IN_YEAR: date.gh(4),
+      V_IN_MONTH: date.gt(2),
+      V_IN_MEMNO: "",
+      T_MONTH: date.gt(2),
+    };
+    post("/golf.calendar.pns?getCalendar_S1", param, {}, (data) => {
+      const els = JSON.parse(data).entitys;
+      Array.from(els).forEach((el) => {
+        if (el.IT_OPEN_DESC != "신청하기") return;
+        const fulldate = el.ORI_CD_DATE.split("-").join("");
+        dates.push([fulldate, 0]);
+      });
+      callback();
     });
-    callback();
   });
 }
-  
-/* <============line_div==========> */
+
+
 function mneCallDetail(arrDate) {
   const [date] = arrDate;
   const dictCourse = {
-    A: "Ocean",
-    B: "Valley",
-    C: "Mountain",
+    I: "In",
+    O: "Out",
   };
-  const courses = ["A", "B", "C"];
+  const arr = ["I", "O"];
+
   exec();
 
   function exec() {
-    const cos = courses.shift();
-    if(!cos) {
+    const courseCode = arr.shift();
+    if (!courseCode) {
       procDate();
       return;
     }
+
     const param = {
-      method: "getTeeList",
-      coDiv: "560",
-      date,
-      cos,
+      V_IN_GOLF_ID: "S1",
+      V_IN_DATE: date.datify(),
+      V_IN_COURSE: "O",
+      V_IN_ROUND_TYPE: "4",
+      ID_REF_CD: "",
+      V_IN_MEMNO: "",
     };
-    post("/controller/ReservationController.asp", param, {}, (data) => {
-      const els = JSON.parse(data).rows;
-      Array.from(els).forEach((el, i) => {
-        const course = dictCourse[el.BK_COS];
-        const time = el.BK_TIME;
-        let fee_normal = el.BK_B_CHARGE_NM.getFee();
-        let fee_discount = el.BK_S_CHARGE_NM.getFee();
-  
-        if (isNaN(fee_normal)) fee_normal = -1;
-        if (isNaN(fee_discount)) fee_discount = -1;
+    post("/golf.course.pns?getCourse_G", param, {}, (data) => {
+      const els = JSON.parse(data).entitys;
+      Array.from(els).forEach((el) => {
+        const time = el.r_TIME.rm(":");
+        const course = dictCourse[courseCode];
+        fee_discount = el.ACT_GREENFEE * 1;
+        fee_normal = el.ACT_GREENFEE * 1;
   
         golf_schedule.push({
           golf_club_id: clubId,
@@ -763,21 +533,78 @@ function mneCallDetail(arrDate) {
           persons: "",
           fee_normal,
           fee_discount,
-          others: "9홀",
+          others: "18홀",
         });
       });
       exec();
     });
-  };
+  }  
 }
 
-/* <============line_div==========> */
 
-/* <============line_div==========> */
-mneCall(thisdate, () => {
-    mneCall(nextdate, procDate);
-});
-    } else {
-        location.href = "https://www.goldenbay.kr/mobile/reservation/golf_reser.asp";
+function funcCalendar() {
+  log("funcCalendar");
+  S1.click();
+}
+  function LOGOUT() {
+    log("LOGOUT");
+    location.href="/oak_new/login_exec.asp?logout=y"
+  }
+    
+    function main() {
+      log("main");
+
+      if (!TZ_BOT_SAFETY) {
+        log("stopped by Infinite Call");
+        return;
+      }
+
+      const func = dict[addr];
+      if (!func) funcOther();
+      else func();
     }
+
+    function funcList() {
+      log("funcList");
+      location.href = "https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp";
+      return;
+    }
+    function funcMain() {
+      log("funcMain");
+      location.href = "https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp";
+      return;
+    }
+    function funcOut() {
+      log("funcOut");
+
+      funcEnd();
+
+      return;
+    }
+    function funcOther() {
+      log("funcOther");
+
+      const chk = LSCHK("TZ_SEARCH_OTHER", 5);
+      if(!chk) return;
+        
+      location.href = "https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp";
+
+      return;
+    }    
+    function funcReserve() {
+      log("funcSearch");
+
+      const chk = LSCHK("TZ_SEARCH_RESERVE", 5);
+      if(!chk) return;
+
+      
+mneCall(thisdate, () => {
+  mneCall(nextdate, procDate);
+});
+
+      return;
+    }
+
+    main();
 })();
+    
