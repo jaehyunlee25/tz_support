@@ -5,17 +5,20 @@ const log = console.log;
 client.on("connect", () => {
   log("connected!!");
   const param = {
-    club: "paju_KMH",
+    /* club: "paju_KMH",
     club_id: "ae0b0349-7dce-11ec-b15c-0242ac110005",
     year: "2022",
     month: "08",
     date: "28",
     course: "단일",
-    time: "0500",
-    command: "search", // reserve, reserveSearch, reserveCancel, search
+    time: "0500", */
+    club: "",
+    club_id: "",
+    clubs: ["acro", "ariji"],
+    command: "reserveSearchAll", // reserve, reserveSearch, reserveCancel, search
   };
   client.publish(
-    "95b7a543-ea1d-11ec-a93e-0242ac11000a",
+    "f4972159-1620-11ed-a93e-0242ac11000a", //기기마다 다름
     JSON.stringify(param),
     {
       retain: true,
