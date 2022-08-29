@@ -7,13 +7,20 @@ const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 const logParam = {
   type: "command",
-  sub_type: "reserve/reserve",
+  sub_type: "start",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
   golf_club_id: "${golfClubId}",
   message: "start reserve/reserve",
   parameter: JSON.stringify({}),
 };
+let ac = false; 
+try {
+	ac = window.AndroidController || window.webkit.messageHandlers.iosController;
+	ac.message = ac.message || window.webkit.messageHandlers.iosController.postMessage;
+} catch(e) {
+	ac = false;
+}
 
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
@@ -246,7 +253,6 @@ let curTimeforVisit = new Date().getTime();
 log(visitNumber, visitNumber == null);
 if(lsg("TZ_ADMIN_BLOCK_IC") != null) {
 	log(1);
-	log(curTimeforVisit, lastVistTime, curTimeforVisit - lastVistTime, curTimeforVisit - lastVistTime < 1000 * 15);
 	if (curTimeforVisit - lastVistTime < 1000 * 15) {
 		log(2);
 		if (visitNumber > 9) {
@@ -287,119 +293,60 @@ log("raw addr :: ", location.href);
 log("aDDr :: ", aDDr);
 log("addr :: ", addr);
     
-const year = "${year}";
-const month = "${month}";
-const date = "${date}";
-const course = "${course}";
-const time = "${time}";
-const dict = {
-  "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
-  "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do": funcCancel,
-  "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
-  "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut
-};
+const dict = ${address_mapping};
 
 const func = dict[addr];
-const dictCourse = {
-  1: "Out",
-  2: "In"
-};
+const dictCourse = ${reserve_course_mapping};
+const splitterDate = "${splitter_date}";
+const fulldate = [year, month, date].join(splitterDate);
 
 if (!func) funcOther();
 else func();
 
+function funcMain() {
+  log("funcMain");
+  return;
+}
+function funcOut() {
+  log("funcOut");
+  return;
+}
+function funcOther() {
+  log("funcOther");
+  return;
+}
+function funcLogin() {
+  log("funcLogin");
+  
+  const tag = localStorage.getItem("TZ_LOGIN");
+  if (tag && new Date().getTime() - tag < 1000 * 5) return;
+  localStorage.setItem("TZ_LOGIN", new Date().getTime());
 
-  function LOGOUT() {
-    log("LOGOUT");
-    location.href = "/mobile/user/sign/Logout.do";
-  }
-  function funcCancel() {
-    log("funcCancel");
+  
 
-    const els = doc.gcn("cm_time_list_tbl")[0].gtn("tbody")[0].gtn("tr");
-    const dictCourse = {
-      1: "Out",
-      2: "In",
-    };
-    let target;
-    Array.from(els).every((el) => {
-      const btn = el.children[3].children[0];
-      const [elTime, elCourse, elDate] = btn.attr("onclick").inparen();
-
-      log("reserve cancel", elCourse, elDate, elTime);
-      const fulldate = [year, month, date].join("");
-      if (
-        elDate == fulldate &&
-        dictCourse[elCourse] == course &&
-        elTime == time
-      )
-        target = btn;
-
-      return !target;
-    });
-
-    log("target", target);
-    if (target) {
-      target.click();
-      reservation_cancel_ok();
-    } else {
-      LOGOUT();
-    }
-  }
-  function funcEnd() {
-    log("funcEnd");
-    const strEnd = "end of reserve/cancel";
-    logParam.message = strEnd;
-    TZLOG(logParam, (data) => {});
-    const ac = window.AndroidController;
-    if (ac) ac.message(strEnd);
-  }
-  function funcLogin() {
-    log("funcLogin");
-
-    const tag = lsg("TZ_LOGIN");
-    if (tag && new Date().getTime() - tag < 1000 * 10) return;
-    lss("TZ_LOGIN", new Date().getTime());
-
-    
 logParam.sub_type = "login";
 message: "start login";
 TZLOG(logParam, (data) => {}); 
-usrId2.value = "${login_id}";
-usrPwd2.value = "${login_password}";
-fnLogin2();
- 
-  }
-  function funcMain() {
-    log("funcMain");
-    
-    funcEnd();
-    return;
-  }
-  function funcOther() {
-    log("funcOther");
-    const tag = lsg("TZ_OTHER");
-    if (tag && new Date().getTime() - tag < 1000 * 10) return;
-    lss("TZ_OTHER", new Date().getTime());
+dispUserId.value = '${login_id}';
+dispUserPwd.value = '${login_password}';
+chkLogValue();
 
-    location.href = "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do";
-  }
-  function funcOut() {
-    log("funcOut");
-    funcEnd();
-    return;
-  }
-  function funcReserve() {
-    log("funcReserve");
-    
-    const tag = localStorage.getItem("TZ_RESERVE");
-    if (tag && new Date().getTime() - tag < 1000 * 10) {
-      LOGOUT();
-      return;
-    }
-    localStorage.setItem("TZ_RESERVE", new Date().getTime());
-
-    TZLOG(logParam, (data) => {});
-    funcCancel();
-  }
+  return;
+}
+function funcReserve() {
+  log("funcReserve");
+  return;
+}
+function funcExec() {
+  log("funcExec");
+  return;
+}
+function funcEnd() {
+  log("funcEnd");
+  return;
+}
+function LOGOUT() {
+  log("LOGOUT");
+  return;
+}
 })();

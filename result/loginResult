@@ -7,13 +7,20 @@ const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 const logParam = {
   type: "command",
-  sub_type: "reserve/reserve",
+  sub_type: "start",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
-  golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+  golf_club_id: "1f574db0-f112-11ec-a93e-0242ac11000a",
   message: "start reserve/reserve",
   parameter: JSON.stringify({}),
 };
+let ac = false; 
+try {
+	ac = window.AndroidController || window.webkit.messageHandlers.iosController;
+	ac.message = ac.message || window.webkit.messageHandlers.iosController.postMessage;
+} catch(e) {
+	ac = false;
+}
 
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
@@ -237,11 +244,11 @@ window.timer = function (time, callback) {
 /* 이 부분 자리 옮기지 마시오.*/
 console.clear();
 
+
 logParam.sub_type = "login";
 message: "start login";
 TZLOG(logParam, (data) => {}); 
-usrId2.value = "newrison";
-usrPwd2.value = "ya2ssarama!";
-fnLogin2();
-   
+dispUserId.value = 'jhlee2603';
+dispUserPwd.value = 'ilovegolf778!';
+chkLogValue();  
 })();

@@ -7,13 +7,20 @@ const ls = localStorage;
 const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
 const logParam = {
   type: "command",
-  sub_type: "reserve/reserve",
+  sub_type: "start",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
   golf_club_id: "${golfClubId}",
   message: "start reserve/reserve",
   parameter: JSON.stringify({}),
 };
+let ac = false; 
+try {
+	ac = window.AndroidController || window.webkit.messageHandlers.iosController;
+	ac.message = ac.message || window.webkit.messageHandlers.iosController.postMessage;
+} catch(e) {
+	ac = false;
+}
 
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
@@ -291,115 +298,68 @@ const month = "08";
 const date = "26";
 const course = "Challenge";
 const time = "0637";
-const dict = {
-  "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
-  "http://www.360cc.co.kr/mobile/reservation/real_reservation.do": funcReserve,
-  "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
-  "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut,
-  "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do": funcList
-};
+const dict = ${address_mapping};
 
 const func = dict[addr];
-const dictCourse = {
-  Out: "1",
-  In: "2"
-};
-const splitterDate = "";
+const dictCourse = ${reserve_course_mapping};
+const splitterDate = "${splitter_date}";
 const fulldate = [year, month, date].join(splitterDate);
 
 if (!func) funcOther();
 else func();
 
+function funcList() {
+  log("funcList");
+  return;
+}
+function funcMain() {
+  log("funcMain");
+  return;
+}
+function funcOut() {
+  log("funcOut");
+  return;
+}
+function funcOther() {
+  log("funcOther");
+  return;
+}
+function funcLogin() {
+  log("funcLogin");
+  
+  const tag = localStorage.getItem("TZ_LOGIN");
+  if (tag && new Date().getTime() - tag < 1000 * 5) return;
+  localStorage.setItem("TZ_LOGIN", new Date().getTime());
 
-  function funcList() {
-    log("funcList");
-    LOGOUT();
-    return;
-  }
-  function funcMain() {
-    log("funcMain");
-    
-    funcEnd();
-    return;
-  }
-  function funcOut() {
-    log("funcOut");
-    funcEnd();
-    return;
-  }
-  function funcOther() {
-    log("funcOther");
-    const tag = lsg("TZ_OTHER");
-    if (tag && new Date().getTime() - tag < 1000 * 10) return;
-    lss("TZ_OTHER", new Date().getTime());
+  
 
-    location.href = "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
-  }
-  function funcReserve() {
-    log("funcReserve");
-
-    const signCourse = { Out: "1", In: "2" };
-    TZLOG(logParam, (data) => {});
-    timefrom_change(fulldate, "2", "1", "", "00", "T");
-    timer(2000, funcTime);
-  }
-  function funcTime() {
-    log("funcTime");
-
-    const els = doc.gcn("cm_time_list_tbl")[0].gtn("tbody")[0].gtn("tr");
-    log("els", els, els.length);
-    
-    let target;
-    Array.from(els).every((el) => {
-      const param = el.attr("onclick").inparen();
-      const [ , elCourse, elTime] = param;
-
-      log(dictCourse[course] == elCourse, time == elTime);
-      log(dictCourse[course], elCourse, time, elTime);
-      
-      if (dictCourse[course] == elCourse && time == elTime) 
-        target = el;
-      
-      return !target;
-    });
-
-    log("target", target);
-    if (target) {
-      target.click();
-      timer(500, funcExec);
-    } else {
-      LOGOUT();
-    }
-  }
-  function funcExec() {
-    log("funcExec");
-
-    agree_chk.checked = true;
-    golfsubcmd("R");
-  }
-  function funcEnd() {
-    log("funcEnd");
-    const strEnd = "end of reserve/reserve";
-    logParam.message = strEnd;
-    TZLOG(logParam, (data) => {});
-    const ac = window.AndroidController;
-    if (ac) ac.message(strEnd);
-  }
-  function LOGOUT() {
-    log("LOGOUT");
-    location.href = "/mobile/user/sign/Logout.do";
-  }
-  function funcLogin() {
-    log("funcLogin");
-
-    const tag = lsg("TZ_LOGIN");
-    if (tag && new Date().getTime() - tag < 1000 * 10) return;
-    lss("TZ_LOGIN", new Date().getTime());
-    
+logParam.sub_type = "login";
+message: "start login";
 TZLOG(logParam, (data) => {}); 
-usrId2.value = "${login_id}";
-usrPwd2.value = "${login_password}";
-fnLogin2();
- 
-  }
+dispUserId.value = '${login_id}';
+dispUserPwd.value = '${login_password}';
+chkLogValue();
+
+  return;
+}
+function funcReserve() {
+  log("funcReserve");
+  return;
+}
+function funcTime() {
+  log("funcTime");
+  return;
+}
+function funcExec() {
+  log("funcExec");
+  return;
+}
+function funcEnd() {
+  log("funcEnd");
+  return;
+}
+function LOGOUT() {
+  log("LOGOUT");
+  return;
+}
 })();
