@@ -5,9 +5,15 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "sungmunan";
+const golf_club_eng_name = "goldriver";
+/* request.post(
+    "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
+  { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
+  function (error, response, body) {
+    log(body);
+  }
+); */
 //getDoneClubs();
-
 //getLoginScript();
 getSearchScript();
 //getReserveScript();
@@ -90,16 +96,26 @@ function getReserveScript() {
 }
 function getSearchScript() {
   const flg = false;
+  log(flg);
   request.post(
     //,
-    flg ?
-      "http://dev.mnemosyne.co.kr:1009/searchbot"
-      :"http://dev.mnemosyne.co.kr:1009/searchbots_date_admin",
-    { json: { club: golf_club_eng_name, clubs: [golf_club_eng_name] } },
+    flg
+      ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
+      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_time_admin",
+    {
+      json: {
+        club: golf_club_eng_name,
+        clubs: [golf_club_eng_name],
+        date: "20221026",
+      },
+    },
     function (error, response, body) {
-      flg ?
-        fs.writeFileSync("result/searchResult.js", body.script)
-        :fs.writeFileSync("result/searchResult.js", body.scripts[golf_club_eng_name]);
+      flg
+        ? fs.writeFileSync("result/searchResult.js", body.script)
+        : fs.writeFileSync(
+            "result/searchResult.js",
+            body.scripts[golf_club_eng_name]
+          );
     }
   );
 }
