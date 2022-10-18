@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "goldriver";
+const golf_club_eng_name = "dragonlake";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -14,8 +14,8 @@ const golf_club_eng_name = "goldriver";
   }
 ); */
 //getDoneClubs();
-//getLoginScript();
-getSearchScript();
+getLoginScript();
+//getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
@@ -101,15 +101,16 @@ function getSearchScript() {
     //,
     flg
       ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
-      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_time_admin",
+      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
     {
       json: {
         club: golf_club_eng_name,
         clubs: [golf_club_eng_name],
-        date: "20221026",
+        date: "20221024",
       },
     },
     function (error, response, body) {
+      log(body.urls);
       flg
         ? fs.writeFileSync("result/searchResult.js", body.script)
         : fs.writeFileSync(
@@ -215,12 +216,13 @@ function getLoginScript() {
     rows.forEach((row) => {
       result[row.golf_club_english_name] = row;
     });
-
+    log(result[golf_club_eng_name]);
     request.post(
       "http://dev.mnemosyne.co.kr:1009/" + golf_club_eng_name,
       { json: { key: "value" } },
       function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          log(golf_club_eng_name);
           const param = {
             login_id: result[golf_club_eng_name].golf_club_login_url_admin_id,
             login_password:

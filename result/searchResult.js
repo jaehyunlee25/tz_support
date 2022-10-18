@@ -250,8 +250,19 @@ javascript: (() => {
     const els = this.getElementsByTagName(str);
     return Array.from(els);
   };
+  HTMLElement.prototype.gbn = function (str) {
+    const els = this.getElementsByName(str);
+    return Array.from(els);
+  };
   HTMLElement.prototype.str = function (str) {
     return this.innerText;
+  };
+  HTMLElement.prototype.trav = function (fnc) {
+    fnc(this);
+    var a = this.children.length;
+    for (var i = 0; i < a; i++) {
+      this.children[i].trav(fnc);
+    }
   };
   document.gcn = function (str) {
     const els = this.getElementsByClassName(str);
@@ -259,6 +270,10 @@ javascript: (() => {
   };
   document.gtn = function (str) {
     const els = this.getElementsByTagName(str);
+    return Array.from(els);
+  };
+  document.gbn = function (str) {
+    const els = this.getElementsByName(str);
     return Array.from(els);
   };
   document.clm = function (str) {
@@ -271,8 +286,10 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "http://www.goldrivercc.com/new/ezs_member/login.php": funcLogin,
-    "http://www.goldrivercc.com/new/sub4/menu1.php": funcReserve,
+    "https://www.adoniscc.co.kr/auth/login": funcLogin,
+    "https://www.adoniscc.co.kr/public/booking": funcReserve,
+    "https://www.adoniscc.co.kr/": funcMain,
+    "https://www.adoniscc.co.kr/auth/logout": funcOut,
   };
 
   function funcLogin() {
@@ -281,15 +298,15 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href = "http://www.goldrivercc.com/new/sub4/menu1.php";
+      location.href = "https://www.adoniscc.co.kr/public/booking";
       return;
     }
 
-    if (!window["uid"])
-      location.href = "http://www.goldrivercc.com/new/sub4/menu1.php";
-    uid.value = "${login_id}";
-    doc.getElementsByName("upwd")[0].value = "${login_password}";
-    image.click();
+    document.getElementsByName("username")[0].value = "${login_id}";
+    document.getElementsByName("password")[0].value = "${login_password}";
+    document
+      .getElementsByClassName("btn btn-primary btn-lg btn-block")[0]
+      .click();
 
     return;
   }
@@ -346,10 +363,10 @@ log("aDDr :: ", aDDr);
 log("addr :: ", addr); */
 
   let global_param = {};
-  const COMMAND = "GET_TIME";
-  const clubId = "80cf7b57-f10d-11ec-a93e-0242ac11000a";
+  const COMMAND = "GET_DATE";
+  const clubId = "7cc7880f-f134-11ec-a93e-0242ac11000a";
   const courses = {
-    단일: "80d31bc7-f10d-11ec-a93e-0242ac11000a",
+    단일: "7ccb468c-f134-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -374,7 +391,7 @@ log("addr :: ", addr); */
   let lmt;
   function procDate() {
     if (lmt === undefined && dates.length == 0) {
-      if (COMMAND == "GET_TIME") dates.push(["20221026", 0]);
+      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
     }
 
     if (COMMAND == "GET_DATE") {
@@ -413,18 +430,18 @@ log("addr :: ", addr); */
         acParam.content = golf_date;
       }
       if (ac) ac.message(JSON.stringify(acParam));
-      LOGOUT();
+      /* LOGOUT(); */
 
       return;
     }
 
     if (COMMAND == "GET_TIME") {
-      log("target date", "20221026", dates.length);
+      log("target date", "${TARGET_DATE}", dates.length);
 
       const result = [];
       dates.every((arr) => {
         const [date] = arr;
-        if (date == "20221026") {
+        if (date == "${TARGET_DATE}") {
           result.push(arr);
           /* return false; */
         }
@@ -478,7 +495,7 @@ log("addr :: ", addr); */
       acParam.content = golf_schedule;
     }
     if (ac) ac.message(JSON.stringify(acParam));
-    LOGOUT();
+    /* LOGOUT(); */
     /* const param = {
     golf_schedule,
     device_id: "${deviceId}",
@@ -520,48 +537,29 @@ log("addr :: ", addr); */
   },
 ];
  */
-  function mneCall(date, callback) {
-    const param = {
-      now: (date + "01").datify(),
-    };
-    get("/new/sub4/menu1.php", param, {}, (data) => {
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
-      const els = ifr.gcn("month_list")[0].gtn("dd");
-      Array.from(els).forEach((el) => {
-        if (el.children.length == 0) return;
-        const date = el.children[0].attr("href").gt(10).rm("-");
-        dates.push([date, ""]);
-      });
-      callback();
+  function mneCall(strdate, callback) {
+    const param = {};
+    const els = document
+      .getElementsByClassName("booking-calendar")[0]
+      .getElementsByTagName("a");
+    Array.from(els).forEach((el) => {
+      const date = el.getAttribute("data-date");
+      dates.push([date, ""]);
     });
+    callback();
   }
 
   function mneCallDetail(arrDate) {
-    const [date, course] = arrDate;
-    const param = {
-      pmode: "appointment",
-      s: date.datify(),
-    };
-    const dictCourse = { 1: "단일" };
+    const [date, strParam] = arrDate;
+    const param = {};
 
-    post("/new/sub4/menu1.php", param, {}, (data) => {
-      const ifr = doc.createElement("div");
-      ifr.innerHTML = data;
-
-      const cvr = doc.getElementById("booking");
-      const els = cvr.gtn("a");
-      Array.from(els).forEach((el) => {
-        if (el.str() != "예약하기") return;
-        const param = el.attr("href").inparen()[0].split("?")[1].split("&");
-        let course = 1;
-        let [, opt] = param[1].split("=");
-        let [, time] = param[3].split("=");
-        time = time.rm(":");
-        const hole = opt == "3" ? "9홀" : "18홀";
-        const fee_discount = 85000;
-        const fee_normal = 85000;
-        course = dictCourse[course];
+    get("/public/booking/time/" + date, param, {}, (data) => {
+      const arr = JSON.parse(data);
+      arr.forEach((el, i) => {
+        const course = "단일";
+        const time = el.bk_time;
+        const fee_discount = el.bk_greenfee * 1;
+        const fee_normal = el.bk_greenfee * 1;
 
         golf_schedule.push({
           golf_club_id: clubId,
@@ -572,16 +570,16 @@ log("addr :: ", addr); */
           persons: "",
           fee_normal,
           fee_discount,
-          others: hole,
+          others: "18홀",
         });
       });
-      procDate();
+      setTimeout(procDate, 1000);
     });
   }
 
   function LOGOUT() {
     log("LOGOUT");
-    location.href = "/new/ezs_member/logout.php?loginOut=1";
+    redirect("/auth/logout");
   }
 
   function main() {
@@ -599,7 +597,7 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href = "http://www.goldrivercc.com/new/sub4/menu1.php";
+    location.href = "https://www.adoniscc.co.kr/public/booking";
     return;
   }
   function funcMain() {
@@ -612,7 +610,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "http://www.goldrivercc.com/new/sub4/menu1.php";
+    location.href = "https://www.adoniscc.co.kr/public/booking";
     return;
   }
   function funcOut() {
@@ -632,7 +630,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "http://www.goldrivercc.com/new/sub4/menu1.php";
+    location.href = "https://www.adoniscc.co.kr/public/booking";
 
     return;
   }
@@ -646,9 +644,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    mneCall(thisdate, () => {
-      mneCall(nextdate, procDate);
-    });
+    mneCall(thisdate, procDate);
 
     return;
   }
