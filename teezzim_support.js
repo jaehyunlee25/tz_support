@@ -14,8 +14,8 @@ const golf_club_eng_name = "dragonlake";
   }
 ); */
 //getDoneClubs();
-getLoginScript();
-//getSearchScript();
+//getLoginScript();
+getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
