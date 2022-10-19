@@ -301,13 +301,6 @@ javascript: (() => {
   main();
   function main() {
     if (precheck()) return;
-<<<<<<< HEAD
-    txt_id.value = "newrison";
-    txt_pw.value = "ilovegolf778";
-    timer(1000, () => {
-      btn_lgoin.click();
-    });
-=======
     userId1.value = "mnemosyne";
     userPw1.value = "ya2ssarama!";
     Login_Check();
@@ -323,7 +316,6 @@ javascript: (() => {
       return false;
     }
     /* end: precheck content */
->>>>>>> 82a0da5ad92e745072e8405d15b336de7ed5f927
   }
   function precheck() {}
 })();
