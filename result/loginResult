@@ -10,7 +10,7 @@ javascript: (() => {
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "f919af75-eeb0-11ec-a93e-0242ac11000a",
+    golf_club_id: "d26b37e1-7437-11ec-b15c-0242ac110005",
     message: "",
     parameter: JSON.stringify({}),
   };
@@ -264,6 +264,15 @@ javascript: (() => {
       this.children[i].trav(fnc);
     }
   };
+  HTMLElement.prototype.gba = function (attr, val) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.trav((el) => {
+      const str = el.attr(attr);
+      if (str == val) res.push(el);
+    });
+    return res;
+  };
   document.gcn = function (str) {
     const els = this.getElementsByClassName(str);
     return Array.from(els);
@@ -292,11 +301,29 @@ javascript: (() => {
   main();
   function main() {
     if (precheck()) return;
+<<<<<<< HEAD
     txt_id.value = "newrison";
     txt_pw.value = "ilovegolf778";
     timer(1000, () => {
       btn_lgoin.click();
     });
+=======
+    userId1.value = "mnemosyne";
+    userPw1.value = "ya2ssarama!";
+    Login_Check();
+
+    /* begin: precheck content */
+    function precheck() {
+      const strLogout = "로그아웃";
+      const str = doc.gcn("loginBtn")[0].children[0].attr("alt");
+      if (str == strLogout) {
+        if (ac) ac.message("ALREADY_LOGIN");
+        return true;
+      }
+      return false;
+    }
+    /* end: precheck content */
+>>>>>>> 82a0da5ad92e745072e8405d15b336de7ed5f927
   }
   function precheck() {}
 })();
