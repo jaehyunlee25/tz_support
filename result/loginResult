@@ -10,7 +10,7 @@ javascript: (() => {
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "834761a4-c009-11ec-a93e-0242ac11000a",
+    golf_club_id: "085e4286-f05e-11ec-a93e-0242ac11000a",
     message: "",
     parameter: JSON.stringify({}),
   };
@@ -288,6 +288,15 @@ javascript: (() => {
   document.clm = function (str) {
     return document.createElement(str);
   };
+  document.gba = function (attr, val) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.body.trav((el) => {
+      const str = el.attr(attr);
+      if (str == val) res.push(el);
+    });
+    return res;
+  };
   window.timer = function (time, callback) {
     setTimeout(callback, time);
   };
@@ -301,9 +310,9 @@ javascript: (() => {
   main();
   function main() {
     if (precheck()) return;
-    txtId.value = "jhlee25";
-    txtPw.value = "ilovegolf778";
-    doLogin();
+    login_id.value = "newrison";
+    login_pw.value = "ilovegolf778";
+    chkLogValue("frmLogin", "in", "login_id", "login_pw");
   }
   function precheck() {}
 })();
