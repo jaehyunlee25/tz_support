@@ -10,7 +10,7 @@ javascript: (() => {
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "d26b37e1-7437-11ec-b15c-0242ac110005",
+    golf_club_id: "085e4286-f05e-11ec-a93e-0242ac11000a",
     message: "",
     parameter: JSON.stringify({}),
   };
@@ -288,6 +288,15 @@ javascript: (() => {
   document.clm = function (str) {
     return document.createElement(str);
   };
+  document.gba = function (attr, val) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.body.trav((el) => {
+      const str = el.attr(attr);
+      if (str == val) res.push(el);
+    });
+    return res;
+  };
   window.timer = function (time, callback) {
     setTimeout(callback, time);
   };
@@ -301,21 +310,9 @@ javascript: (() => {
   main();
   function main() {
     if (precheck()) return;
-    userId1.value = "mnemosyne";
-    userPw1.value = "ya2ssarama!";
-    Login_Check();
-
-    /* begin: precheck content */
-    function precheck() {
-      const strLogout = "로그아웃";
-      const str = doc.gcn("loginBtn")[0].children[0].attr("alt");
-      if (str == strLogout) {
-        if (ac) ac.message("ALREADY_LOGIN");
-        return true;
-      }
-      return false;
-    }
-    /* end: precheck content */
+    login_id.value = "newrison";
+    login_pw.value = "ilovegolf778";
+    chkLogValue("frmLogin", "in", "login_id", "login_pw");
   }
   function precheck() {}
 })();
