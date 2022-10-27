@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "zensfield";
+const golf_club_eng_name = "golfclubq";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -14,8 +14,8 @@ const golf_club_eng_name = "zensfield";
   }
 ); */
 //getDoneClubs();
-getLoginScript();
-//getSearchScript();
+//getLoginScript();
+getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
@@ -34,6 +34,7 @@ request.post(
   }
 );
 */
+
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
   const result = {};
@@ -72,6 +73,7 @@ function getReserveSearchScript() {
       },
     },
     function (error, response, body) {
+      log(body.url);
       fs.writeFileSync("result/reserveSearchResult.js", body.script);
     }
   );
