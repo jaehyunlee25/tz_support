@@ -7,11 +7,11 @@ javascript: (() => {
   const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
   const logParam = {
     type: "command",
-    sub_type: "start",
+    sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
     golf_club_id: "${golfClubId}",
-    message: "start reserve/reserve",
+    message: "",
     parameter: JSON.stringify({}),
   };
   let ac = false;
@@ -24,10 +24,34 @@ javascript: (() => {
     ac = false;
   }
 
+  const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+  const aDDr = location.href.split(splitter)[0];
+  const suffix = location.href.split(splitter)[1];
+  const dictSplitter = { "#": "?", "?": "#" };
+  let addr = aDDr;
+  if (aDDr.indexOf(dictSplitter[splitter]) != -1)
+    addr = aDDr.split(dictSplitter[splitter])[0];
+
+  logParam.sub_type = "url";
+  logParam.message = "raw addr :: " + location.href;
+  TZLOG(logParam);
+  logParam.message = "aDDr :: " + aDDr;
+  TZLOG(logParam);
+  logParam.message = "addr :: " + addr;
+  TZLOG(logParam);
+  log("addr", addr);
+
+  function LSCHK(str, sec) {
+    const tag = lsg(str);
+    log("time check", new Date().getTime() - tag, 1000 * sec);
+    if (tag && new Date().getTime() - tag < 1000 * sec) return false;
+    lss(str, new Date().getTime());
+    return true;
+  }
   function TZLOG(param, callback) {
     const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
     post(addr, param, { "Content-Type": "application/json" }, (data) => {
-      callback(data);
+      if (callback) callback(data);
     });
   }
   function post(addr, param, header, callback) {
@@ -129,7 +153,11 @@ javascript: (() => {
     return localStorage.removeItem(str);
   }
   function lsc() {
-    return localStorage.clear();
+    const keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+      if (key.indexOf("TZ_") == -1) return;
+      lsr(key);
+    });
   }
   String.prototype.gt = function (num) {
     return this.substring(this.length - num, this.length);
@@ -226,8 +254,28 @@ javascript: (() => {
     const els = this.getElementsByTagName(str);
     return Array.from(els);
   };
+  HTMLElement.prototype.gbn = function (str) {
+    const els = this.getElementsByName(str);
+    return Array.from(els);
+  };
   HTMLElement.prototype.str = function (str) {
     return this.innerText;
+  };
+  HTMLElement.prototype.trav = function (fnc) {
+    fnc(this);
+    var a = this.children.length;
+    for (var i = 0; i < a; i++) {
+      this.children[i].trav(fnc);
+    }
+  };
+  HTMLElement.prototype.gba = function (attr, val) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.trav((el) => {
+      const str = el.attr(attr);
+      if (str == val) res.push(el);
+    });
+    return res;
   };
   document.gcn = function (str) {
     const els = this.getElementsByClassName(str);
@@ -237,8 +285,21 @@ javascript: (() => {
     const els = this.getElementsByTagName(str);
     return Array.from(els);
   };
+  document.gbn = function (str) {
+    const els = this.getElementsByName(str);
+    return Array.from(els);
+  };
   document.clm = function (str) {
     return document.createElement(str);
+  };
+  document.gba = function (attr, val) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.body.trav((el) => {
+      const str = el.attr(attr);
+      if (str == val) res.push(el);
+    });
+    return res;
   };
   window.timer = function (time, callback) {
     setTimeout(callback, time);
@@ -254,6 +315,12 @@ javascript: (() => {
   log(visitNumber, visitNumber == null);
   if (lsg("TZ_ADMIN_BLOCK_IC") != null) {
     log(1);
+    log(
+      curTimeforVisit,
+      lastVistTime,
+      curTimeforVisit - lastVistTime,
+      curTimeforVisit - lastVistTime < 1000 * 15
+    );
     if (curTimeforVisit - lastVistTime < 1000 * 15) {
       log(2);
       if (visitNumber > 9) {
@@ -286,70 +353,130 @@ javascript: (() => {
   );
   /* end blocking infinite call */
 
-  const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-  const aDDr = location.href.split(splitter)[0];
-  const suffix = location.href.split(splitter)[1];
-  const dictSplitter = { "#": "?", "?": "#" };
-  let addr = aDDr;
-  if (aDDr.indexOf(dictSplitter[splitter]) != -1)
-    addr = aDDr.split(dictSplitter[splitter])[0];
-
   log("raw addr :: ", location.href);
   log("aDDr :: ", aDDr);
   log("addr :: ", addr);
 
-  const dict = ${address_mapping};
+  const dict = {
+    "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
+    "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do": funcReserve,
+    "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
+    "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut,
+  };
 
   const func = dict[addr];
-  const dictCourse = ${reserve_course_mapping};
-  const splitterDate = "${splitter_date}";
-  const fulldate = [year, month, date].join(splitterDate);
+  const dictCourse = {
+    OUT: "Out",
+    IN: "In",
+  };
 
   if (!func) funcOther();
   else func();
 
-  function funcMain() {
-    log("funcMain");
-    return;
+  function getDetail(param, fnc) {
+    log("getDetail");
+    post(
+      OUTER_ADDR_HEADER + "/api/crawler/getScheduleDetail",
+      param,
+      { "Content-Type": "application/json" },
+      (data) => {
+        fnc(data.message);
+      }
+    );
   }
-  function funcOut() {
-    log("funcOut");
-    return;
+  function LOGOUT() {
+    log("LOGOUT");
+    location.href = "/mobile/user/sign/Logout.do";
   }
-  function funcOther() {
-    log("funcOther");
-    return;
+  function funcEnd() {
+    log("funcEnd");
+    const strEnd = "end of reserve/search";
+    logParam.message = strEnd;
+    TZLOG(logParam, (data) => {});
+    if (ac) ac.message(strEnd);
   }
   function funcLogin() {
     log("funcLogin");
 
-    const tag = localStorage.getItem("TZ_LOGIN");
-    if (tag && new Date().getTime() - tag < 1000 * 5) return;
-    localStorage.setItem("TZ_LOGIN", new Date().getTime());
+    const tag = lsg("TZ_LOGIN");
+    if (tag && new Date().getTime() - tag < 1000 * 10) {
+      if (lsg("tz_once")) {
+        funcEnd();
+        lsr("tz_once");
+        return;
+      }
+      lss("tz_once", "true");
+      location.href =
+        "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do";
+
+      return;
+    }
+    lss("TZ_LOGIN", new Date().getTime());
 
     logParam.sub_type = "login";
     message: "start login";
     TZLOG(logParam, (data) => {});
-    dispUserId.value = '${login_id}';
-    dispUserPwd.value = '${login_password}';
-    chkLogValue();
+    usrId2.value = "${login_id}";
+    usrPwd2.value = "${login_password}";
+    fnLogin2();
+  }
+  function funcMain() {
+    log("funcMain");
+
+    funcEnd();
+    return;
+  }
+  function funcOther() {
+    log("funcOther");
+    const tag = lsg("TZ_OTHER");
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
+    lss("TZ_OTHER", new Date().getTime());
+
+    location.href =
+      "http://www.360cc.co.kr/mobile/reservation/my_golfreslist.do";
+  }
+  function funcOut() {
+    log("funcOut");
+    funcEnd();
 
     return;
   }
   function funcReserve() {
     log("funcReserve");
-    return;
+
+    const tag = localStorage.getItem("TZ_RESERVE");
+    if (tag && new Date().getTime() - tag < 1000 * 10) return;
+    localStorage.setItem("TZ_RESERVE", new Date().getTime());
+
+    TZLOG(logParam, (data) => {});
+    funcSearch();
   }
-  function funcExec() {
-    log("funcExec");
-    return;
-  }
-  function funcEnd() {
-    log("funcEnd");
-    return;
-  }
-  function LOGOUT() {
-    log("LOGOUT");
-    return;
+  function funcSearch() {
+    log("funcSearch");
+
+    const els = doc.gcn("cm_time_list_tbl")[0].gtn("tbody")[0].gtn("tr");
+    const result = [];
+    Array.from(els).forEach((el) => {
+      if (!el.children[3]) return true;
+      const param = el.children[3].children[0].attr("onclick").inparen();
+      const [time, , date, , , course] = param;
+
+      log("reserve search", dictCourse[course], date, time);
+      result.push({ date, time, course: dictCourse[course] });
+    });
+    const param = {
+      command: "SUCCESS_OF_RESERVE_SEARCH",
+      golf_club_id: "a7fe6b1d-f05e-11ec-a93e-0242ac11000a",
+      device_id: "${deviceId}",
+      result,
+    };
+    getDetail(param, (exParam) => {
+      if (ac) ac.message(JSON.stringify(exParam));
+    });
+    /*const addr = OUTER_ADDR_HEADER + "/api/reservation/newReserveSearch";
+    post(addr, param, { "Content-Type": "application/json" }, (data) => {
+      console.log(data);
+      LOGOUT();
+    });*/
   }
 })();
