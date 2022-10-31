@@ -1,52 +1,37 @@
 function mneCallDetail(arrDate) {
-  const [date, course] = arrDate;
+  const [date, num] = arrDate;
   const param = {
-    p_calgbn: "A",
-    p_cos: "",
-    p_date: date,
-    p_golfgbn: "160",
-    p_rtype: "1",
+    submitDate: date,
+    Roundf: "",
   };
   const dictCourse = {
-    거북: "거북",
-    백호: "백호",
-    청룡: "청룡",
+    11: "단일",
   };
 
-  post(
-    "/_AJAX/reservation/services.asmx/GetGolfTimeList",
-    param,
-    { "Content-Type": "application/json" },
-    (data) => {
-      const str = JSON.parse(data).d;
-      const json = JSON.parse(str);
-      const html = json.html;
-      const ifr = doc.clm("table");
-      ifr.innerHTML = html;
+  post("/03reservation/booking_01_1.asp", param, {}, (data) => {
+    const ifr = doc.clm("div");
+    ifr.innerHTML = data;
 
-      const els = ifr.children[0].children;
-      Array.from(els).forEach((el) => {
-        const [tdCourse, tdTime, tdFee] = Array.from(el.children);
-        const time = tdTime.str().rm(":");
-        const course = dictCourse[tdCourse.str()];
-        const fee = tdFee.str().ct(1).rm(",") * 1;
-        const fee_discount = fee;
-        const fee_normal = fee;
-        const hole = "9홀";
+    const els = ifr.gba("style", "cursor:hand");
+    Array.from(els).forEach((el) => {
+      const [date, time] = el.parentNode.attr("href").inparen();
+      const course = dictCourse["11"];
+      const fee_discount = 50000;
+      const fee_normal = 50000;
+      hole = "9홀";
 
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole,
-        });
+      golf_schedule.push({
+        golf_club_id: clubId,
+        golf_course_id: course,
+        date,
+        time,
+        in_out: "",
+        persons: "",
+        fee_normal,
+        fee_discount,
+        others: hole,
       });
-      procDate();
-    }
-  );
+    });
+    procDate();
+  });
 }

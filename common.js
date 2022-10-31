@@ -212,6 +212,22 @@ HTMLElement.prototype.gbn = function (str) {
 HTMLElement.prototype.str = function (str) {
   return this.innerText;
 };
+HTMLElement.prototype.trav = function (fnc) {
+  fnc(this);
+  var a = this.children.length;
+  for (var i = 0; i < a; i++) {
+    this.children[i].trav(fnc);
+  }
+};
+HTMLElement.prototype.gba = function (attr, val) {
+  /* getElementsByAttribute */
+  const res = [];
+  this.trav((el) => {
+    const str = el.attr(attr);
+    if (str == val) res.push(el);
+  });
+  return res;
+};
 document.gcn = function (str) {
   const els = this.getElementsByClassName(str);
   return Array.from(els);

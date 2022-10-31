@@ -308,8 +308,8 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "https://www.gumicc.com/Mobile/Member/LogIn.aspx": funcLogin,
-    "https://www.gumicc.com/Mobile/Booking/GolfCalendar.aspx": funcReserve,
+    "https://www.gunsancc.net/Mobile/Member/Login.aspx": funcLogin,
+    "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx": funcReserve,
   };
 
   function funcLogin() {
@@ -318,13 +318,14 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href = "https://www.gumicc.com/Mobile/Booking/GolfCalendar.aspx";
+      location.href =
+        "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
       return;
     }
 
-    userID.value = "${login_id}";
-    userPassword.value = "${login_password}";
-    LoginButton.click();
+    ctl00_ContentPlaceHolder1_txtUserLoginID.value = "${login_id}";
+    ctl00_ContentPlaceHolder1_txtUserLoginPassword.value = "${login_password}";
+    ctl00_ContentPlaceHolder1_lbtUserLogin.click();
 
     return;
   }
@@ -382,11 +383,17 @@ log("addr :: ", addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "0bbd2ab1-ee3f-11ec-a93e-0242ac11000a";
+  const clubId = "819cb6c3-ee1b-11ec-a93e-0242ac11000a";
   const courses = {
-    거북: "0bbfb378-ee3f-11ec-a93e-0242ac11000a",
-    백호: "0bbfb46e-ee3f-11ec-a93e-0242ac11000a",
-    청룡: "0bbfb4ed-ee3f-11ec-a93e-0242ac11000a",
+    전주: "819eaa3b-ee1b-11ec-a93e-0242ac11000a",
+    익산: "819eab34-ee1b-11ec-a93e-0242ac11000a",
+    김제: "819eab76-ee1b-11ec-a93e-0242ac11000a",
+    정읍: "819eabab-ee1b-11ec-a93e-0242ac11000a",
+    부안: "819eabde-ee1b-11ec-a93e-0242ac11000a",
+    남원: "819eac0d-ee1b-11ec-a93e-0242ac11000a",
+    순창: "819eac39-ee1b-11ec-a93e-0242ac11000a",
+    LAKE: "819eac62-ee1b-11ec-a93e-0242ac11000a",
+    REED: "819eac8a-ee1b-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -564,49 +571,52 @@ log("addr :: ", addr); */
 ];
  */
   function mneCall(date, callback) {
-    const els = doc.gcn("onclick");
+    const els = doc.gcn("calenda")[0].gcn("reserv");
     Array.from(els).forEach((el) => {
-      const date = el.attr("data-dt");
-      dates.push([date.rm("-"), ""]);
+      const [, date, num] = el.attr("href").inparen();
+      dates.push([date.rm("-"), num]);
     });
     callback();
   }
 
   function mneCallDetail(arrDate) {
-    const [date, course] = arrDate;
-    const param = {
-      p_calgbn: "A",
-      p_cos: "",
-      p_date: date,
-      p_golfgbn: "160",
-      p_rtype: "1",
-    };
+    const [date, num] = arrDate;
+    const param = {};
+    Array.from(aspnetForm.elements).forEach(
+      (el) => (param[el.name] = el.value)
+    );
+    param["SelectedDate"] = date.datify();
+    param["Day_Gubun"] = num;
+    param["ctl00$ContentPlaceHolder1$htbArgs"] =
+      "PREV|" + date.datify() + "|" + date.datify() + "|date";
+
     const dictCourse = {
-      거북: "거북",
-      백호: "백호",
-      청룡: "청룡",
+      11: "전주",
+      22: "익산",
+      33: "김제",
+      44: "정읍",
+      55: "부안",
+      66: "남원",
+      77: "순창",
+      88: "LAKE",
+      99: "REED",
     };
 
     post(
-      "/_AJAX/reservation/services.asmx/GetGolfTimeList",
+      "/Mobile/Reservation/ReservationTimeList.aspx?typecode=date",
       param,
-      { "Content-Type": "application/json" },
+      {},
       (data) => {
-        const str = JSON.parse(data).d;
-        const json = JSON.parse(str);
-        const html = json.html;
-        const ifr = doc.clm("table");
-        ifr.innerHTML = html;
+        const ifr = doc.clm("div");
+        ifr.innerHTML = data;
 
-        const els = ifr.children[0].children;
+        const els = ifr.gcn("reserv_btn");
         Array.from(els).forEach((el) => {
-          const [tdCourse, tdTime, tdFee] = Array.from(el.children);
-          const time = tdTime.str().rm(":");
-          const course = dictCourse[tdCourse.str()];
-          const fee = tdFee.str().ct(1).rm(",") * 1;
-          const fee_discount = fee;
-          const fee_normal = fee;
-          const hole = "9홀";
+          let [date, course, , time, , , hole] = el.attr("href").inparen();
+          course = dictCourse[course];
+          const fee_discount = 140000;
+          const fee_normal = 140000;
+          hole = hole + "홀";
 
           golf_schedule.push({
             golf_club_id: clubId,
@@ -627,7 +637,7 @@ log("addr :: ", addr); */
 
   function LOGOUT() {
     log("LOGOUT");
-    location.href = "https://www.gumicc.com/Mobile/Member/LogOut.aspx";
+    location.href = "javascript:()=>{}";
   }
 
   function main() {
@@ -645,7 +655,8 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href = "https://www.gumicc.com/Mobile/Booking/GolfCalendar.aspx";
+    location.href =
+      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
     return;
   }
   function funcMain() {
@@ -658,7 +669,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://www.gumicc.com/Mobile/Booking/GolfCalendar.aspx";
+    location.href =
+      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
     return;
   }
   function funcOut() {
@@ -678,7 +690,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://www.gumicc.com/Mobile/Booking/GolfCalendar.aspx";
+    location.href =
+      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
 
     return;
   }
@@ -692,7 +705,12 @@ log("addr :: ", addr); */
       return;
     }
 
-    mneCall(thisdate, procDate);
+    mneCall(thisdate, () => {
+      doc.gcn("arrow arrow_R")[0].parentNode.click();
+      setTimeout(() => {
+        mneCall(nextdate, procDate);
+      }, 500);
+    });
 
     return;
   }
