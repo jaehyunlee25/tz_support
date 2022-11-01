@@ -308,8 +308,9 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "https://www.gunsancc.net/Mobile/Member/Login.aspx": funcLogin,
-    "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx": funcReserve,
+    "https://m.golfzoncounty.com/member/login?gfsReturn=/reserve/main%3Fgc_no%3D222%26area_code%3D0":
+      funcLogin,
+    "https://www.golfzoncounty.com/reserve/main": funcReserve,
   };
 
   function funcLogin() {
@@ -319,13 +320,13 @@ javascript: (() => {
     if (!chk) {
       log("funcLogin Timein ERROR");
       location.href =
-        "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
+        "http://www.golfzoncounty.com/reserve/main?gc_no=222&area_code=1";
       return;
     }
 
-    ctl00_ContentPlaceHolder1_txtUserLoginID.value = "${login_id}";
-    ctl00_ContentPlaceHolder1_txtUserLoginPassword.value = "${login_password}";
-    ctl00_ContentPlaceHolder1_lbtUserLogin.click();
+    loginID.value = "${login_id}";
+    loginPW.value = "${login_password}";
+    doc.gcn("login")[1].click();
 
     return;
   }
@@ -383,17 +384,10 @@ log("addr :: ", addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "819cb6c3-ee1b-11ec-a93e-0242ac11000a";
+  const clubId = "af763598-efcf-11ec-a93e-0242ac11000a";
   const courses = {
-    전주: "819eaa3b-ee1b-11ec-a93e-0242ac11000a",
-    익산: "819eab34-ee1b-11ec-a93e-0242ac11000a",
-    김제: "819eab76-ee1b-11ec-a93e-0242ac11000a",
-    정읍: "819eabab-ee1b-11ec-a93e-0242ac11000a",
-    부안: "819eabde-ee1b-11ec-a93e-0242ac11000a",
-    남원: "819eac0d-ee1b-11ec-a93e-0242ac11000a",
-    순창: "819eac39-ee1b-11ec-a93e-0242ac11000a",
-    LAKE: "819eac62-ee1b-11ec-a93e-0242ac11000a",
-    REED: "819eac8a-ee1b-11ec-a93e-0242ac11000a",
+    In: "af7a2390-efcf-11ec-a93e-0242ac11000a",
+    Out: "af7a2479-efcf-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -571,68 +565,84 @@ log("addr :: ", addr); */
 ];
  */
   function mneCall(date, callback) {
-    const els = doc.gcn("calenda")[0].gcn("reserv");
-    Array.from(els).forEach((el) => {
-      const [, date, num] = el.attr("href").inparen();
-      dates.push([date.rm("-"), num]);
+    const obj = {};
+    location.href
+      .split("?")[1]
+      .split("&")
+      .forEach((el) => {
+        const [key, val] = el.split("=");
+        obj[key] = val;
+      });
+    const ClubNumber = obj.gc_no;
+    const param = {
+      gc_no: ClubNumber,
+      search_type: "simple",
+      rand: "",
+    };
+    post("/reserve/ajax/commonTeeList", param, {}, (data) => {
+      const json = JSON.parse(data);
+      const els = json.reservePossibleDateMap;
+      Object.keys(els).forEach((date) => {
+        const obj = els[date];
+        if (obj.reserve_possible_cnt == 0) return;
+        dates.push([date, ""]);
+      });
+      callback();
     });
-    callback();
   }
 
   function mneCallDetail(arrDate) {
     const [date, num] = arrDate;
-    const param = {};
-    Array.from(aspnetForm.elements).forEach(
-      (el) => (param[el.name] = el.value)
-    );
-    param["SelectedDate"] = date.datify();
-    param["Day_Gubun"] = num;
-    param["ctl00$ContentPlaceHolder1$htbArgs"] =
-      "PREV|" + date.datify() + "|" + date.datify() + "|date";
-
+    const param = {
+      select_date: date,
+      rand: "",
+    };
     const dictCourse = {
-      11: "전주",
-      22: "익산",
-      33: "김제",
-      44: "정읍",
-      55: "부안",
-      66: "남원",
-      77: "순창",
-      88: "LAKE",
-      99: "REED",
+      IN: "In",
+      OUT: "Out",
     };
 
-    post(
-      "/Mobile/Reservation/ReservationTimeList.aspx?typecode=date",
-      param,
-      {},
-      (data) => {
-        const ifr = doc.clm("div");
-        ifr.innerHTML = data;
+    const obj = {};
+    location.href
+      .split("?")[1]
+      .split("&")
+      .forEach((el) => {
+        const [key, val] = el.split("=");
+        obj[key] = val;
+      });
+    const ClubNumber = obj.gc_no;
 
-        const els = ifr.gcn("reserv_btn");
-        Array.from(els).forEach((el) => {
-          let [date, course, , time, , , hole] = el.attr("href").inparen();
-          course = dictCourse[course];
-          const fee_discount = 140000;
-          const fee_normal = 140000;
-          hole = hole + "홀";
+    post("/reserve/ajax/teeList/" + ClubNumber, param, {}, (data) => {
+      const json = JSON.parse(data);
+      const els = json.teeList;
+      Array.from(els).forEach((el) => {
+        let {
+          teeup_time: time,
+          price,
+          dc_price,
+          course_nm: course,
+          time_date: date,
+          bk_round: hole,
+        } = el;
+        course = dictCourse[course];
+        const fee_discount = price - dc_price;
+        const fee_normal = price;
+        hole = hole + "홀";
 
-          golf_schedule.push({
-            golf_club_id: clubId,
-            golf_course_id: course,
-            date,
-            time,
-            in_out: "",
-            persons: "",
-            fee_normal,
-            fee_discount,
-            others: hole,
-          });
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: hole,
         });
-        procDate();
-      }
-    );
+      });
+      procDate();
+    });
   }
 
   function LOGOUT() {
@@ -656,7 +666,7 @@ log("addr :: ", addr); */
   function funcList() {
     log("funcList");
     location.href =
-      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
+      "http://www.golfzoncounty.com/reserve/main?gc_no=222&area_code=1";
     return;
   }
   function funcMain() {
@@ -670,7 +680,7 @@ log("addr :: ", addr); */
     }
 
     location.href =
-      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
+      "http://www.golfzoncounty.com/reserve/main?gc_no=222&area_code=1";
     return;
   }
   function funcOut() {
@@ -691,7 +701,7 @@ log("addr :: ", addr); */
     }
 
     location.href =
-      "https://www.gunsancc.net/Mobile/Reservation/Reservation.aspx";
+      "http://www.golfzoncounty.com/reserve/main?gc_no=222&area_code=1";
 
     return;
   }
@@ -705,12 +715,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    mneCall(thisdate, () => {
-      doc.gcn("arrow arrow_R")[0].parentNode.click();
-      setTimeout(() => {
-        mneCall(nextdate, procDate);
-      }, 500);
-    });
+    mneCall(thisdate, procDate);
 
     return;
   }

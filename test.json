@@ -1,0 +1,21 @@
+{
+    "resultCode":1,
+    "message":"OK",
+    "data":[
+        {"name":"gzc","golf_club_id":"48681b19-f05f-11ec-a93e-0242ac11000a","eng_id":"gzc_ansungH"},
+        {"name":"gzc","golf_club_id":"7ca7a1f2-f05f-11ec-a93e-0242ac11000a","eng_id":"gzc_ansungW"},
+        {"name":"gzc","golf_club_id":"af763598-efcf-11ec-a93e-0242ac11000a","eng_id":"gzc_chunan"},
+        {"name":"gzc","golf_club_id":"f441c67a-ef9d-11ec-a93e-0242ac11000a","eng_id":"gzc_chungtong"},
+        {"name":"gzc","golf_club_id":"a6b3d473-ef7d-11ec-a93e-0242ac11000a","eng_id":"gzc_gampo"},
+        {"name":"gzc","golf_club_id":"d91fc7f9-ef7d-11ec-a93e-0242ac11000a","eng_id":"gzc_gumi"},
+        {"name":"gzc","golf_club_id":"9c07e922-ef23-11ec-a93e-0242ac11000a","eng_id":"gzc_hanlim"},
+        {"name":"gzc","golf_club_id":"3a11b0ff-efd1-11ec-a93e-0242ac11000a","eng_id":"gzc_hwarang"},
+        {"name":"gzc","golf_club_id":"24bb897e-eecb-11ec-a93e-0242ac11000a","eng_id":"gzc_jinchun"},
+        {"name":"gzc","golf_club_id":"dcab2f97-ef76-11ec-a93e-0242ac11000a","eng_id":"gzc_kyungnam"},
+        {"name":"gzc","golf_club_id":"dee87b8e-efbf-11ec-a93e-0242ac11000a","eng_id":"gzc_muju"},
+        {"name":"gzc","golf_club_id":"213ea85e-efc6-11ec-a93e-0242ac11000a","eng_id":"gzc_ora"},
+        {"name":"gzc","golf_club_id":"ff641594-ee3b-11ec-a93e-0242ac11000a","eng_id":"gzc_sacheon"},
+        {"name":"gzc","golf_club_id":"aadb562b-ee1f-11ec-a93e-0242ac11000a","eng_id":"gzc_suncheon"},
+        {"name":"gzc","golf_club_id":"21e66065-efbf-11ec-a93e-0242ac11000a","eng_id":"gzc_sunun"}
+    ]
+}
