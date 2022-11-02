@@ -1,40 +1,20 @@
 function mneCallDetail(arrDate) {
   const [date, num] = arrDate;
-  const param = {
-    select_date: date,
-    rand: "",
-  };
+  const param = {};
   const dictCourse = {
-    HILL: "Hill",
-    LAKE: "Lake",
+    A: "단일",
   };
 
-  const obj = {};
-  location.href
-    .split("?")[1]
-    .split("&")
-    .forEach((el) => {
-      const [key, val] = el.split("=");
-      obj[key] = val;
-    });
-  const ClubNumber = obj.gc_no;
-
-  post("/reserve/ajax/teeList/" + ClubNumber, param, {}, (data) => {
+  get("/booking/time/" + date, param, {}, (data) => {
     const json = JSON.parse(data);
-    const els = json.teeList;
+    const els = json;
     Array.from(els).forEach((el) => {
-      let {
-        teeup_time: time,
-        price,
-        dc_price,
-        course_nm: course,
-        time_date: date,
-        bk_round: hole,
-      } = el;
-      course = dictCourse[course];
-      const fee_discount = price - dc_price;
-      const fee_normal = price;
-      hole = hole + "홀";
+      const time = el.bk_time;
+      const hole = el.bk_hole + "홀";
+      const course = dictCourse[el.bk_cours];
+      const fee_normal = el.bk_green_fee.rm(",") * 1;
+      const fee_discount = fee_normal;
+      log(date, time, course, hole, fee_normal, fee_discount);
 
       golf_schedule.push({
         golf_club_id: clubId,
