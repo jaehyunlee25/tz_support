@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "gzc_chunan";
+const golf_club_eng_name = "hpeliche";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -14,8 +14,8 @@ const golf_club_eng_name = "gzc_chunan";
   }
 ); */
 //getDoneClubs();
-//getLoginScript();
-//getSearchScript();
+getLoginScript();
+getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
