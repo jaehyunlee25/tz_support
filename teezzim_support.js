@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "namchunchun";
+const golf_club_eng_name = "gzc_chunan";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -15,7 +15,7 @@ const golf_club_eng_name = "namchunchun";
 ); */
 //getDoneClubs();
 //getLoginScript();
-getSearchScript();
+//getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
@@ -23,17 +23,16 @@ getSearchScript();
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
-/*
+
 request.post(
-  // "http://dev.mnemosyne.co.kr:1009/login",
-  "http://localhost:8080/control",
+  "http://dev.mnemosyne.co.kr:1009/clubGroup",
+  // "http://localhost:8080/control",
   // { clubId: "053d7baf-ce10-11ec-a93e-0242ac11000a" },
-  { json: { club: "tani" } },
+  { json: { club_id: "48681b19-f05f-11ec-a93e-0242ac11000b" } },
   (err, resp, body) => {
     log(body);
   }
 );
-*/
 
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
