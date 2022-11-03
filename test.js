@@ -1,26 +1,32 @@
 function mneCallDetail(arrDate) {
   const [date, num] = arrDate;
   const param = {
-    book_date: date,
+    clickTdId: "A" + date,
+    clickTdClass: "",
+    workMonth: date.ct(2),
+    workDate: date,
+    bookgDate: "",
+    bookgTime: "",
+    bookgCourse: "ALL",
+    searchTime: "",
+    agreeYn: "Y",
   };
   const dictCourse = {
-    1: "Imperial",
-    2: "Majesty",
-    3: "Palace",
+    1: "사과",
+    2: "나무",
   };
 
-  post("/hampyeong/html/reserve/reserve01.asp", param, {}, (data) => {
+  post("/reservation/ajax/golfTimeList", param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
-    const els = ifr.gcn("course_select")[0].gtn("tr");
+    const els = ifr.gcn("btn-res");
     Array.from(els).forEach((el) => {
-      const [tdTime, tdFee, tdBtn] = el.children;
-      let [date, course, time] = tdBtn.children[0].attr("onclick").inparen();
-      const hole = "9홀";
+      let [date, time, course, , , hole, fee_normal, , fee_discount] = el
+        .attr("onclick")
+        .inparen();
       course = dictCourse[course];
-      const fee_normal = tdFee.str().ct(1).rm(",") * 1;
-      const fee_discount = fee_normal;
-      log(date, time, course, hole, fee_normal, fee_discount);
+      fee_normal = fee_normal * 1000;
+      fee_discount = fee_discount * 1000;
 
       golf_schedule.push({
         golf_club_id: clubId,
