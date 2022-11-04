@@ -186,6 +186,9 @@ String.prototype.fillzero = function (sep) {
 
   return result.join("");
 };
+String.prototype.jp = function () {
+  return JSON.parse(this);
+};
 HTMLElement.prototype.str = function () {
   return this.innerText;
 };
@@ -219,14 +222,36 @@ HTMLElement.prototype.trav = function (fnc) {
     this.children[i].trav(fnc);
   }
 };
-HTMLElement.prototype.gba = function (attr, val) {
+HTMLElement.prototype.gba = function (attr, val, opt) {
   /* getElementsByAttribute */
   const res = [];
   this.trav((el) => {
     const str = el.attr(attr);
-    if (str == val) res.push(el);
+    if (!str) return;
+    if (opt) {
+      if (str.indexOf(val) != -1) res.push(el);
+    } else {
+      if (str == val) res.push(el);
+    }
   });
   return res;
+};
+HTMLElement.prototype.nm = function () {
+  /* node move */
+  const args = Array.from(arguments);
+  const up = args.shift();
+  let el = this;
+  for (let i = 0; i < up; i++) {
+    const p = el.parentNode;
+    if (p) el = p;
+  }
+
+  args.forEach((num) => {
+    const p = el.children[num];
+    if (p) el = p;
+  });
+
+  return el;
 };
 document.gcn = function (str) {
   const els = this.getElementsByClassName(str);
