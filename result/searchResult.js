@@ -235,6 +235,9 @@ javascript: (() => {
 
     return result.join("");
   };
+  String.prototype.jp = function () {
+    return JSON.parse(this);
+  };
   HTMLElement.prototype.str = function () {
     return this.innerText;
   };
@@ -268,14 +271,36 @@ javascript: (() => {
       this.children[i].trav(fnc);
     }
   };
-  HTMLElement.prototype.gba = function (attr, val) {
+  HTMLElement.prototype.gba = function (attr, val, opt) {
     /* getElementsByAttribute */
     const res = [];
     this.trav((el) => {
       const str = el.attr(attr);
-      if (str == val) res.push(el);
+      if (!str) return;
+      if (opt) {
+        if (str.indexOf(val) != -1) res.push(el);
+      } else {
+        if (str == val) res.push(el);
+      }
     });
     return res;
+  };
+  HTMLElement.prototype.nm = function () {
+    /* node move */
+    const args = Array.from(arguments);
+    const up = args.shift();
+    let el = this;
+    for (let i = 0; i < up; i++) {
+      const p = el.parentNode;
+      if (p) el = p;
+    }
+
+    args.forEach((num) => {
+      const p = el.children[num];
+      if (p) el = p;
+    });
+
+    return el;
   };
   document.gcn = function (str) {
     const els = this.getElementsByClassName(str);
@@ -308,8 +333,8 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "http://hpelichecc.co.kr/hampyeong/html/service/login.asp": funcLogin,
-    "http://hpelichecc.co.kr/hampyeong/html/reserve/reserve01.asp": funcReserve,
+    "https://www.haevichi.com/hub/ko/login": funcLogin,
+    "https://www.haevichi.com/ccjeju/ko/": funcReserve,
   };
 
   function funcLogin() {
@@ -318,26 +343,18 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href =
-        "http://hpelichecc.co.kr/hampyeong/html/reserve/reserve01.asp";
+      location.href = "https://www.haevichi.com/ccjeju/ko/";
       return;
     }
 
-    loginId.value = "${login_id}";
-    loginPw.value = "${login_password}";
-    Login1();
+    const loginT = setInterval(() => {
+      if (!window["memberID"]) return;
 
-    /* begin: precheck content */
-    function precheck() {
-      const strLogout = "로그아웃";
-      const str = util.children[0].str();
-      if (str == strLogout) {
-        if (ac) ac.message("ALREADY_LOGIN");
-        return true;
-      }
-      return false;
-    }
-    /* end: precheck content */
+      clearInterval(loginT);
+      memberID.value = "${login_id}";
+      memberPassword.value = "${login_password}";
+      loginSubmit.click();
+    }, 200);
 
     return;
   }
@@ -394,12 +411,13 @@ log("aDDr :: ", aDDr);
 log("addr :: ", addr); */
 
   let global_param = {};
-  const COMMAND = "GET_DATE";
-  const clubId = "fc3c231d-eeaf-11ec-a93e-0242ac11000a";
+  const COMMAND = "GET_TIME";
+  const clubId = "7f0b5384-efcf-11ec-a93e-0242ac11000a";
   const courses = {
-    Imperial: "fc3dc6f1-eeaf-11ec-a93e-0242ac11000a",
-    Majesty: "fc3dc7e7-eeaf-11ec-a93e-0242ac11000a",
-    Palace: "fc3dc82f-eeaf-11ec-a93e-0242ac11000a",
+    Sky: "7f0f1659-efcf-11ec-a93e-0242ac11000a",
+    Palm: "7f0f173a-efcf-11ec-a93e-0242ac11000a",
+    Lake: "7f0f177a-efcf-11ec-a93e-0242ac11000a",
+    Valley: "7f0f17ad-efcf-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -424,7 +442,7 @@ log("addr :: ", addr); */
   let lmt;
   function procDate() {
     if (lmt === undefined && dates.length == 0) {
-      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
+      if (COMMAND == "GET_TIME") dates.push(["20221130", 0]);
     }
 
     if (COMMAND == "GET_DATE") {
@@ -472,12 +490,12 @@ log("addr :: ", addr); */
     }
 
     if (COMMAND == "GET_TIME") {
-      log("target date", "${TARGET_DATE}", dates.length);
+      log("target date", "20221130", dates.length);
 
       const result = [];
       dates.every((arr) => {
         const [date] = arr;
-        if (date == "${TARGET_DATE}") {
+        if (date == "20221130") {
           result.push(arr);
           /* return false; */
         }
@@ -577,53 +595,78 @@ log("addr :: ", addr); */
 ];
  */
   function mneCall(date, callback) {
-    const els = doc.gcn("book");
-    Array.from(els).forEach((el) => {
-      if (!el.attr("onclick")) return;
-      const [year, month, date] = el.attr("onclick").inparen();
-      const dt = [year, month, date].join("");
-      dates.push([dt, ""]);
+    const param = {
+      coDiv: "802",
+      bkMedia: "R",
+      stDate: date + "01",
+      edDate: date + "31",
+    };
+    post("/golf/getReservableDate.do", param, {}, (data) => {
+      const json = data.jp();
+      const els = json.rows;
+      Array.from(els).forEach((el) => {
+        if (el.ABLE_COS == "X") return;
+        dates.push([el.CL_SOLAR, el.CL_BUSINESS]);
+      });
+      callback();
     });
-    callback();
   }
 
   function mneCallDetail(arrDate) {
-    const [date, num] = arrDate;
+    const fCall = { post, get };
+    const [date, sign] = arrDate;
+    const addr = "/golf/getReservableTimes.do";
+    const method = "post";
     const param = {
-      book_date: date,
+      coDiv: "802",
+      bkDay: date,
+      bkCos: "A",
+      bkMedia: "R",
+      agency: "",
+      startCnt: "0",
+      countInPage: "10",
     };
     const dictCourse = {
-      1: "Imperial",
-      2: "Majesty",
-      3: "Palace",
+      A: "Sky",
+      B: "Palm",
+      C: "Lake",
+      D: "Valley",
     };
+    const arr = ["A", "B", "C", "D"];
+    exec();
+    function exec() {
+      const signCourse = arr.shift();
+      if (!signCourse) {
+        procDate();
+        return;
+      }
+      param.bkCos = signCourse;
+      fCall[method](addr, param, {}, (data) => {
+        const json = data.jp();
+        const els = json.rows;
+        Array.from(els).forEach((el) => {
+          const time = el.BK_TIME;
+          const course = dictCourse[el.BK_COS];
+          const hole = 18;
+          const fee = el.BK_CHARGE_NM * 1;
+          const fee_normal = fee;
+          const fee_discount = fee;
 
-    post("/hampyeong/html/reserve/reserve01.asp", param, {}, (data) => {
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
-      const els = ifr.gcn("course_select")[0].gtn("tr");
-      Array.from(els).forEach((el) => {
-        const [tdTime, tdFee, tdBtn] = el.children;
-        let [date, course, time] = tdBtn.children[0].attr("onclick").inparen();
-        const hole = "9홀";
-        course = dictCourse[course];
-        const fee_normal = tdFee.str().ct(1).rm(",") * 1;
-        const fee_discount = fee_normal;
-
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole,
+          golf_schedule.push({
+            golf_club_id: clubId,
+            golf_course_id: course,
+            date,
+            time,
+            in_out: "",
+            persons: "",
+            fee_normal,
+            fee_discount,
+            others: hole + "홀",
+          });
         });
+        exec();
       });
-      procDate();
-    });
+    }
   }
 
   function LOGOUT() {
@@ -646,8 +689,7 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href =
-      "http://hpelichecc.co.kr/hampyeong/html/reserve/reserve01.asp";
+    location.href = "https://www.haevichi.com/ccjeju/ko/";
     return;
   }
   function funcMain() {
@@ -660,8 +702,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href =
-      "http://hpelichecc.co.kr/hampyeong/html/reserve/reserve01.asp";
+    location.href = "https://www.haevichi.com/ccjeju/ko/";
     return;
   }
   function funcOut() {
@@ -681,22 +722,25 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href =
-      "http://hpelichecc.co.kr/hampyeong/html/reserve/reserve01.asp";
+    location.href = "https://www.haevichi.com/ccjeju/ko/";
 
     return;
   }
   function funcReserve() {
     log("funcSearch");
 
-    const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
-    log("timeout chk", chk);
-    if (!chk) {
-      log("funcSearch Timein ERROR");
-      return;
+    if (location.href == addr) {
+      const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
+      log("timeout chk", chk);
+      if (!chk) {
+        log("funcSearch Timein ERROR");
+        return;
+      }
     }
 
-    mneCall(thisdate, procDate);
+    mneCall(thisdate, () => {
+      mneCall(nextdate, procDate);
+    });
 
     return;
   }

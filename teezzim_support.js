@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "hpeliche";
+const golf_club_eng_name = "haevichi";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -14,7 +14,7 @@ const golf_club_eng_name = "hpeliche";
   }
 ); */
 //getDoneClubs();
-getLoginScript();
+//getLoginScript();
 getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
@@ -23,7 +23,7 @@ getSearchScript();
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
-
+/*
 request.post(
   "http://dev.mnemosyne.co.kr:1009/clubGroup",
   // "http://localhost:8080/control",
@@ -33,6 +33,7 @@ request.post(
     log(body);
   }
 );
+*/
 
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
@@ -102,12 +103,12 @@ function getSearchScript() {
     //,
     flg
       ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
-      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
+      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_time_admin",
     {
       json: {
         club: golf_club_eng_name,
         clubs: [golf_club_eng_name],
-        date: "20221024",
+        date: "20221130",
       },
     },
     function (error, response, body) {

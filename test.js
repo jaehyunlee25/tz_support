@@ -1,31 +1,36 @@
 function mneCallDetail(arrDate) {
   const fCall = { post, get };
   const [date, sign] = arrDate;
-  const addr = "/_Gunwi/Mobile/Reservation/ReservationTimeList.aspx";
+  const addr = "/reservation/ajax/golfTimeList";
   const method = "post";
-  const param = {};
-  Array.from(aspnetForm.elements).forEach((el) => (param[el.name] = el.value));
-  param["strLGubun"] = "110";
-  param["strReserveDate"] = date.datify();
-  param["strDayType"] = sign;
+  const param = {
+    clickTdId: "A" + date,
+    clickTdClass: "",
+    workMonth: date.ct(2),
+    workDate: date,
+    bookgDate: "",
+    bookgTime: "",
+    bookgCourse: "ALL",
+    searchTime: "",
+    agreeYn: "Y",
+  };
   const dictCourse = {
-    11: "산울",
-    22: "여울",
+    11: "단일",
   };
 
   fCall[method](addr, param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
 
-    const els = ifr.gba("href", "javascript:ReserveCheck", true);
+    const els = ifr.gba("onclick", "golfConfirm", true);
     Array.from(els).forEach((el) => {
-      const [str] = el.attr("href").inparen();
-      let [, , date, time, course, sign, , hole, , , , , fee] = str.split("|");
-      date = date.rm("-");
-      course = dictCourse[course];
-      fee = fee.rm(",") * 1000;
-      const fee_normal = fee;
-      const fee_discount = fee;
+      let [, date, time, sign, , , hole, fee_normal, fee_discount] = el
+        .attr("onclick")
+        .inparen(true);
+      course = dictCourse[11];
+      hole = hole.ct(1);
+      fee_normal = fee_normal.rm(",") * 1;
+      fee_discount = fee_discount.rm(",") * 1;
 
       golf_schedule.push({
         golf_club_id: clubId,
