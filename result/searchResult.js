@@ -175,18 +175,38 @@ javascript: (() => {
     if (this.length == 1) return "0" + this;
     return this;
   };
-  String.prototype.inparen = function () {
+  String.prototype.inparen = function (opt) {
     const regex = /.+?\((.+)\)/;
     const str = this.toString();
     const result = [];
-    regex
-      .exec(str)[1]
-      .split("'")
-      .join("")
-      .split(",")
-      .forEach((str) => {
-        result.push(str.trim());
+    const org = regex.exec(str)[1];
+    if (opt) {
+      let ar = [];
+      let flg = false;
+      Array.from(org).forEach((chr) => {
+        if (chr == "'") {
+          if (flg) {
+            result.push(ar.join(""));
+            ar = [];
+            flg = false;
+          } else {
+            flg = true;
+          }
+        } else if (chr == ",") {
+          if (flg) ar.push(chr);
+        } else {
+          ar.push(chr);
+        }
       });
+    } else {
+      org
+        .split("'")
+        .join("")
+        .split(",")
+        .forEach((str) => {
+          result.push(str.trim());
+        });
+    }
     return result;
   };
   String.prototype.datify = function (sign) {
@@ -333,8 +353,8 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "https://www.haevichi.com/hub/ko/login": funcLogin,
-    "https://www.haevichi.com/ccjeju/ko/": funcReserve,
+    "http://m.pineridge.co.kr/main/login.asp": funcLogin,
+    "http://m.pineridge.co.kr/booking/booking_golf.asp": funcReserve,
   };
 
   function funcLogin() {
@@ -343,18 +363,25 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href = "https://www.haevichi.com/ccjeju/ko/";
+      location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
       return;
     }
 
-    const loginT = setInterval(() => {
-      if (!window["memberID"]) return;
+    doc.gbn("memb_inet_no")[0].value = "${login_id}";
+    doc.gbn("memb_inet_pass")[0].value = "${login_password}";
+    LoginChk();
 
-      clearInterval(loginT);
-      memberID.value = "${login_id}";
-      memberPassword.value = "${login_password}";
-      loginSubmit.click();
-    }, 200);
+    /* begin: precheck content */
+    function precheck() {
+      const strLogout = "LOGOUT";
+      const str = doc.body.gba("src", "../../img/common/menu_logout.gif");
+      if (str.length > 0) {
+        if (ac) ac.message("ALREADY_LOGIN");
+        return true;
+      }
+      return false;
+    }
+    /* end: precheck content */
 
     return;
   }
@@ -411,13 +438,12 @@ log("aDDr :: ", aDDr);
 log("addr :: ", addr); */
 
   let global_param = {};
-  const COMMAND = "GET_TIME";
-  const clubId = "7f0b5384-efcf-11ec-a93e-0242ac11000a";
+  const COMMAND = "GET_DATE";
+  const clubId = "739f7798-ee3b-11ec-a93e-0242ac11000a";
   const courses = {
-    Sky: "7f0f1659-efcf-11ec-a93e-0242ac11000a",
-    Palm: "7f0f173a-efcf-11ec-a93e-0242ac11000a",
-    Lake: "7f0f177a-efcf-11ec-a93e-0242ac11000a",
-    Valley: "7f0f17ad-efcf-11ec-a93e-0242ac11000a",
+    PINE: "73a15bc1-ee3b-11ec-a93e-0242ac11000a",
+    RIDGE: "73a15cbb-ee3b-11ec-a93e-0242ac11000a",
+    LAKE: "73a15d05-ee3b-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -442,7 +468,7 @@ log("addr :: ", addr); */
   let lmt;
   function procDate() {
     if (lmt === undefined && dates.length == 0) {
-      if (COMMAND == "GET_TIME") dates.push(["20221130", 0]);
+      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
     }
 
     if (COMMAND == "GET_DATE") {
@@ -490,12 +516,12 @@ log("addr :: ", addr); */
     }
 
     if (COMMAND == "GET_TIME") {
-      log("target date", "20221130", dates.length);
+      log("target date", "${TARGET_DATE}", dates.length);
 
       const result = [];
       dates.every((arr) => {
         const [date] = arr;
-        if (date == "20221130") {
+        if (date == "${TARGET_DATE}") {
           result.push(arr);
           /* return false; */
         }
@@ -595,78 +621,60 @@ log("addr :: ", addr); */
 ];
  */
   function mneCall(date, callback) {
-    const param = {
-      coDiv: "802",
-      bkMedia: "R",
-      stDate: date + "01",
-      edDate: date + "31",
-    };
-    post("/golf/getReservableDate.do", param, {}, (data) => {
-      const json = data.jp();
-      const els = json.rows;
-      Array.from(els).forEach((el) => {
-        if (el.ABLE_COS == "X") return;
-        dates.push([el.CL_SOLAR, el.CL_BUSINESS]);
-      });
-      callback();
+    const els = doc.body.gba("href", "./booking_golf_reservation_sh.asp", true);
+    Array.from(els).forEach((el, i) => {
+      const href = el.attr("href");
+      const date = href.split("?")[1].split("&")[0].split("=")[1];
+      dates.push([date, ""]);
     });
+    callback();
   }
 
   function mneCallDetail(arrDate) {
     const fCall = { post, get };
     const [date, sign] = arrDate;
-    const addr = "/golf/getReservableTimes.do";
+    const addr = "/page/booking/golf_reservation_sh.asp";
     const method = "post";
     const param = {
-      coDiv: "802",
-      bkDay: date,
-      bkCos: "A",
-      bkMedia: "R",
-      agency: "",
-      startCnt: "0",
-      countInPage: "10",
+      book_date: date.datify(),
+      book_crs: "%",
+      book_chapt: "%",
+      sbook_chapt: "%",
     };
     const dictCourse = {
-      A: "Sky",
-      B: "Palm",
-      C: "Lake",
-      D: "Valley",
+      파인: "PINE",
+      리즈: "RIDGE",
+      레이크: "LAKE",
     };
-    const arr = ["A", "B", "C", "D"];
-    exec();
-    function exec() {
-      const signCourse = arr.shift();
-      if (!signCourse) {
-        procDate();
-        return;
-      }
-      param.bkCos = signCourse;
-      fCall[method](addr, param, {}, (data) => {
-        const json = data.jp();
-        const els = json.rows;
-        Array.from(els).forEach((el) => {
-          const time = el.BK_TIME;
-          const course = dictCourse[el.BK_COS];
-          const hole = 18;
-          const fee = el.BK_CHARGE_NM * 1;
-          const fee_normal = fee;
-          const fee_discount = fee;
 
-          golf_schedule.push({
-            golf_club_id: clubId,
-            golf_course_id: course,
-            date,
-            time,
-            in_out: "",
-            persons: "",
-            fee_normal,
-            fee_discount,
-            others: hole + "홀",
-          });
+    fCall[method](addr, param, {}, (data) => {
+      const ifr = doc.clm("div");
+      ifr.innerHTML = data;
+
+      const els = ifr.gba("onClick", "JavaScript:Time_Select", true);
+      Array.from(els).forEach((el) => {
+        let [date, sign, time, , , , hole, course, fee] = el
+          .attr("onClick")
+          .inparen(true);
+        course = dictCourse[course];
+        hole = hole.ct(1);
+        fee_normal = fee.rm(",") * 1;
+        fee_discount = fee.rm(",") * 1;
+
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: hole + "홀",
         });
-        exec();
       });
-    }
+      procDate();
+    });
   }
 
   function LOGOUT() {
@@ -689,7 +697,7 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href = "https://www.haevichi.com/ccjeju/ko/";
+    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
     return;
   }
   function funcMain() {
@@ -702,7 +710,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://www.haevichi.com/ccjeju/ko/";
+    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
     return;
   }
   function funcOut() {
@@ -722,7 +730,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://www.haevichi.com/ccjeju/ko/";
+    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
 
     return;
   }
@@ -738,9 +746,7 @@ log("addr :: ", addr); */
       }
     }
 
-    mneCall(thisdate, () => {
-      mneCall(nextdate, procDate);
-    });
+    mneCall(thisdate, procDate);
 
     return;
   }

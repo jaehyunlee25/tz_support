@@ -1,36 +1,37 @@
 function mneCallDetail(arrDate) {
   const fCall = { post, get };
   const [date, sign] = arrDate;
-  const addr = "/reservation/ajax/golfTimeList";
+  const addr = "/Mobile/Reservation/Reservation.aspx";
   const method = "post";
-  const param = {
-    clickTdId: "A" + date,
-    clickTdClass: "",
-    workMonth: date.ct(2),
-    workDate: date,
-    bookgDate: "",
-    bookgTime: "",
-    bookgCourse: "ALL",
-    searchTime: "",
-    agreeYn: "Y",
-  };
-  const dictCourse = {
-    11: "단일",
-  };
+  const param = {};
+  Array.from(aspnetForm.elements).forEach((el) => (param[el.name] = el.value));
+  param["__ASYNCPOST"] = "true";
+  param["ctl00$contents$htbArgs"] = strParam;
+  param["ctl00$contents$ScptManager"] =
+    "ctl00$contents$ScptManager|ctl00$contents$lnkBtnUpd";
+  param["__EVENTTARGET"] = "ctl00$contents$lnkBtnUpd";
 
-  fCall[method](addr, param, {}, (data) => {
-    const ifr = doc.clm("div");
+  post("ReservationCalendar.aspx", param, {}, (data) => {
+    const ifr = document.createElement("div");
     ifr.innerHTML = data;
 
-    const els = ifr.gba("onclick", "golfConfirm", true);
-    Array.from(els).forEach((el) => {
-      let [, date, time, sign, , , hole, fee_normal, fee_discount] = el
-        .attr("onclick")
-        .inparen(true);
-      course = dictCourse[11];
-      hole = hole.ct(1);
-      fee_normal = fee_normal.rm(",") * 1;
-      fee_discount = fee_discount.rm(",") * 1;
+    const els = ifr.gcn("reservBtn");
+    const dictCourse = {
+      11: "파크",
+      22: "밸리",
+    };
+
+    Array.from(els).forEach((el, i) => {
+      const param = el.attr("onclick").inparen();
+      let [elDate, time, elCourse] = param;
+      const course = dictCourse[elCourse];
+      const fee_discount =
+        el.parentNode.parentNode.children[4].str().ct(1).split(",").join("") *
+        1;
+      const fee_normal =
+        el.parentNode.parentNode.children[4].str().ct(1).split(",").join("") *
+        1;
+      const holes = el.parentNode.parentNode.children[2].str() + "홀";
 
       golf_schedule.push({
         golf_club_id: clubId,
@@ -41,7 +42,7 @@ function mneCallDetail(arrDate) {
         persons: "",
         fee_normal,
         fee_discount,
-        others: hole + "홀",
+        others: holes,
       });
     });
     procDate();
