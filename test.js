@@ -1,37 +1,30 @@
 function mneCallDetail(arrDate) {
   const fCall = { post, get };
-  const [date, sign] = arrDate;
-  const addr = "/Mobile/Reservation/Reservation.aspx";
+  const [date, sign, gb] = arrDate;
+  const addr = "/reservation/select";
   const method = "post";
-  const param = {};
-  Array.from(aspnetForm.elements).forEach((el) => (param[el.name] = el.value));
-  param["__ASYNCPOST"] = "true";
-  param["ctl00$contents$htbArgs"] = strParam;
-  param["ctl00$contents$ScptManager"] =
-    "ctl00$contents$ScptManager|ctl00$contents$lnkBtnUpd";
-  param["__EVENTTARGET"] = "ctl00$contents$lnkBtnUpd";
+  const param = {
+    submitDate: date,
+    coDiv: "75",
+    mType: "M",
+  };
+  const dictCourse = {
+    A: "Tomato",
+    B: "Apple",
+    C: "Orange",
+  };
 
-  post("ReservationCalendar.aspx", param, {}, (data) => {
-    const ifr = document.createElement("div");
+  fCall[method](addr, param, {}, (data) => {
+    const ifr = doc.clm("div");
     ifr.innerHTML = data;
 
-    const els = ifr.gcn("reservBtn");
-    const dictCourse = {
-      11: "파크",
-      22: "밸리",
-    };
-
-    Array.from(els).forEach((el, i) => {
-      const param = el.attr("onclick").inparen();
-      let [elDate, time, elCourse] = param;
-      const course = dictCourse[elCourse];
-      const fee_discount =
-        el.parentNode.parentNode.children[4].str().ct(1).split(",").join("") *
-        1;
-      const fee_normal =
-        el.parentNode.parentNode.children[4].str().ct(1).split(",").join("") *
-        1;
-      const holes = el.parentNode.parentNode.children[2].str() + "홀";
+    const els = ifr.gba("onclick", "showConfirm", true);
+    Array.from(els).forEach((el) => {
+      let [date, , time, course, , , , ,] = el.attr("onclick").inparen(true);
+      course = dictCourse[course];
+      hole = 18;
+      fee_normal = 120000;
+      fee_discount = 120000;
 
       golf_schedule.push({
         golf_club_id: clubId,
@@ -42,7 +35,7 @@ function mneCallDetail(arrDate) {
         persons: "",
         fee_normal,
         fee_discount,
-        others: holes,
+        others: hole + "홀",
       });
     });
     procDate();
