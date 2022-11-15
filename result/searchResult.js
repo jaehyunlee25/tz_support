@@ -186,14 +186,17 @@ javascript: (() => {
       Array.from(org).forEach((chr) => {
         if (chr == "'") {
           if (flg) {
-            result.push(ar.join(""));
-            ar = [];
             flg = false;
           } else {
             flg = true;
           }
         } else if (chr == ",") {
-          if (flg) ar.push(chr);
+          if (flg) {
+            ar.push(chr);
+          } else {
+            result.push(ar.join(""));
+            ar = [];
+          }
         } else {
           ar.push(chr);
         }
@@ -353,8 +356,9 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "http://m.pineridge.co.kr/main/login.asp": funcLogin,
-    "http://m.pineridge.co.kr/booking/booking_golf.asp": funcReserve,
+    "https://www.sunningpoint.com/_mobile/login/login.asp": funcLogin,
+    "https://www.sunningpoint.com/_mobile/golfRes/real_calendar.asp":
+      funcReserve,
   };
 
   function funcLogin() {
@@ -363,25 +367,14 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
+      location.href =
+        "https://www.sunningpoint.com/_mobile/golfRes/real_calendar.asp";
       return;
     }
 
-    doc.gbn("memb_inet_no")[0].value = "${login_id}";
-    doc.gbn("memb_inet_pass")[0].value = "${login_password}";
-    LoginChk();
-
-    /* begin: precheck content */
-    function precheck() {
-      const strLogout = "LOGOUT";
-      const str = doc.body.gba("src", "../../img/common/menu_logout.gif");
-      if (str.length > 0) {
-        if (ac) ac.message("ALREADY_LOGIN");
-        return true;
-      }
-      return false;
-    }
-    /* end: precheck content */
+    login_id.value = "${login_id}";
+    login_pw.value = "${login_password}";
+    chkLogValue(frmLogin, "in", frmLogin.mem_id, frmLogin.usr_pwd);
 
     return;
   }
@@ -439,11 +432,10 @@ log("addr :: ", addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "739f7798-ee3b-11ec-a93e-0242ac11000a";
+  const clubId = "0f927c36-f064-11ec-a93e-0242ac11000a";
   const courses = {
-    PINE: "73a15bc1-ee3b-11ec-a93e-0242ac11000a",
-    RIDGE: "73a15cbb-ee3b-11ec-a93e-0242ac11000a",
-    LAKE: "73a15d05-ee3b-11ec-a93e-0242ac11000a",
+    Sun: "0f95aaab-f064-11ec-a93e-0242ac11000a",
+    Point: "0f95ac68-f064-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -621,45 +613,41 @@ log("addr :: ", addr); */
 ];
  */
   function mneCall(date, callback) {
-    const els = doc.body.gba("href", "./booking_golf_reservation_sh.asp", true);
-    Array.from(els).forEach((el, i) => {
-      const href = el.attr("href");
-      const date = href.split("?")[1].split("&")[0].split("=")[1];
-      dates.push([date, ""]);
+    const els = doc.body.gba("onclick", "goSend", true);
+    Array.from(els).forEach((el) => {
+      const [, date, sign, gb] = el.attr("onclick").inparen();
+      dates.push([date, sign, gb]);
     });
     callback();
   }
 
   function mneCallDetail(arrDate) {
     const fCall = { post, get };
-    const [date, sign] = arrDate;
-    const addr = "/page/booking/golf_reservation_sh.asp";
+    const [date, sign, gb] = arrDate;
+    const addr = "/_mobile/golfRes/real_timeList.asp";
     const method = "post";
     const param = {
-      book_date: date.datify(),
-      book_crs: "%",
-      book_chapt: "%",
-      sbook_chapt: "%",
+      pointdate: date,
+      openyn: sign,
+      dategbn: gb,
     };
     const dictCourse = {
-      파인: "PINE",
-      리즈: "RIDGE",
-      레이크: "LAKE",
+      1: "Sun",
+      2: "Point",
     };
 
     fCall[method](addr, param, {}, (data) => {
       const ifr = doc.clm("div");
       ifr.innerHTML = data;
 
-      const els = ifr.gba("onClick", "JavaScript:Time_Select", true);
+      const els = ifr.gba("href", "javascript:goSend", true);
       Array.from(els).forEach((el) => {
-        let [date, sign, time, , , , hole, course, fee] = el
-          .attr("onClick")
-          .inparen(true);
+        let [, course, time] = el.attr("href").inparen(true);
         course = dictCourse[course];
-        hole = hole.ct(1);
-        fee_normal = fee.rm(",") * 1;
-        fee_discount = fee.rm(",") * 1;
+        hole = el.nm(2, 2).str().trim().ct(1);
+        const fee = el.nm(2, 3).str().ct(1).rm(",") * 1;
+        fee_normal = fee;
+        fee_discount = fee;
 
         golf_schedule.push({
           golf_club_id: clubId,
@@ -697,7 +685,8 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
+    location.href =
+      "https://www.sunningpoint.com/_mobile/golfRes/real_calendar.asp";
     return;
   }
   function funcMain() {
@@ -710,7 +699,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
+    location.href =
+      "https://www.sunningpoint.com/_mobile/golfRes/real_calendar.asp";
     return;
   }
   function funcOut() {
@@ -730,7 +720,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "http://m.pineridge.co.kr/booking/booking_golf.asp";
+    location.href =
+      "https://www.sunningpoint.com/_mobile/golfRes/real_calendar.asp";
 
     return;
   }
