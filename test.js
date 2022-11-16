@@ -1,27 +1,28 @@
 function mneCallDetail(arrDate) {
   const fCall = { post, get };
   const [date, sign, gb] = arrDate;
-  const addr = "/m/reservation/resv_apply.asp";
+  const addr = "/adm/cop/adb/select.do";
   const method = "post";
   const param = {
-    pointdate: date,
+    match_day: date.datify(),
+    gubun: "1",
   };
   const dictCourse = {
     11: "단일",
   };
 
   fCall[method](addr, param, {}, (data) => {
-    const ifr = doc.clm("div");
-    ifr.innerHTML = data;
-
-    const els = ifr.gba("class", "resv_btn dev-btn-apply");
+    const json = data.jp();
+    const els = json.res;
     Array.from(els).forEach((el) => {
-      const td = el.nm(1);
-      const time = td.attr("data-bookg-time");
+      let { matchDay: date, matchTime: time, price: fee } = el;
+      date = date.rm("-");
+      time = time.rm(":");
       course = dictCourse[11];
-      hole = td.nm(1, 2).str().gh(2);
-      fee_normal = 0;
-      fee_discount = 0;
+      const hole = 9;
+      fee = fee.rm(",") * 1;
+      fee_normal = fee;
+      fee_discount = fee;
 
       golf_schedule.push({
         golf_club_id: clubId,
