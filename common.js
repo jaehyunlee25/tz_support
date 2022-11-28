@@ -136,11 +136,7 @@ String.prototype.inparen = function (opt) {
     let flg = false;
     Array.from(org).forEach((chr) => {
       if (chr == "'") {
-        if (flg) {
-          flg = false;
-        } else {
-          flg = true;
-        }
+        flg = !flg;
       } else if (chr == ",") {
         if (flg) {
           ar.push(chr);
@@ -152,6 +148,10 @@ String.prototype.inparen = function (opt) {
         ar.push(chr);
       }
     });
+    if (ar.length > 0) {
+      result.push(ar.join(""));
+      ar = [];
+    }
   } else {
     org
       .split("'")
@@ -211,6 +211,17 @@ String.prototype.jp = function () {
 };
 String.prototype.regex = function (re) {
   return re.exec(this);
+};
+String.prototype.gup = function () {
+  /*get url param*/
+  const param = {};
+  this.split("?")[1]
+    .split("&")
+    .forEach((str) => {
+      const [key, val] = str.split("=");
+      param[key] = val;
+    });
+  return param;
 };
 HTMLElement.prototype.str = function () {
   return this.innerText;

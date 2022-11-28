@@ -1,26 +1,29 @@
 function mneCallDetail(arrDate) {
-  const fCall = { post, get };
-  const [date, sign, gb] = arrDate;
-  const addr = "/booking/booking_action.asp";
-  const method = "post";
-  const param = {
-    book_date: date,
-  };
-  const dictCourse = {
-    1: "Imperial",
-    2: "Majesty",
-  };
+  const [date] = arrDate;
+  const rows = doc.gcn("fc-content-skeleton");
+  const res = {};
+  rows.forEach((row) => {
+    const elDates = Array.from(row.gtn("thead")[0].gtn("tr")[0].children);
+    const elTeams = Array.from(row.gtn("tbody")[0].gtn("tr")[0].children);
+    elDates.forEach((el, i) => {
+      const strDate = el.attr("data-date");
+      let num = elTeams[i].str() * 1;
+      if (!num) num = 0;
+      if (num > 0) res[strDate.rm("-")] = el;
+    });
+  });
 
-  fCall[method](addr, param, {}, (data) => {
+  res[date].click();
+
+  /* fCall[method](addr, param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
-
-    const els = ifr.gba("href", "JavaScript:Book_time", true);
+    const els = ifr.gcn("rounding");
     Array.from(els).forEach((el) => {
-      let [date, , course, , time, , fee] = el.attr("href").inparen();
-      course = dictCourse[course];
-      hole = 18;
-      fee *= 1;
+      let time = el.nm(2, 0).str().rm(":");
+      let hole = el.str().ct(1);
+      course = dictCourse[1];
+      const fee = 60000;
       fee_normal = fee;
       fee_discount = fee;
 
@@ -37,5 +40,5 @@ function mneCallDetail(arrDate) {
       });
     });
     procDate();
-  });
+  }); */
 }
