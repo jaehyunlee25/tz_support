@@ -1,9 +1,3 @@
-insert into 
-    golf_club_rule 
-values(
-    '${golfClubId}',
-    '${reserveOpen}',
-    '${reserveCancel}',
-    now(),
-    now()
-);
+select * 
+from golf_club_eng
+where eng_id = '${eng}';

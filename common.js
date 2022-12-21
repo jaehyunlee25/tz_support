@@ -302,6 +302,20 @@ document.gbn = function (str) {
 document.clm = function (str) {
   return document.createElement(str);
 };
+document.gba = function (attr, val, opt) {
+  /* getElementsByAttribute */
+  const res = [];
+  this.body.trav((el) => {
+    const str = el.attr(attr);
+    if (!str) return;
+    if (opt) {
+      if (str.indexOf(val) != -1) res.push(el);
+    } else {
+      if (str == val) res.push(el);
+    }
+  });
+  return res;
+};
 window.timer = function (time, callback) {
   setTimeout(callback, time);
 };

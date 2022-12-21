@@ -185,11 +185,7 @@ javascript: (() => {
       let flg = false;
       Array.from(org).forEach((chr) => {
         if (chr == "'") {
-          if (flg) {
-            flg = false;
-          } else {
-            flg = true;
-          }
+          flg = !flg;
         } else if (chr == ",") {
           if (flg) {
             ar.push(chr);
@@ -201,6 +197,10 @@ javascript: (() => {
           ar.push(chr);
         }
       });
+      if (ar.length > 0) {
+        result.push(ar.join(""));
+        ar = [];
+      }
     } else {
       org
         .split("'")
@@ -246,9 +246,6 @@ javascript: (() => {
   String.prototype.rm = function (str) {
     return this.split(str).join("");
   };
-  String.prototype.regex = function (regex) {
-    return this.replace(regex, "");
-  };
   String.prototype.fillzero = function (sep) {
     const ar = this.split(sep);
     const result = [];
@@ -261,8 +258,78 @@ javascript: (() => {
   String.prototype.jp = function () {
     return JSON.parse(this);
   };
-  String.prototype.regex = function (regex) {
-    return this.replace(regex, "");
+  String.prototype.regex = function (re) {
+    return re.exec(this);
+  };
+  String.prototype.gup = function () {
+    /*get url param*/
+    const param = {};
+    this.split("?")[1]
+      .split("&")
+      .forEach((str) => {
+        const [key, val] = str.split("=");
+        param[key] = val;
+      });
+    return param;
+  };
+  String.prototype.sort = function () {
+    return Array.from(this).sort().join("");
+  };
+  String.prototype.vector = function () {
+    /* 정렬한 뒤, 겹치는 글자는 뺀다. */
+    const res = {};
+    Array.from(this)
+      .sort()
+      .forEach((chr) => (res[chr] = true));
+    return Object.keys(res).join("");
+  };
+  String.prototype.comp = function (str) {
+    let a = Array.from(this);
+    let b = Array.from(str);
+    let c;
+    if (b.length > a.length) {
+      c = a;
+      a = b;
+      b = c;
+      c = undefined;
+    }
+
+    const res = [];
+
+    exec();
+
+    function exec() {
+      let flg = false;
+      let cur = b.shift();
+      let tmp = [];
+      a.forEach((chr) => {
+        if (chr == cur) {
+          flg = true;
+          tmp.push(cur);
+          cur = b.shift();
+        } else {
+          if (flg) {
+            flg = false;
+            if (tmp.length > 0) {
+              res.push(tmp);
+              tmp = [];
+            }
+            if (cur != undefined) {
+              b.unshift(cur);
+              exec();
+            }
+          }
+        }
+      });
+      if (tmp.length > 0) {
+        res.push(tmp);
+        if (cur != undefined) {
+          b.unshift(cur);
+          exec();
+        }
+      }
+    }
+    return res;
   };
   HTMLElement.prototype.str = function () {
     return this.innerText;
@@ -343,12 +410,17 @@ javascript: (() => {
   document.clm = function (str) {
     return document.createElement(str);
   };
-  document.gba = function (attr, val) {
+  document.gba = function (attr, val, opt) {
     /* getElementsByAttribute */
     const res = [];
     this.body.trav((el) => {
       const str = el.attr(attr);
-      if (str == val) res.push(el);
+      if (!str) return;
+      if (opt) {
+        if (str.indexOf(val) != -1) res.push(el);
+      } else {
+        if (str == val) res.push(el);
+      }
     });
     return res;
   };
@@ -359,8 +431,9 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "https://m.ecolian.or.kr:444/asp/rsvn/login.asp": funcLogin,
-    "https://m.ecolian.or.kr:444/asp/rsvn/rsvnStep1.asp": funcReserve,
+    "http://res.ladenaresort.com/_mobile/login/login.asp": funcLogin,
+    "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp":
+      funcReserve,
   };
 
   function funcLogin() {
@@ -369,25 +442,19 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href = "https://m.ecolian.or.kr:444/asp/rsvn/rsvnStep1.asp";
+      location.href =
+        "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
       return;
     }
 
-    f_id.value = "${login_id}";
-    f_pw.value = "${login_password}";
-    doc.gcn("btn_login")[0].children[0].click();
-
-    /* begin: precheck content */
-    function precheck() {
-      const strLogout = "로그아웃";
-      const str = doc.gcn("footer_menu")[0].gtn("a")[0].str();
-      if (str == strLogout) {
-        if (ac) ac.message("ALREADY_LOGIN");
-        return true;
-      }
-      return false;
-    }
-    /* end: precheck content */
+    login_id.value = "${login_id}";
+    login_pw.value = "${login_password}";
+    doc.body
+      .gba(
+        "href",
+        "javascript:chkLogValue('frmLogin','in','login_id','login_pw')"
+      )[0]
+      .click();
 
     return;
   }
@@ -445,9 +512,11 @@ log("addr :: ", addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "89bc0553-f07a-11ec-a93e-0242ac11000a";
+  const clubId = "a351e25d-707a-11ed-9c7a-0242ac110007";
   const courses = {
-    단일: "89bf8de7-f07a-11ec-a93e-0242ac11000a",
+    Lake: "dcc273b6-7b80-11ed-9c7a-0242ac110007",
+    Garden: "dcc2758d-7b80-11ed-9c7a-0242ac110007",
+    Nature: "dcc275cf-7b80-11ed-9c7a-0242ac110007",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -624,67 +693,66 @@ log("addr :: ", addr); */
   },
 ];
  */
-  function mneCall(date, callback) {
-    const dt = (date + "01").datify();
-    const param = {
-      f_flag: "calendar",
-      f_yy: date.gh(4),
-      f_mm: date.gt(2),
-      f_bsns: "33",
-    };
-    post("/asp/rsvn/rsvn_proc.asp", param, {}, (data) => {
-      log(data);
-      const json = data.jp();
-      const els = json.rtnData;
-      Array.from(els).forEach((el) => {
-        if (el.IT_OPEN_TLT != "예약") return;
-        dates.push([el.CUR_DATE.rm("-"), el.IT_OPEN]);
-      });
-      callback();
+  function mneCall(strdate, callback) {
+    const param = {};
+    const els = doc.gba("href", "javascript:timefrom_change", true);
+    Array.from(els).forEach((el) => {
+      const [date, , , , , opt] = el.attr("href").inparen();
+      if (opt != "T") return;
+      dates.push([date, ""]);
     });
+    callback();
   }
 
   function mneCallDetail(arrDate) {
-    const fCall = { post, get };
-    const [date, sign, gb] = arrDate;
-    const addr = "/asp/rsvn/rsvn_proc.asp";
-    const method = "post";
+    const [date, strParam] = arrDate;
     const param = {
-      f_flag: "time",
-      f_date: date.datify(),
-      f_rsvntype: "1",
-      f_bsns: "33",
+      golfrestype: "real",
+      courseid: "0",
+      usrmemcd: "31",
+      pointdate: date,
+      openyn: "1",
+      dategbn: "4",
+      choice_time: "00",
+      cssncourseum: "",
+      inputtype: "I",
     };
     const dictCourse = {
-      1: "단일",
+      1: "Lake",
+      2: "Garden",
+      3: "Nature",
     };
 
-    fCall[method](addr, param, {}, (data) => {
-      const json = data.jp();
-      const els = json.rtnData;
-      Array.from(els).forEach((el) => {
-        let { CH_COURSE: course, ROUND_DESC: hole, R_TIME: time } = el;
-        time = time.rm(":");
-        hole = hole.ct(1);
-        course = dictCourse[course];
-        const fee = "0";
-        fee_normal = fee.rm(",") * 1;
-        fee_discount = fee.rm(",") * 1;
+    post(
+      "/_mobile/GolfRes/onepage/real_timeinfo_ajax_from.asp",
+      param,
+      {},
+      (data) => {
+        const ifr = doc.clm("div");
+        ifr.innerHTML = data;
 
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole + "홀",
+        const els = ifr.gba("href", "javascript:subcmd", true);
+        Array.from(els).forEach((el, i) => {
+          let [, course, time] = el.attr("href").inparen();
+          course = dictCourse[course];
+          const fee_discount = 220000;
+          const fee_normal = 220000;
+
+          golf_schedule.push({
+            golf_club_id: clubId,
+            golf_course_id: course,
+            date,
+            time,
+            in_out: "",
+            persons: "",
+            fee_normal,
+            fee_discount,
+            others: "18홀",
+          });
         });
-      });
-      procDate();
-    });
+        procDate();
+      }
+    );
   }
 
   function LOGOUT() {
@@ -707,7 +775,8 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href = "https://m.ecolian.or.kr:444/asp/rsvn/rsvnStep1.asp";
+    location.href =
+      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
     return;
   }
   function funcMain() {
@@ -720,7 +789,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://m.ecolian.or.kr:444/asp/rsvn/rsvnStep1.asp";
+    location.href =
+      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
     return;
   }
   function funcOut() {
@@ -740,7 +810,8 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href = "https://m.ecolian.or.kr:444/asp/rsvn/rsvnStep1.asp";
+    location.href =
+      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
 
     return;
   }
@@ -756,11 +827,7 @@ log("addr :: ", addr); */
       }
     }
 
-    setTimeout(() => {
-      mneCall(thisdate, () => {
-        mneCall(nextdate, procDate);
-      });
-    }, 5000);
+    mneCall(thisdate, procDate);
 
     return;
   }

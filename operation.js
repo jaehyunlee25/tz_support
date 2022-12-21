@@ -1,23 +1,98 @@
 const mysql = require("mysql");
 const mqtt = require("mqtt");
 const fs = require("fs");
-
 const log = console.log;
-const dbconn = jp(gf("db.json"));
-const query = gf("sql/website.sql");
-const result = [];
 
-const connection = mysql.createConnection(dbconn);
-connection.connect();
-connection.query(query, (err, rows, fields) => {
-  rows.forEach((row) => {
-    result.push(row.eng_id);
+addGolfClubEng();
+
+function addGolfClubEng() {
+  const con = gf("test.doc");
+  const queries = [];
+  con.split("\n").forEach((ln) => {
+    const [name, , eng, , , , , , description] = ln.split("\t");
+    const query = "select * from golf_club where name='" + name + "';";
+    queries.push([query, eng]);
   });
-  mqttExec(0, 10);
-  fs.writeFileSync("result/homepage", result.join(",\r\n"), "utf-8");
-});
-connection.end();
 
+  exec();
+  let cnt = 0;
+  function exec() {
+    const el = queries.shift();
+    if (!el) return;
+    const [query, eng] = el;
+    setQuery(query, (res) => {
+      const [row] = res;
+      log(cnt++, row.name, row.id, eng);
+      const qry =
+        "insert into golf_club_eng values('" + eng + "', '" + row.id + "');";
+      setQuery(qry, (res) => {
+        log(res);
+        exec();
+      });
+    });
+  }
+}
+function addGolfClub() {
+  const con = gf("test.doc");
+  const engs = [];
+  const queries = [];
+  con.split("\n").forEach((ln) => {
+    const [
+      name,
+      address,
+      eng,
+      area,
+      phone,
+      email,
+      homepage,
+      regNum,
+      description,
+    ] = ln.split("\t");
+    engs.push(eng);
+    const query =
+      "insert into golf_club values(uuid(), '" +
+      name +
+      "', '" +
+      address +
+      "', '" +
+      area +
+      "','" +
+      phone +
+      "','" +
+      email +
+      "','" +
+      homepage +
+      "', '" +
+      regNum +
+      "', '" +
+      description.replace(/<br>/g, "\n").replace(/\s+$/, "").replace(/'/g, "") +
+      "', now(), now());";
+    queries.push(query);
+  });
+  function exec() {
+    const query = queries.shift();
+    if (!query) return;
+    setQuery(query, (res) => {
+      log(res);
+      exec();
+    });
+  }
+}
+function setQuery(query, func) {
+  const dbconn = jp(gf("db.json"));
+  const result = [];
+
+  const connection = mysql.createConnection(dbconn);
+  connection.connect();
+  connection.query(query, (err, rows, fields) => {
+    if (err) {
+      func(err);
+      return;
+    }
+    func(rows);
+  });
+  connection.end();
+}
 function mqttExec(start, end) {
   const client = mqtt.connect("mqtt:dev.mnemosyne.co.kr");
   const clubs = result.slice(start, end);

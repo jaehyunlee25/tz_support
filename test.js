@@ -1,31 +1,36 @@
 function mneCallDetail(arrDate) {
-  const [date] = arrDate;
-  const rows = doc.gcn("fc-content-skeleton");
-  const res = {};
-  rows.forEach((row) => {
-    const elDates = Array.from(row.gtn("thead")[0].gtn("tr")[0].children);
-    const elTeams = Array.from(row.gtn("tbody")[0].gtn("tr")[0].children);
-    elDates.forEach((el, i) => {
-      const strDate = el.attr("data-date");
-      let num = elTeams[i].str() * 1;
-      if (!num) num = 0;
-      if (num > 0) res[strDate.rm("-")] = el;
-    });
-  });
+  const fCall = { post, get };
+  const [date, sign, gb] = arrDate;
+  const addr = "/_mobile/GolfRes/onepage/real_timelist_ajax_list.asp";
+  const method = "post";
+  const param = {
+    golfrestype: "real",
+    courseid: "0",
+    usrmemcd: "80",
+    pointdate: date,
+    openyn: sign,
+    dategbn: gb,
+    choice_time: "00",
+    cssncourseum: "",
+    inputtype: "I",
+  };
+  const dictCourse = {
+    1: "동코스",
+    2: "서코스",
+  };
 
-  res[date].click();
-
-  /* fCall[method](addr, param, {}, (data) => {
+  fCall[method](addr, param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
-    const els = ifr.gcn("rounding");
+
+    const attr = "href";
+    const els = ifr.gba(attr, "javascript:subcmd", true);
     Array.from(els).forEach((el) => {
-      let time = el.nm(2, 0).str().rm(":");
-      let hole = el.str().ct(1);
-      course = dictCourse[1];
-      const fee = 60000;
-      fee_normal = fee;
-      fee_discount = fee;
+      let [, course, time, , , hole] = el.attr(attr).inparen();
+      hole = hole.ct(1) * 1;
+      course = dictCourse[course];
+      const fee_normal = 210000;
+      const fee_discount = 210000;
 
       golf_schedule.push({
         golf_club_id: clubId,
@@ -40,5 +45,5 @@ function mneCallDetail(arrDate) {
       });
     });
     procDate();
-  }); */
+  });
 }

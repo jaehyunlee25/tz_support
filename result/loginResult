@@ -10,7 +10,7 @@ javascript: (() => {
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "739f7798-ee3b-11ec-a93e-0242ac11000a",
+    golf_club_id: "ca2c06b1-7f4f-11ed-9c7a-0242ac110007",
     message: "",
     parameter: JSON.stringify({}),
   };
@@ -185,19 +185,22 @@ javascript: (() => {
       let flg = false;
       Array.from(org).forEach((chr) => {
         if (chr == "'") {
+          flg = !flg;
+        } else if (chr == ",") {
           if (flg) {
+            ar.push(chr);
+          } else {
             result.push(ar.join(""));
             ar = [];
-            flg = false;
-          } else {
-            flg = true;
           }
-        } else if (chr == ",") {
-          if (flg) ar.push(chr);
         } else {
           ar.push(chr);
         }
       });
+      if (ar.length > 0) {
+        result.push(ar.join(""));
+        ar = [];
+      }
     } else {
       org
         .split("'")
@@ -243,9 +246,6 @@ javascript: (() => {
   String.prototype.rm = function (str) {
     return this.split(str).join("");
   };
-  String.prototype.regex = function (regex) {
-    return this.replace(regex, "");
-  };
   String.prototype.fillzero = function (sep) {
     const ar = this.split(sep);
     const result = [];
@@ -257,6 +257,79 @@ javascript: (() => {
   };
   String.prototype.jp = function () {
     return JSON.parse(this);
+  };
+  String.prototype.regex = function (re) {
+    return re.exec(this);
+  };
+  String.prototype.gup = function () {
+    /*get url param*/
+    const param = {};
+    this.split("?")[1]
+      .split("&")
+      .forEach((str) => {
+        const [key, val] = str.split("=");
+        param[key] = val;
+      });
+    return param;
+  };
+  String.prototype.sort = function () {
+    return Array.from(this).sort().join("");
+  };
+  String.prototype.vector = function () {
+    /* 정렬한 뒤, 겹치는 글자는 뺀다. */
+    const res = {};
+    Array.from(this)
+      .sort()
+      .forEach((chr) => (res[chr] = true));
+    return Object.keys(res).join("");
+  };
+  String.prototype.comp = function (str) {
+    let a = Array.from(this);
+    let b = Array.from(str);
+    let c;
+    if (b.length > a.length) {
+      c = a;
+      a = b;
+      b = c;
+      c = undefined;
+    }
+
+    const res = [];
+
+    exec();
+
+    function exec() {
+      let flg = false;
+      let cur = b.shift();
+      let tmp = [];
+      a.forEach((chr) => {
+        if (chr == cur) {
+          flg = true;
+          tmp.push(cur);
+          cur = b.shift();
+        } else {
+          if (flg) {
+            flg = false;
+            if (tmp.length > 0) {
+              res.push(tmp);
+              tmp = [];
+            }
+            if (cur != undefined) {
+              b.unshift(cur);
+              exec();
+            }
+          }
+        }
+      });
+      if (tmp.length > 0) {
+        res.push(tmp);
+        if (cur != undefined) {
+          b.unshift(cur);
+          exec();
+        }
+      }
+    }
+    return res;
   };
   HTMLElement.prototype.str = function () {
     return this.innerText;
@@ -288,7 +361,7 @@ javascript: (() => {
     fnc(this);
     var a = this.children.length;
     for (var i = 0; i < a; i++) {
-      this.children[i].trav(fnc);
+      if (this.children[i].trav) this.children[i].trav(fnc);
     }
   };
   HTMLElement.prototype.gba = function (attr, val, opt) {
@@ -359,21 +432,9 @@ javascript: (() => {
   main();
   function main() {
     if (precheck()) return;
-    doc.gbn("memb_inet_no")[0].value = "newrison";
-    doc.gbn("memb_inet_pass")[0].value = "ilovegolf778";
-    LoginChk();
-
-    /* begin: precheck content */
-    function precheck() {
-      const strLogout = "LOGOUT";
-      const str = doc.body.gba("src", "../../img/common/menu_logout.gif");
-      if (str.length > 0) {
-        if (ac) ac.message("ALREADY_LOGIN");
-        return true;
-      }
-      return false;
-    }
-    /* end: precheck content */
+    memberId.value = "";
+    memberPw.value = "";
+    login();
   }
   function precheck() {}
 })();
