@@ -1,22 +1,34 @@
 function mneCallDetail(arrDate) {
   const fCall = { post, get };
   const [date, sign, gb] = arrDate;
-  const addr = "/_mobile/GolfRes/onepage/real_timelist_ajax_list.asp";
+  const addr = "/mobile/reservation/Reservation02.asp";
   const method = "post";
   const param = {
-    golfrestype: "real",
-    courseid: "0",
-    usrmemcd: "80",
-    pointdate: date,
-    openyn: sign,
-    dategbn: gb,
-    choice_time: "00",
-    cssncourseum: "",
-    inputtype: "I",
+    strYY: date.gh(4),
+    strMM: date.ch(4).gh(2),
+    strReserveType: "1",
+    strReserveDate: date.datify(),
+    strReserveTime: "",
+    strCourseCode: "",
+    strDayGubun: sign,
+    strHole: "",
+    strSeq: "",
+    strBu: "",
+    strTotalCnt: "",
+    strPrevDL: "",
+    strPrevTD: "",
+    strPrevReserveType: "1",
+    dtmChangeDate: "",
+    strChangeTime: "",
+    strChangeSeq: "",
+    strChangeDayGubun: "",
+    strChangeCourseCode: "",
+    strChangeHole: "",
   };
   const dictCourse = {
-    1: "동코스",
-    2: "서코스",
+    11: "고구려",
+    22: "백제",
+    33: "신라",
   };
 
   fCall[method](addr, param, {}, (data) => {
@@ -24,13 +36,12 @@ function mneCallDetail(arrDate) {
     ifr.innerHTML = data;
 
     const attr = "href";
-    const els = ifr.gba(attr, "javascript:subcmd", true);
+    const els = ifr.gba(attr, "javascript:ReserveOK", true);
     Array.from(els).forEach((el) => {
       let [, course, time, , , hole] = el.attr(attr).inparen();
-      hole = hole.ct(1) * 1;
       course = dictCourse[course];
-      const fee_normal = 210000;
-      const fee_discount = 210000;
+      const fee_normal = el.nm(1, 2).str().rm(",") * 1;
+      const fee_discount = el.nm(1, 4).str().rm(",") * 1;
 
       golf_schedule.push({
         golf_club_id: clubId,
