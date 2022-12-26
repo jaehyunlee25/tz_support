@@ -1,1 +1,18 @@
-{daychoice: "20221129",daywtype: "0",ninehole: "18",daydaekiyn: "N",coursegubun: "P"}
+{
+    "urls": {
+                "62c8233b-cdb7-11ec-a93e-0242ac11000a": "https://www.yongincc.com/Mobile/", 
+                "62c8233b-cdb7-11ec-a93e-0242ac11000a": "http://www.urigolfclub.co.kr/Mobile/Booking"
+            }, 
+    "scripts": {
+        "62c8233b-cdb7-11ec-a93e-0242ac11000a":"javascript:(() => {   "
+    }, 
+    "procProcs": {}, 
+    "procLandingLinks": {
+        "62c8233b-cdb7-11ec-a93e-0242ac11000a":"https://www.yongincc.com/Mobile/",
+        "62c8233b-cdb7-11ec-a93e-0242ac":"https://www.google.com"
+    }, 
+    "procMessages":{
+        "62c8233b-cdb7-11ec-a93e-0242ac11000a":"이미 로그인되어있습니다."
+    },
+    "procResults":{}
+  }

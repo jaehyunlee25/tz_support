@@ -1,60 +1,28 @@
-function mneCallDetail(arrDate) {
-  const fCall = { post, get };
-  const [date, sign, gb] = arrDate;
-  const addr = "/mobile/reservation/Reservation02.asp";
-  const method = "post";
+function mneCall(date, callback) {
   const param = {
-    strYY: date.gh(4),
-    strMM: date.ch(4).gh(2),
-    strReserveType: "1",
-    strReserveDate: date.datify(),
-    strReserveTime: "",
-    strCourseCode: "",
-    strDayGubun: sign,
-    strHole: "",
-    strSeq: "",
-    strBu: "",
-    strTotalCnt: "",
-    strPrevDL: "",
-    strPrevTD: "",
-    strPrevReserveType: "1",
-    dtmChangeDate: "",
-    strChangeTime: "",
-    strChangeSeq: "",
-    strChangeDayGubun: "",
-    strChangeCourseCode: "",
-    strChangeHole: "",
+    Kind: 9,
   };
-  const dictCourse = {
-    11: "고구려",
-    22: "백제",
-    33: "신라",
-  };
-
-  fCall[method](addr, param, {}, (data) => {
+  get("/sub_03_00M.aspx", param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
-
     const attr = "href";
-    const els = ifr.gba(attr, "javascript:ReserveOK", true);
-    Array.from(els).forEach((el) => {
-      let [, course, time, , , hole] = el.attr(attr).inparen();
-      course = dictCourse[course];
-      const fee_normal = el.nm(1, 2).str().rm(",") * 1;
-      const fee_discount = el.nm(1, 4).str().rm(",") * 1;
-
-      golf_schedule.push({
-        golf_club_id: clubId,
-        golf_course_id: course,
-        date,
-        time,
-        in_out: "",
-        persons: "",
-        fee_normal,
-        fee_discount,
-        others: hole + "홀",
-      });
+    const els = ifr.gba(attr, "sub_03_01M.aspx?", true);
+    els.forEach((el) => {
+      const { Kind, YMD } = el.attr(attr).gup();
+      dates.push([YMD, Kind]);
     });
-    procDate();
+
+    param.Kind = 6;
+    get("/sub_03_00M.aspx", param, {}, (data) => {
+      const ifr = doc.clm("div");
+      ifr.innerHTML = data;
+      const attr = "href";
+      const els = ifr.gba(attr, "sub_03_01M.aspx?", true);
+      els.forEach((el) => {
+        const { Kind, YMD } = el.attr(attr).gup();
+        dates.push([YMD, Kind]);
+      });
+      callback();
+    });
   });
 }
