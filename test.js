@@ -1,28 +1,35 @@
-function mneCall(date, callback) {
-  const param = {
-    Kind: 9,
-  };
-  get("/sub_03_00M.aspx", param, {}, (data) => {
-    const ifr = doc.clm("div");
-    ifr.innerHTML = data;
-    const attr = "href";
-    const els = ifr.gba(attr, "sub_03_01M.aspx?", true);
-    els.forEach((el) => {
-      const { Kind, YMD } = el.attr(attr).gup();
-      dates.push([YMD, Kind]);
-    });
+const [date, option] = arrDate;
+const dictCourse = {
+  A: "West",
+  B: "East",
+};
+const param = {
+  coDiv: "01",
+  date: date,
+  _: new Date().getTime(),
+};
+post("/clubd/reservation/getTeeList.do", param, {}, (data) => {
+  const els = JSON.parse(data).rows;
+  els.forEach((el, i) => {
+    const course = dictCourse[el.BK_COS];
+    const time = el.BK_TIME;
+    let fee_normal = el.BK_BASIC_CHARGE * 1;
+    let fee_discount = el.BK_CHARGE.split(",")[1] * 1;
 
-    param.Kind = 6;
-    get("/sub_03_00M.aspx", param, {}, (data) => {
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
-      const attr = "href";
-      const els = ifr.gba(attr, "sub_03_01M.aspx?", true);
-      els.forEach((el) => {
-        const { Kind, YMD } = el.attr(attr).gup();
-        dates.push([YMD, Kind]);
-      });
-      callback();
+    if (isNaN(fee_normal)) fee_normal = -1;
+    if (isNaN(fee_discount)) fee_discount = -1;
+
+    golf_schedule.push({
+      golf_club_id: clubId,
+      golf_course_id: course,
+      date,
+      time,
+      in_out: "",
+      persons: "",
+      fee_normal,
+      fee_discount,
+      others: "18홀",
     });
   });
-}
+  procDate();
+});

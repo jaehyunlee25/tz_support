@@ -431,9 +431,10 @@ javascript: (() => {
   console.clear();
 
   const dict = {
-    "http://res.ladenaresort.com/_mobile/login/login.asp": funcLogin,
-    "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp":
-      funcReserve,
+    "https://www.clubd.com/m_clubd/member/login.do": funcLogin,
+    "https://www.clubd.com/m_clubd/index.do": funcReserve,
+    "https://www.clubd.com/m_clubd/index.do": funcMain,
+    "https://www.clubd.com/clubd/member/actionLogout.do": funcOut,
   };
 
   function funcLogin() {
@@ -442,19 +443,13 @@ javascript: (() => {
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       log("funcLogin Timein ERROR");
-      location.href =
-        "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
+      location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
       return;
     }
 
-    login_id.value = "${login_id}";
-    login_pw.value = "${login_password}";
-    doc.body
-      .gba(
-        "href",
-        "javascript:chkLogValue('frmLogin','in','login_id','login_pw')"
-      )[0]
-      .click();
+    msId.value = "${login_id}";
+    msPw.value = "${login_password}";
+    actionLogin();
 
     return;
   }
@@ -512,11 +507,10 @@ log("addr :: ", addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "a351e25d-707a-11ed-9c7a-0242ac110007";
+  const clubId = "b494a7c2-efc5-11ec-a93e-0242ac11000a";
   const courses = {
-    Lake: "dcc273b6-7b80-11ed-9c7a-0242ac110007",
-    Garden: "dcc2758d-7b80-11ed-9c7a-0242ac110007",
-    Nature: "dcc275cf-7b80-11ed-9c7a-0242ac110007",
+    West: "b4965a04-efc5-11ec-a93e-0242ac11000a",
+    East: "b4965b07-efc5-11ec-a93e-0242ac11000a",
   };
   log("step::", 1);
   const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
@@ -693,66 +687,52 @@ log("addr :: ", addr); */
   },
 ];
  */
-  function mneCall(strdate, callback) {
-    const param = {};
-    const els = doc.gba("href", "javascript:timefrom_change", true);
+  function mneCall(date, callback) {
+    const els = document.getElementsByClassName("MReser");
     Array.from(els).forEach((el) => {
-      const [date, , , , , opt] = el.attr("href").inparen();
-      if (opt != "T") return;
-      dates.push([date, ""]);
+      const param = el.getAttribute("href").inparen();
+      if (param[0] === "0") return;
+      dates.push([param[0], param]);
     });
     callback();
   }
 
   function mneCallDetail(arrDate) {
-    const [date, strParam] = arrDate;
-    const param = {
-      golfrestype: "real",
-      courseid: "0",
-      usrmemcd: "31",
-      pointdate: date,
-      openyn: "1",
-      dategbn: "4",
-      choice_time: "00",
-      cssncourseum: "",
-      inputtype: "I",
-    };
+    const [date, option] = arrDate;
     const dictCourse = {
-      1: "Lake",
-      2: "Garden",
-      3: "Nature",
+      A: "West",
+      B: "East",
     };
+    const param = {
+      coDiv: "01",
+      date: date,
+      _: new Date().getTime(),
+    };
+    post("/clubd/reservation/getTeeList.do", param, {}, (data) => {
+      const els = JSON.parse(data).rows;
+      els.forEach((el, i) => {
+        const course = dictCourse[el.BK_COS];
+        const time = el.BK_TIME;
+        let fee_normal = el.BK_BASIC_CHARGE * 1;
+        let fee_discount = el.BK_CHARGE.split(",")[1] * 1;
 
-    post(
-      "/_mobile/GolfRes/onepage/real_timeinfo_ajax_from.asp",
-      param,
-      {},
-      (data) => {
-        const ifr = doc.clm("div");
-        ifr.innerHTML = data;
+        if (isNaN(fee_normal)) fee_normal = -1;
+        if (isNaN(fee_discount)) fee_discount = -1;
 
-        const els = ifr.gba("href", "javascript:subcmd", true);
-        Array.from(els).forEach((el, i) => {
-          let [, course, time] = el.attr("href").inparen();
-          course = dictCourse[course];
-          const fee_discount = 220000;
-          const fee_normal = 220000;
-
-          golf_schedule.push({
-            golf_club_id: clubId,
-            golf_course_id: course,
-            date,
-            time,
-            in_out: "",
-            persons: "",
-            fee_normal,
-            fee_discount,
-            others: "18홀",
-          });
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: "18홀",
         });
-        procDate();
-      }
-    );
+      });
+      procDate();
+    });
   }
 
   function LOGOUT() {
@@ -775,22 +755,20 @@ log("addr :: ", addr); */
 
   function funcList() {
     log("funcList");
-    location.href =
-      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
+    location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
     return;
   }
   function funcMain() {
     log("funcMain");
 
-    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
+    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 3);
     log("timeout chk", chk);
     if (!chk) {
       log("funcMain Timein ERROR");
       return;
     }
 
-    location.href =
-      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
+    location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
     return;
   }
   function funcOut() {
@@ -810,8 +788,7 @@ log("addr :: ", addr); */
       return;
     }
 
-    location.href =
-      "http://res.ladenaresort.com/_mobile/GolfRes/onepage/real_reservation.asp";
+    location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
 
     return;
   }
