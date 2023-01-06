@@ -15,7 +15,7 @@ const golf_club_eng_name = "clubd_geumgang";
 ); */
 //getDoneClubs();
 //getLoginScript();
-getSearchScript();
+//getSearchScript();
 //getReserveScript();
 //getReserveSearchScript();
 //getReserveCancelScript();
@@ -40,6 +40,25 @@ request.post(
   }
 );
 */
+
+const query = gf("sql/login.sql");
+const result = {};
+const dbconn = jp(gf("db.json"));
+const connection = mysql.createConnection(dbconn);
+connection.connect();
+connection.query(
+  "select * from golf_club order by created_at desc;",
+  (err, rows, fields) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    rows.forEach((row) => {
+      log(row);
+    });
+  }
+);
+connection.end();
 
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
