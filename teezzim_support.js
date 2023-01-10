@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "clubd_geumgang";
+const golf_club_eng_name = "zensfield";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -15,8 +15,9 @@ const golf_club_eng_name = "clubd_geumgang";
 ); */
 //getDoneClubs();
 //getLoginScript();
-getSearchScript();
+//getSearchScript();
 //getReserveScript();
+setSurvey();
 //getReserveSearchScript();
 //getReserveCancelScript();
 
@@ -41,6 +42,36 @@ request.post(
 );
 */
 
+function setSurvey() {
+  request.post(
+    "https://dev.mnemosyne.co.kr/api/crawler/setSurvey",
+    {
+      json: {
+        device_id: "5c8cfa37-8be3-11ed-9c7a-0242ac110007",
+        gender: 0,
+        area: "서울특별시",
+        age: 2,
+        confirm: 1,
+      },
+    },
+    (error, response, body) => {
+      log(body);
+    }
+  );
+}
+function getWarning() {
+  request.post(
+    "https://dev.mnemosyne.co.kr/api/crawler/getWarning",
+    {
+      json: {
+        golf_club_id: "e0ab88a4-ee25-11ec-a93e-0242ac11000a",
+      },
+    },
+    (error, response, body) => {
+      log(body);
+    }
+  );
+}
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
   const result = {};
