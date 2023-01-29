@@ -1,843 +1,795 @@
-javascript:(() => {   
-  
-    /* test */
-const log = console.log;
-const dir = console.dir;
-const doc = document;
-const ls = localStorage;
-const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
-const logParam = {
-  type: "command",
-  sub_type: "",
-  device_id: "${deviceId}",
-  device_token: "${deviceToken}",
-  golf_club_id: "${golfClubId}",
-  message: "",
-  parameter: JSON.stringify({}),
-};
-let ac = false;
-try {
-  ac = window.AndroidController || window.webkit.messageHandlers.iosController;
-  ac.message =
-    ac.message || window.webkit.messageHandlers.iosController.postMessage;
-} catch (e) {
-  ac = false;
-}
-
-const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-const aDDr = location.href.split(splitter)[0];
-const suffix = location.href.split(splitter)[1];
-const dictSplitter = { "#": "?", "?": "#" };
-let addr = aDDr;
-if (aDDr.indexOf(dictSplitter[splitter]) != -1)
-  addr = aDDr.split(dictSplitter[splitter])[0];
-
-logParam.sub_type = "url";
-logParam.message = "raw addr :: " + location.href;
-TZLOG(logParam);
-logParam.message = "aDDr :: " + aDDr;
-TZLOG(logParam);
-logParam.message = "addr :: " + addr;
-TZLOG(logParam);
-log("addr", addr);
-
-function LSCHK(str, sec) {
-  const tag = lsg(str);
-  log("time check", new Date().getTime() - tag, 1000 * sec);
-  if (tag && new Date().getTime() - tag < 1000 * sec) return false;
-  lss(str, new Date().getTime());
-  return true;
-}
-function TZLOG(param, callback) {
-  const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
-  post(addr, param, { "Content-Type": "application/json" }, (data) => {
-    if (callback) callback(data);
-  });
-}
-function post(addr, param, header, callback) {
-  var a = new ajaxcallforgeneral(),
-    str = [];
-  if (header["Content-Type"] == "application/json") {
-    str = JSON.stringify(param);
-  } else {
-    for (var el in param) str.push(el + "=" + encodeURIComponent(param[el]));
-    str = str.join("&");
-  }
-  a.post(addr, str, header);
-  a.ajaxcallback = callback;
-}
-function get(addr, param, header, callback) {
-  var a = new ajaxcallforgeneral(),
-    str = [];
-  for (var el in param) {
-    str.push(el + "=" + param[el]);
-  }
-  str = str.join("&");
-  a.jAjax(addr + "?" + str, header);
-  a.ajaxcallback = callback;
-}
-function ajaxcallforgeneral() {
-  this.xmlHttp;
-  var j = this;
-  var HTTP = {};
-  var ADDR;
-  var PARAM;
-  var HEADER;
-  this.jAjax = function (address, header) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.onerror = onError;
-    j.xmlHttp.open("GET", address, true);
-    if (header) {
-      Object.keys(header).forEach((key) => {
-        var val = header[key];
-        j.xmlHttp.setRequestHeader(key, val);
-      });
-    }
-    j.xmlHttp.send(null);
+javascript: (() => {
+  const log = console.log;
+  const dir = console.dir;
+  const doc = document;
+  const ls = localStorage;
+  const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
+  const LOGID = new Date().getTime();
+  const logParam = {
+    type: "command",
+    sub_type: "",
+    device_id: "${deviceId}",
+    device_token: "${deviceToken}",
+    golf_club_id: "${golfClubId}",
+    message: "",
+    parameter: JSON.stringify({ LOGID }),
   };
-  this.post = function (addr, prm, header) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.onerror = onError;
-    j.xmlHttp.open("POST", addr, true);
+  let ac = false;
+  try {
+    ac =
+      window.AndroidController || window.webkit.messageHandlers.iosController;
+    ac.message =
+      ac.message || window.webkit.messageHandlers.iosController.postMessage;
+  } catch (e) {
+    ac = false;
+  }
 
-    if (header) {
-      if (header["Content-Type"])
+  const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+  const aDDr = location.href.split(splitter)[0];
+  const suffix = location.href.split(splitter)[1];
+  const dictSplitter = { "#": "?", "?": "#" };
+  let addr = aDDr;
+  if (aDDr.indexOf(dictSplitter[splitter]) != -1)
+    addr = aDDr.split(dictSplitter[splitter])[0];
+
+  EXTZLOG("url", "raw addr :: " + location.href);
+  EXTZLOG("url", "aDDr :: " + aDDr);
+  EXTZLOG("url", "addr :: " + addr);
+
+  function LSCHK(str, sec) {
+    const tag = lsg(str);
+    log("time check", new Date().getTime() - tag, 1000 * sec);
+    if (tag && new Date().getTime() - tag < 1000 * sec) return false;
+    lss(str, new Date().getTime());
+    return true;
+  }
+  function TZLOG(param, callback) {
+    const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
+    post(addr, param, { "Content-Type": "application/json" }, (data) => {
+      if (callback) callback(data);
+    });
+  }
+  function EXTZLOG(subtype, message, param) {
+    logParam.sub_type = subtype;
+    logParam.message = message;
+    if (param) logParam.parameter = JSON.stringify(param);
+    TZLOG(logParam);
+  }
+  function post(addr, param, header, callback) {
+    var a = new ajaxcallforgeneral(),
+      str = [];
+    if (header["Content-Type"] == "application/json") {
+      str = JSON.stringify(param);
+    } else {
+      for (var el in param) str.push(el + "=" + encodeURIComponent(param[el]));
+      str = str.join("&");
+    }
+    a.post(addr, str, header);
+    a.ajaxcallback = callback;
+  }
+  function get(addr, param, header, callback) {
+    var a = new ajaxcallforgeneral(),
+      str = [];
+    for (var el in param) {
+      str.push(el + "=" + param[el]);
+    }
+    str = str.join("&");
+    a.jAjax(addr + "?" + str, header);
+    a.ajaxcallback = callback;
+  }
+  function ajaxcallforgeneral() {
+    this.xmlHttp;
+    var j = this;
+    var HTTP = {};
+    var ADDR;
+    var PARAM;
+    var HEADER;
+    this.jAjax = function (address, header) {
+      j.xmlHttp = new XMLHttpRequest();
+      j.xmlHttp.onreadystatechange = on_ReadyStateChange;
+      j.xmlHttp.onerror = onError;
+      j.xmlHttp.open("GET", address, true);
+      if (header) {
         Object.keys(header).forEach((key) => {
           var val = header[key];
           j.xmlHttp.setRequestHeader(key, val);
         });
-      else
+      }
+      j.xmlHttp.send(null);
+    };
+    this.post = function (addr, prm, header) {
+      j.xmlHttp = new XMLHttpRequest();
+      j.xmlHttp.onreadystatechange = on_ReadyStateChange;
+      j.xmlHttp.onerror = onError;
+      j.xmlHttp.open("POST", addr, true);
+
+      if (header) {
+        if (header["Content-Type"])
+          Object.keys(header).forEach((key) => {
+            var val = header[key];
+            j.xmlHttp.setRequestHeader(key, val);
+          });
+        else
+          j.xmlHttp.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+      } else {
         j.xmlHttp.setRequestHeader(
           "Content-Type",
           "application/x-www-form-urlencoded"
         );
-    } else {
-      j.xmlHttp.setRequestHeader(
-        "Content-Type",
-        "application/x-www-form-urlencoded"
-      );
-    }
-
-    ADDR = addr;
-    PARAM = prm;
-    HEADER = JSON.stringify(header);
-
-    j.xmlHttp.send(prm);
-  };
-  this.file = function (addr, prm) {
-    j.xmlHttp = new XMLHttpRequest();
-    j.xmlHttp.onreadystatechange = on_ReadyStateChange;
-    j.xmlHttp.open("POST", addr, true);
-    j.xmlHttp.send(prm);
-  };
-  function onError() {}
-  function on_ReadyStateChange() {
-    if (j.xmlHttp.readyState == 4) {
-      if (j.xmlHttp.status == 200) {
-        var data = j.xmlHttp.responseText;
-        j.ajaxcallback(data);
-      } else {
       }
-    }
-  }
-}
-function lsg(str) {
-  return localStorage.getItem(str);
-}
-function lss(key, val) {
-  return localStorage.setItem(key, val);
-}
-function lsr(str) {
-  return localStorage.removeItem(str);
-}
-function lsc() {
-  const keys = Object.keys(localStorage);
-  keys.forEach((key) => {
-    if (key.indexOf("TZ_") == -1) return;
-    lsr(key);
-  });
-}
-String.prototype.gt = function (num) {
-  return this.substring(this.length - num, this.length);
-};
-String.prototype.gh = function (num) {
-  return this.substring(0, num);
-};
-String.prototype.ct = function (num) {
-  return this.substring(0, this.length - num);
-};
-String.prototype.ch = function (num) {
-  return this.substring(num, this.length);
-};
-String.prototype.addzero = function () {
-  if (this.length == 1) return "0" + this;
-  return this;
-};
-String.prototype.inparen = function (opt) {
-  const regex = /.+?\((.+)\)/;
-  const str = this.toString();
-  const result = [];
-  const org = regex.exec(str)[1];
-  if (opt) {
-    let ar = [];
-    let flg = false;
-    Array.from(org).forEach((chr) => {
-      if (chr == "'") {
-        flg = !flg;
-      } else if (chr == ",") {
-        if (flg) {
-          ar.push(chr);
+
+      ADDR = addr;
+      PARAM = prm;
+      HEADER = JSON.stringify(header);
+
+      j.xmlHttp.send(prm);
+    };
+    this.file = function (addr, prm) {
+      j.xmlHttp = new XMLHttpRequest();
+      j.xmlHttp.onreadystatechange = on_ReadyStateChange;
+      j.xmlHttp.open("POST", addr, true);
+      j.xmlHttp.send(prm);
+    };
+    function onError() {}
+    function on_ReadyStateChange() {
+      if (j.xmlHttp.readyState == 4) {
+        if (j.xmlHttp.status == 200) {
+          var data = j.xmlHttp.responseText;
+          j.ajaxcallback(data);
         } else {
-          result.push(ar.join(""));
-          ar = [];
         }
-      } else {
-        ar.push(chr);
       }
-    });
-    if (ar.length > 0) {
-      result.push(ar.join(""));
-      ar = [];
     }
-  } else {
-    org
-      .split("'")
-      .join("")
-      .split(",")
-      .forEach((str) => {
-        result.push(str.trim());
+  }
+  function lsg(str) {
+    return localStorage.getItem(str);
+  }
+  function lss(key, val) {
+    return localStorage.setItem(key, val);
+  }
+  function lsr(str) {
+    return localStorage.removeItem(str);
+  }
+  function lsc() {
+    const keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+      if (key.indexOf("TZ_") == -1) return;
+      lsr(key);
+    });
+  }
+  String.prototype.gt = function (num) {
+    return this.substring(this.length - num, this.length);
+  };
+  String.prototype.gh = function (num) {
+    return this.substring(0, num);
+  };
+  String.prototype.ct = function (num) {
+    return this.substring(0, this.length - num);
+  };
+  String.prototype.ch = function (num) {
+    return this.substring(num, this.length);
+  };
+  String.prototype.addzero = function () {
+    if (this.length == 1) return "0" + this;
+    return this;
+  };
+  String.prototype.inparen = function (opt) {
+    const regex = /.+?\((.+)\)/;
+    const str = this.toString();
+    const result = [];
+    const org = regex.exec(str)[1];
+    if (opt) {
+      let ar = [];
+      let flg = false;
+      Array.from(org).forEach((chr) => {
+        if (chr == "'") {
+          flg = !flg;
+        } else if (chr == ",") {
+          if (flg) {
+            ar.push(chr);
+          } else {
+            result.push(ar.join(""));
+            ar = [];
+          }
+        } else {
+          ar.push(chr);
+        }
       });
-  }
-  return result;
-};
-String.prototype.datify = function (sign) {
-  const str = this.toString();
-  if (!sign) sign = "-";
-  return [str.gh(4), str.ch(4).gh(2), str.gt(2)].join(sign);
-};
-String.prototype.getFee = function () {
-  let str = this.toString();
-  str = str.replace(/[^0-9]/g, "");
-  return str * 1;
-};
-String.prototype.daySign = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  let sign;
-  if (num == 0) sign = 3;
-  else if (num == 6) sign = 2;
-  else sign = 1;
-  return sign.toString();
-};
-String.prototype.dayNum = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  return (num + 1).toString();
-};
-String.prototype.dayKor = function () {
-  const str = this.getFee().toString();
-  const num = new Date(str.datify()).getDay();
-  const week = ["일", "월", "화", "수", "목", "금", "토"];
+      if (ar.length > 0) {
+        result.push(ar.join(""));
+        ar = [];
+      }
+    } else {
+      org
+        .split("'")
+        .join("")
+        .split(",")
+        .forEach((str) => {
+          result.push(str.trim());
+        });
+    }
+    return result;
+  };
+  String.prototype.datify = function (sign) {
+    const str = this.toString();
+    if (!sign) sign = "-";
+    return [str.gh(4), str.ch(4).gh(2), str.gt(2)].join(sign);
+  };
+  String.prototype.getFee = function () {
+    let str = this.toString();
+    str = str.replace(/[^0-9]/g, "");
+    return str * 1;
+  };
+  String.prototype.daySign = function () {
+    const str = this.getFee().toString();
+    const num = new Date(str.datify()).getDay();
+    let sign;
+    if (num == 0) sign = 3;
+    else if (num == 6) sign = 2;
+    else sign = 1;
+    return sign.toString();
+  };
+  String.prototype.dayNum = function () {
+    const str = this.getFee().toString();
+    const num = new Date(str.datify()).getDay();
+    return (num + 1).toString();
+  };
+  String.prototype.dayKor = function () {
+    const str = this.getFee().toString();
+    const num = new Date(str.datify()).getDay();
+    const week = ["일", "월", "화", "수", "목", "금", "토"];
 
-  return week[num];
-};
-String.prototype.rm = function (str) {
-  return this.split(str).join("");
-};
-String.prototype.fillzero = function (sep) {
-  const ar = this.split(sep);
-  const result = [];
-  ar.forEach((el) => {
-    result.push(el.addzero());
-  });
-
-  return result.join("");
-};
-String.prototype.jp = function () {
-  return JSON.parse(this);
-};
-String.prototype.regex = function (re) {
-  return re.exec(this);
-};
-String.prototype.gup = function () {
-  /*get url param*/
-  const param = {};
-  this.split("?")[1]
-    .split("&")
-    .forEach((str) => {
-      const [key, val] = str.split("=");
-      param[key] = val;
+    return week[num];
+  };
+  String.prototype.rm = function (str) {
+    return this.split(str).join("");
+  };
+  String.prototype.fillzero = function (sep) {
+    const ar = this.split(sep);
+    const result = [];
+    ar.forEach((el) => {
+      result.push(el.addzero());
     });
-  return param;
-};
-String.prototype.sort = function () {
-  return Array.from(this).sort().join("");
-};
-String.prototype.vector = function () {
-  /* 정렬한 뒤, 겹치는 글자는 뺀다. */
-  const res = {};
-  Array.from(this)
-    .sort()
-    .forEach((chr) => (res[chr] = true));
-  return Object.keys(res).join("");
-};
-String.prototype.comp = function (str) {
-  let a = Array.from(this);
-  let b = Array.from(str);
-  let c;
-  if (b.length > a.length) {
-    c = a;
-    a = b;
-    b = c;
-    c = undefined;
-  }
 
-  const res = [];
+    return result.join("");
+  };
+  String.prototype.jp = function () {
+    return JSON.parse(this);
+  };
+  String.prototype.regex = function (re) {
+    return re.exec(this);
+  };
+  String.prototype.gup = function () {
+    /*get url param*/
+    const param = {};
+    this.split("?")[1]
+      .split("&")
+      .forEach((str) => {
+        const [key, val] = str.split("=");
+        param[key] = val;
+      });
+    return param;
+  };
+  String.prototype.sort = function () {
+    return Array.from(this).sort().join("");
+  };
+  String.prototype.vector = function () {
+    /* 정렬한 뒤, 겹치는 글자는 뺀다. */
+    const res = {};
+    Array.from(this)
+      .sort()
+      .forEach((chr) => (res[chr] = true));
+    return Object.keys(res).join("");
+  };
+  String.prototype.comp = function (str) {
+    let a = Array.from(this);
+    let b = Array.from(str);
+    let c;
+    if (b.length > a.length) {
+      c = a;
+      a = b;
+      b = c;
+      c = undefined;
+    }
 
-  exec();
+    const res = [];
 
-  function exec() {
-    let flg = false;
-    let cur = b.shift();
-    let tmp = [];
-    a.forEach((chr) => {
-      if (chr == cur) {
-        flg = true;
-        tmp.push(cur);
-        cur = b.shift();
-      } else {
-        if (flg) {
-          flg = false;
-          if (tmp.length > 0) {
-            res.push(tmp);
-            tmp = [];
-          }
-          if (cur != undefined) {
-            b.unshift(cur);
-            exec();
+    exec();
+
+    function exec() {
+      let flg = false;
+      let cur = b.shift();
+      let tmp = [];
+      a.forEach((chr) => {
+        if (chr == cur) {
+          flg = true;
+          tmp.push(cur);
+          cur = b.shift();
+        } else {
+          if (flg) {
+            flg = false;
+            if (tmp.length > 0) {
+              res.push(tmp);
+              tmp = [];
+            }
+            if (cur != undefined) {
+              b.unshift(cur);
+              exec();
+            }
           }
         }
+      });
+      if (tmp.length > 0) {
+        res.push(tmp);
+        if (cur != undefined) {
+          b.unshift(cur);
+          exec();
+        }
+      }
+    }
+    return res;
+  };
+  HTMLElement.prototype.str = function () {
+    return this.innerText;
+  };
+  HTMLElement.prototype.add = function (tag) {
+    const el = document.createElement(tag);
+    this.appendChild(el);
+    return el;
+  };
+  HTMLElement.prototype.attr = function (str) {
+    return this.getAttribute(str);
+  };
+  HTMLElement.prototype.gcn = function (str) {
+    const els = this.getElementsByClassName(str);
+    return Array.from(els);
+  };
+  HTMLElement.prototype.gtn = function (str) {
+    const els = this.getElementsByTagName(str);
+    return Array.from(els);
+  };
+  HTMLElement.prototype.gbn = function (str) {
+    const els = this.getElementsByName(str);
+    return Array.from(els);
+  };
+  HTMLElement.prototype.str = function (str) {
+    return this.innerText;
+  };
+  HTMLElement.prototype.trav = function (fnc) {
+    fnc(this);
+    var a = this.children.length;
+    for (var i = 0; i < a; i++) {
+      if (this.children[i].trav) this.children[i].trav(fnc);
+    }
+  };
+  HTMLElement.prototype.gba = function (attr, val, opt) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.trav((el) => {
+      const str = el.attr(attr);
+      if (!str) return;
+      if (opt) {
+        if (str.indexOf(val) != -1) res.push(el);
+      } else {
+        if (str == val) res.push(el);
       }
     });
-    if (tmp.length > 0) {
-      res.push(tmp);
-      if (cur != undefined) {
-        b.unshift(cur);
-        exec();
+    return res;
+  };
+  HTMLElement.prototype.nm = function () {
+    /* node move */
+    const args = Array.from(arguments);
+    const up = args.shift();
+    let el = this;
+    for (let i = 0; i < up; i++) {
+      const p = el.parentNode;
+      if (p) el = p;
+    }
+
+    args.forEach((num) => {
+      const p = el.children[num];
+      if (p) el = p;
+    });
+
+    return el;
+  };
+  document.gcn = function (str) {
+    const els = this.getElementsByClassName(str);
+    return Array.from(els);
+  };
+  document.gtn = function (str) {
+    const els = this.getElementsByTagName(str);
+    return Array.from(els);
+  };
+  document.gbn = function (str) {
+    const els = this.getElementsByName(str);
+    return Array.from(els);
+  };
+  document.clm = function (str) {
+    return document.createElement(str);
+  };
+  document.gba = function (attr, val, opt) {
+    /* getElementsByAttribute */
+    const res = [];
+    this.body.trav((el) => {
+      const str = el.attr(attr);
+      if (!str) return;
+      if (opt) {
+        if (str.indexOf(val) != -1) res.push(el);
+      } else {
+        if (str == val) res.push(el);
       }
-    }
-  }
-  return res;
-};
-HTMLElement.prototype.str = function () {
-  return this.innerText;
-};
-HTMLElement.prototype.add = function (tag) {
-  const el = document.createElement(tag);
-  this.appendChild(el);
-  return el;
-};
-HTMLElement.prototype.attr = function (str) {
-  return this.getAttribute(str);
-};
-HTMLElement.prototype.gcn = function (str) {
-  const els = this.getElementsByClassName(str);
-  return Array.from(els);
-};
-HTMLElement.prototype.gtn = function (str) {
-  const els = this.getElementsByTagName(str);
-  return Array.from(els);
-};
-HTMLElement.prototype.gbn = function (str) {
-  const els = this.getElementsByName(str);
-  return Array.from(els);
-};
-HTMLElement.prototype.str = function (str) {
-  return this.innerText;
-};
-HTMLElement.prototype.trav = function (fnc) {
-  fnc(this);
-  var a = this.children.length;
-  for (var i = 0; i < a; i++) {
-    if (this.children[i].trav) this.children[i].trav(fnc);
-  }
-};
-HTMLElement.prototype.gba = function (attr, val, opt) {
-  /* getElementsByAttribute */
-  const res = [];
-  this.trav((el) => {
-    const str = el.attr(attr);
-    if (!str) return;
-    if (opt) {
-      if (str.indexOf(val) != -1) res.push(el);
-    } else {
-      if (str == val) res.push(el);
-    }
-  });
-  return res;
-};
-HTMLElement.prototype.nm = function () {
-  /* node move */
-  const args = Array.from(arguments);
-  const up = args.shift();
-  let el = this;
-  for (let i = 0; i < up; i++) {
-    const p = el.parentNode;
-    if (p) el = p;
-  }
+    });
+    return res;
+  };
+  window.timer = function (time, callback) {
+    setTimeout(callback, time);
+  };
+  /* 이 부분 자리 옮기지 마시오.*/
+  console.clear();
 
-  args.forEach((num) => {
-    const p = el.children[num];
-    if (p) el = p;
-  });
+  const dict = {
+    "http://www.sscc.co.kr/mobile/login.asp": funcLogin,
+    "http://www.sscc.co.kr/mobile/reservation_date.asp": funcReserve,
+  };
 
-  return el;
-};
-document.gcn = function (str) {
-  const els = this.getElementsByClassName(str);
-  return Array.from(els);
-};
-document.gtn = function (str) {
-  const els = this.getElementsByTagName(str);
-  return Array.from(els);
-};
-document.gbn = function (str) {
-  const els = this.getElementsByName(str);
-  return Array.from(els);
-};
-document.clm = function (str) {
-  return document.createElement(str);
-};
-document.gba = function (attr, val, opt) {
-  /* getElementsByAttribute */
-  const res = [];
-  this.body.trav((el) => {
-    const str = el.attr(attr);
-    if (!str) return;
-    if (opt) {
-      if (str.indexOf(val) != -1) res.push(el);
-    } else {
-      if (str == val) res.push(el);
-    }
-  });
-  return res;
-};
-window.timer = function (time, callback) {
-  setTimeout(callback, time);
-};
-/* 이 부분 자리 옮기지 마시오.*/
-console.clear();
+  function precheck() {}
+  function funcLogin() {
+    EXTZLOG("search", "funcLogin");
 
- 
-    const dict = {"https://www.clubd.com/m_clubd/member/login.do": funcLogin,"https://www.clubd.com/m_clubd/index.do": funcReserve,"https://www.clubd.com/clubd/member/actionLogout.do": funcOut};
-
-    function funcLogin() {
-      log("funcLogin");
-
-      const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
-      if (!chk) {
-        log("funcLogin Timein ERROR");
-        location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
-        return;
-      }
-
-      var tLoginCount = 0;
-log("tLoginCount", tLoginCount);
-const tLogin = setInterval(timeraction, 1000);
-timeraction();
-function timeraction() {
-  if (!window["msId"]) {
-    tLoginCount++;
-    log("tLoginCount", tLoginCount);
-    if (tLoginCount > 4) clearInterval(tLogin);
-    return;
-  }
-  clearInterval(tLogin);
-  if (precheck()) return;
-  msId.value = "${login_id}";
-  msPw.value = "${login_password}";
-  actionLogin();
-
-  /* begin: precheck content */
-  function precheck() {
-    if (doc.gcn("m_logout").length > 0) {
-      log("ALREADY_LOGIN");
-      if (ac) ac.message("ALREADY_LOGIN");
-      return true;
-    }
-    return false;
-  }
-  /* end: precheck content */
-}
-
-
+    const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
+    if (!chk) {
+      EXTZLOG("search", "funcLogin Timein ERROR");
+      location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
       return;
     }
 
-    /* begin blocking infinite call */
-let TZ_BOT_SAFETY = true;
-let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
-let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
-let curTimeforVisit = new Date().getTime();
-log(visitNumber, visitNumber == null);
-if(lsg("TZ_ADMIN_BLOCK_IC") != null) {
-	log(1);
-	if (curTimeforVisit - lastVistTime < 1000 * 15) {
-		log(2);
-		if (visitNumber > 9) {
-			log(3);
-			if (ac) ac.message(JSON.stringify({command: "TZ_MSG_IC"}));
-			TZ_BOT_SAFETY = false;
-			/* 초기화 */
-			visitNumber = 0;
-			lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-			/* 로그아웃 */
-			if (LOGOUT) LOGOUT();
-		}
-	} else {
-		log(4);
-		visitNumber = 0;
-		lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-	}
-} else {
-	log(5);
-	visitNumber = 0;
-	lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-}
-visitNumber++;
-lss("TZ_ADMIN_BLOCK_IC", visitNumber);
-log("TZ_ADMIN_BLOCK_IC", lsg("TZ_ADMIN_BLOCK_IC"), lsg("TZ_ADMIN_BLOCK_IC_TIME"));
-/* end blocking infinite call */
+    var tLoginCount = 0;
+    log("tLoginCount", tLoginCount);
+    const tLogin = setInterval(timeraction, 1000);
+    timeraction();
+    function timeraction() {
+      if (!window["ms_id"]) {
+        tLoginCount++;
+        log("tLoginCount", tLoginCount);
+        if (tLoginCount > 4) clearInterval(tLogin);
+        return;
+      }
+      clearInterval(tLogin);
+      if (precheck()) return;
+      ms_id.value = "${login_id}";
+      ms_password.value = "${login_password}";
+      fnLogin();
+    }
 
-/* var splitter = location.href.indexOf("?") == -1 ? "#" : "?";
-var aDDr = location.href.split(splitter)[0];
-var suffix = location.href.split(splitter)[1];
-var dictSplitter = {"#": "?", "?": "#"};
-var addr = aDDr;
-if(aDDr.indexOf(dictSplitter[splitter]) != -1) 
-    addr = aDDr.split(dictSplitter[splitter])[0];
-
-log("raw addr :: ", location.href);
-log("aDDr :: ", aDDr);
-log("addr :: ", addr); */
-
-let global_param = {};
-const COMMAND = "GET_DATE";
-const clubId = 'b494a7c2-efc5-11ec-a93e-0242ac11000a';
-const courses = { 
-	'West': 'b4965a04-efc5-11ec-a93e-0242ac11000a',
-	'East': 'b4965b07-efc5-11ec-a93e-0242ac11000a',
-};
-log("step::", 1);const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
-const header = { "Content-Type": "application/json" };
-
-const now = new Date();
-const thisyear = now.getFullYear() + "";
-const thismonth = ("0" + (1 + now.getMonth())).slice(-2);
-const thisdate = thisyear + thismonth;
-
-now.setDate(28);
-now.setMonth(now.getMonth() + 1);
-const nextyear = now.getFullYear() + "";
-const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
-const nextdate = nextyear + nextmonth;
-
-log(thisdate, nextdate);
-
-let dates = [];
-const result = [];
-const golf_schedule = [];
-let lmt;
-function procDate() {
-  if (lmt === undefined && dates.length == 0) {
-    if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
+    return;
   }
 
-  if (COMMAND == "GET_DATE") {
-    const golf_date = [];
-    dates.forEach(([date]) => {
-      logParam.sub_type = "search";
-      logParam.message = date;
-      logParam.parameter = JSON.stringify({
-        clubId,
-        date,
-        type: typeof date,
-      });
-      TZLOG(logParam, (data) => {});
-      golf_date.push(date.datify("-"));
-    });
-    /* const param = {
-      golf_date,
-      golf_club_id: clubId,
-      device_id: "${deviceId}",
-    };
-    log("golf_date", golf_date);
-    post(
-      OUTER_ADDR_HEADER + "/api/reservation/golfDate",
-      param,
-      header,
-      (data) => {
-        const json = JSON.parse(data);
-        log(json.message);
+  /* begin blocking infinite call */
+  let TZ_BOT_SAFETY = true;
+  let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
+  let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
+  let curTimeforVisit = new Date().getTime();
+
+  EXTZLOG("search", [visitNumber, visitNumber == null].join(", "), {
+    LOGID,
+    step: "IC_CHK",
+  });
+  if (lsg("TZ_ADMIN_BLOCK_IC") != null) {
+    if (curTimeforVisit - lastVistTime < 1000 * 15) {
+      if (visitNumber > 9) {
+        if (ac) ac.message(JSON.stringify({ command: "TZ_MSG_IC" }));
+        TZ_BOT_SAFETY = false;
+        /* 초기화 */
+        visitNumber = 0;
+        lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+        /* 로그아웃 */
+        if (LOGOUT) LOGOUT();
       }
-    ); */
-    const acParam = {};
-    if (golf_date.length == 0) {
-      acParam.command = "NONE_OF_GET_DATE";
     } else {
-      acParam.command = "SUCCESS_OF_GET_DATE";
-      acParam.content = golf_date;
+      visitNumber = 0;
+      lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+    }
+  } else {
+    visitNumber = 0;
+    lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+  }
+  visitNumber++;
+  lss("TZ_ADMIN_BLOCK_IC", visitNumber);
+  EXTZLOG(
+    "search",
+    [
+      "TZ_ADMIN_BLOCK_IC",
+      lsg("TZ_ADMIN_BLOCK_IC"),
+      lsg("TZ_ADMIN_BLOCK_IC_TIME"),
+    ].join(", "),
+    { LOGID, step: "IC_CHK" }
+  );
+  /* end blocking infinite call */
+
+  let global_param = {};
+  const COMMAND = "GET_DATE";
+  const clubId = "da04c980-cdce-11ec-a93e-0242ac11000a";
+  const courses = {
+    Lake: "ffc933a6-cdce-11ec-a93e-0242ac11000a",
+    Mountain: "ffc9359a-cdce-11ec-a93e-0242ac11000a",
+  };
+  EXTZLOG("search", ["start search", COMMAND].join(", "), {
+    LOGID,
+    step: "IC_CHK",
+  });
+  const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
+  const header = { "Content-Type": "application/json" };
+
+  const now = new Date();
+  const thisyear = now.getFullYear() + "";
+  const thismonth = ("0" + (1 + now.getMonth())).slice(-2);
+  const thisdate = thisyear + thismonth;
+
+  now.setDate(28);
+  now.setMonth(now.getMonth() + 1);
+  const nextyear = now.getFullYear() + "";
+  const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
+  const nextdate = nextyear + nextmonth;
+
+  EXTZLOG("search", [thisdate, nextdate].join(", "), {
+    LOGID,
+    step: "EXEC",
+  });
+
+  let dates = [];
+  const result = [];
+  const golf_schedule = [];
+  let lmt;
+  function procDate() {
+    const LOG_PRM = {
+      LOGID,
+      step: "procDate",
+    };
+    if (lmt === undefined && dates.length == 0) {
+      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
+    }
+
+    if (COMMAND == "GET_DATE") {
+      const golf_date = [];
+      dates.forEach(([date]) => {
+        EXTZLOG("search", [date, typeof date].join(", "), LOG_PRM);
+        golf_date.push(date.datify("-"));
+      });
+      const acParam = {};
+      if (golf_date.length == 0) {
+        acParam.command = "NONE_OF_GET_DATE";
+      } else {
+        acParam.command = "SUCCESS_OF_GET_DATE";
+        acParam.content = golf_date;
+      }
+      if (ac) {
+        ac.message(JSON.stringify(acParam));
+        lsc();
+      }
+      return;
+    }
+
+    if (COMMAND == "GET_TIME") {
+      EXTZLOG(
+        "search",
+        ["target date", "${TARGET_DATE}", dates.length].join(", "),
+        LOG_PRM
+      );
+
+      const result = [];
+      dates.every((arr) => {
+        const [date] = arr;
+        if (date == "${TARGET_DATE}") {
+          result.push(arr);
+          /* return false; */
+        }
+        return true;
+      });
+      dates = result;
+    }
+
+    if (lmt === undefined) lmt = dates.length - 1;
+    const order = lmt - dates.length + 1;
+    const arrDate = dates.shift();
+    if (arrDate) {
+      EXTZLOG(
+        "search",
+        ["수집하기", order + "/" + lmt, arrDate[0]].join(", "),
+        LOG_PRM
+      );
+      EXTZLOG(
+        "search",
+        ["TZ_PROGRESS," + order + "," + lmt + "," + arrDate[0]].join(", "),
+        LOG_PRM
+      );
+      mneCallDetail(arrDate);
+    } else {
+      procGolfSchedule();
+    }
+  }
+  function procGolfSchedule() {
+    const LOG_PRM = {
+      LOGID,
+      step: "procGolfSchedule",
+    };
+    golf_schedule.forEach((obj) => {
+      obj.golf_course_name = obj.golf_course_id;
+      let course_id = courses[obj.golf_course_id];
+      if (!course_id && Object.keys(courses).length === 1)
+        course_id = courses[Object.keys(courses)[0]];
+      obj.golf_course_id = course_id;
+      obj.date =
+        obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
+      if (obj.time.indexOf(":") == -1)
+        obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
+    });
+
+    EXTZLOG(
+      "search",
+      ["golf_schedule", golf_schedule, typeof golf_schedule].join(", "),
+      LOG_PRM
+    );
+    const acParam = {};
+    if (golf_schedule.length == 0) {
+      EXTZLOG("search", "예약가능한 시간이 없습니다.", LOG_PRM);
+      acParam.command = "NONE_OF_GET_SCHEDULE";
+    } else {
+      acParam.command = "end of procGolfSchedule!";
+      acParam.content = golf_schedule;
     }
     if (ac) {
       ac.message(JSON.stringify(acParam));
       lsc();
     }
-    /* LOGOUT(); */
+  }
+  function mneCall(date, callback) {
+    const opt = date == thisdate ? 0 : 1;
+    const param = { cal_month: opt };
+    get("reservation_date.asp", param, {}, (data) => {
+      const ifr = document.createElement("div");
+      ifr.innerHTML = data;
+
+      const tds = Array.from(ifr.getElementsByClassName("possible"));
+      tds.forEach((td) => {
+        const str = td.innerText.addzero();
+        const strDate = date + str;
+        dates.push([strDate, 0]);
+      });
+      callback();
+    });
+  }
+
+  function mneCallDetail(arrDate) {
+    EXTZLOG("search", "mneCallDetail", { LOGID, step: "mneCallDetail" });
+    const fCall = { post, get };
+    const [date, sign, gb] = arrDate;
+    const addr = "/mobile/reservation_time.asp";
+    const method = "post";
+    const param = {
+      submitDate: date,
+    };
+    const dictCourse = {
+      레이크: "Lake",
+      마운틴: "Mountain",
+    };
+
+    EXTZLOG("search", "mneCallDetail pre ajax", {
+      LOGID,
+      step: "pre mneCallDetail",
+    });
+    fCall[method](addr, param, {}, (data) => {
+      EXTZLOG("search", data.length, { LOGID, step: "mneCallDetail ajax" });
+      const ifr = doc.clm("div");
+      ifr.innerHTML = data;
+
+      const attr = "href";
+      const els = ifr.gba(attr, "JavaScript:onclick=diChk", true);
+      EXTZLOG("search", data.length, { LOGID, step: "mneCallDetail ajax" });
+      Array.from(els).forEach((el) => {
+        const time = el.nm(2, 0).innerHTML.split("<br>")[0].rm(":");
+        const hole = el.nm(2, 0, 1, 0).str().ct(1);
+        const course = dictCourse[el.nm(2, 1).str()];
+        const fee = el.nm(2, 2).str().split("\n");
+        const fee_normal = el.nm(2, 2).innerHTML.split("<br>")[0].rm(",") * 1;
+        const fee_discount = el.nm(2, 2, 1, 0).str().rm(",") * 1;
+
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: hole + "홀",
+        });
+      });
+      EXTZLOG("search", data, { LOGID, step: "pre procDate" });
+      procDate();
+    });
+  }
+
+  function LOGOUT() {
+    log("LOGOUT");
+    location.href = "javascript:()=>{}";
+  }
+
+  function main() {
+    EXTZLOG("search", "main");
+
+    if (!TZ_BOT_SAFETY) {
+      EXTZLOG("search", "stopped by Infinite Call");
+      return;
+    }
+
+    const func = dict[addr];
+    if (!func) funcOther();
+    else func();
+  }
+
+  function funcList() {
+    EXTZLOG("search", "funcList");
+    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
+    return;
+  }
+  function funcMain() {
+    EXTZLOG("search", "funcMain");
+
+    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
+    EXTZLOG("search", ["timeout chk", chk].join(", "));
+
+    if (!chk) {
+      EXTZLOG("search", "funcMain Timein ERROR");
+      return;
+    }
+
+    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
+    return;
+  }
+  function funcOut() {
+    EXTZLOG("search", "funcOut");
+
+    funcEnd();
+
+    return;
+  }
+  function funcOther() {
+    EXTZLOG("search", "funcOther");
+
+    const chk = LSCHK("TZ_SEARCH_OTHER" + clubId, 10);
+    EXTZLOG("search", ["timeout chk", chk]);
+    if (!chk) {
+      log("funcOther Timein ERROR");
+      return;
+    }
+
+    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
+
+    return;
+  }
+  function funcReserve() {
+    EXTZLOG("search", "funcSearch");
+
+    if (location.href == addr) {
+      const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
+      EXTZLOG("search", ["timeout chk", chk]);
+      if (!chk) {
+        EXTZLOG("search", "funcSearch Timein ERROR");
+        return;
+      }
+    }
+
+    mneCall(thisdate, () => {
+      mneCall(nextdate, procDate);
+    });
 
     return;
   }
 
-  if (COMMAND == "GET_TIME") {
-    log("target date", "${TARGET_DATE}", dates.length);
-
-    const result = [];
-    dates.every((arr) => {
-      const [date] = arr;
-      if (date == "${TARGET_DATE}") {
-        result.push(arr);
-        /* return false; */
-      }
-      return true;
-    });
-    dates = result;
-  }
-
-  if (lmt === undefined) lmt = dates.length - 1;
-  const order = lmt - dates.length + 1;
-  const arrDate = dates.shift();
-  if (arrDate) {
-    log("수집하기", order + "/" + lmt, arrDate[0]);
-    log("TZ_PROGRESS," + order + "," + lmt + "," + arrDate[0]);
-    const param = {
-      type: "command",
-      sub_type: "search",
-      device_id: "${deviceId}",
-      device_token: "${deviceToken}",
-      golf_club_id: "${golfClubId}",
-      message: "search",
-      parameter: JSON.stringify({ order, total: lmt, date: arrDate[0] }),
-    };
-    TZLOG(param, (data) => {});
-    mneCallDetail(arrDate);
-  } else {
-    procGolfSchedule();
-  }
-}
-function procGolfSchedule() {
-  golf_schedule.forEach((obj) => {
-    obj.golf_course_name = obj.golf_course_id;
-    let course_id = courses[obj.golf_course_id];
-    if (!course_id && Object.keys(courses).length === 1)
-      course_id = courses[Object.keys(courses)[0]];
-    obj.golf_course_id = course_id;
-    obj.date =
-      obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
-    if (obj.time.indexOf(":") == -1)
-      obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
-  });
-  log("golf_schedule");
-  log(golf_schedule);
-  log(typeof golf_schedule);
-  const acParam = {};
-  if (golf_schedule.length == 0) {
-    log("예약가능한 시간이 없습니다.");
-    acParam.command = "NONE_OF_GET_SCHEDULE";
-  } else {
-    acParam.command = "end of procGolfSchedule!";
-    acParam.content = golf_schedule;
-  }
-  if (ac) {
-    ac.message(JSON.stringify(acParam));
-    lsc();
-  }
-  /* LOGOUT(); */
-  /* const param = {
-    golf_schedule,
-    device_id: "${deviceId}",
-    golf_club_id: clubId,
-  };
-  post(addrOuter, param, header, (data) => {});
-  const json = JSON.parse(data);
-  log(json.message); */
-}
-/* 
-[
-  {
-    club_id: "5d8163d1-cd85-11ec-a93e-0242ac11000a",
-    club: "delphino",
-    content: [
-      {
-        date: "2022-09-28",
-        fee_discount: 210000,
-        fee_normal: 210000,
-        golf_club_id: "5d8163d1-cd85-11ec-a93e-0242ac11000a",
-        golf_course_id: "b81cbf25-cd86-11ec-a93e-0242ac11000a",
-        in_out: "",
-        others: "OUT",
-        persons: "",
-        time: "07:07",
-      },
-      {
-        date: "2022-09-28",
-        fee_discount: 210000,
-        fee_normal: 210000,
-        golf_club_id: "5d8163d1-cd85-11ec-a93e-0242ac11000a",
-        golf_course_id: "b81cc15a-cd86-11ec-a93e-0242ac11000a",
-        in_out: "",
-        others: "IN",
-        persons: "",
-        time: "07:07",
-      },
-    ],
-  },
-];
- */
-function mneCall(date, callback) {
-  const dt = (date + "01").datify("/");
-  const param = {
-    coDiv: "03",
-    selYM: date,
-    _: new Date().getTime(),
-  };
-  get("/clubd/reservation/getCalendar.do", param, {}, (data) => {
-    const { rows: els } = data.jp();
-    Array.from(els).forEach((el) => {
-      if (el.BK_TEAM == "0") return;
-      const { CL_SOLAR: date, CL_BUSINESS: sign, CL_DAYDIV: gb } = el;
-      dates.push([date, sign, gb]);
-    });
-    callback();
-  });
-}
-
-
-function mneCallDetail(arrDate) {
-  const [date, option] = arrDate;
-  const dictCourse = {
-    A: "West",
-    B: "East",
-  };
-  const param = {
-    coDiv: "03",
-    date: date,
-    _: new Date().getTime(),
-  };
-  post("/clubd/reservation/getTeeList.do", param, {}, (data) => {
-    const els = JSON.parse(data).rows;
-    els.forEach((el, i) => {
-      const course = dictCourse[el.BK_COS];
-      const time = el.BK_TIME;
-      let fee_normal = el.BK_BASIC_CHARGE * 1;
-      let fee_discount = el.BK_CHARGE.split(",")[1] * 1;
-
-      if (isNaN(fee_normal)) fee_normal = -1;
-      if (isNaN(fee_discount)) fee_discount = -1;
-
-      golf_schedule.push({
-        golf_club_id: clubId,
-        golf_course_id: course,
-        date,
-        time,
-        in_out: "",
-        persons: "",
-        fee_normal,
-        fee_discount,
-        others: "18홀",
-      });
-    });
-    procDate();
-  });
-}
-
-
-
-  function LOGOUT() {
-    log("LOGOUT");
-    location.href="javascript:()=>{}";
-  }
-
-    function main() {
-      log("main");
-
-      if (!TZ_BOT_SAFETY) {
-        log("stopped by Infinite Call");
-        return;
-      }
-
-      const func = dict[addr];
-      if (!func) funcOther();
-      else func();
-    }
-
-    function funcList() {
-      log("funcList");
-      location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
-      return;
-    }
-    function funcMain() {
-      log("funcMain");
-
-      const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
-      log("timeout chk", chk);
-      if (!chk) {
-        log("funcMain Timein ERROR");
-        return;
-      }
-
-      location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
-      return;
-    }
-    function funcOut() {
-      log("funcOut");
-
-      funcEnd();
-
-      return;
-    }
-    function funcOther() {
-      log("funcOther");
-
-      const chk = LSCHK("TZ_SEARCH_OTHER" + clubId, 10);
-      log("timeout chk", chk);
-      if (!chk) {
-        log("funcOther Timein ERROR");
-        return;
-      }
-
-      location.href = "https://www.clubd.com/m_clubd/index.do?iCoDiv=03";
-
-      return;
-    }
-    function funcReserve() {
-      log("funcSearch");
-
-      if (location.href == addr) {
-        const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
-        log("timeout chk", chk);
-        if (!chk) {
-          log("funcSearch Timein ERROR");
-          return;
-        }
-      }
-
-      
-mneCall(thisdate, procDate);
-
-      return;
-    }
-
-    main();
+  main();
 })();
-    

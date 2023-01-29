@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "zensfield";
+const golf_club_eng_name = "southsprings";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -15,16 +15,16 @@ const golf_club_eng_name = "zensfield";
 ); */
 //getDoneClubs();
 //getLoginScript();
-//getSearchScript();
+getSearchScript();
 //getReserveScript();
-setSurvey();
+//setSurvey();
+//getPenaltyLink();
 //getReserveSearchScript();
 //getReserveCancelScript();
 
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
-
 /*
 request.post(
   "https://dev.mnemosyne.co.kr/api/webview/getGolfClubList",
@@ -34,6 +34,7 @@ request.post(
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
+      keyword: "아크로",
     },
   },
   (err, resp, body) => {
@@ -41,8 +42,17 @@ request.post(
   }
 );
 */
-
-<<<<<<< HEAD
+/*
+request.post(
+  "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
+  //{ json: { key: "value", clubIds: ["014bf8de-ef2b-11ec-a93e-0242ac11000a"] } },
+  { json: { key: "value", clubIds: ["a36815be-707a-11ed-9c7a-0242ac110007"] } },
+  function (error, response, body) {
+    log(body);
+    //fs.writeFileSync("result/loginResult", JSON.stringify(body));
+  }
+);
+*/
 function setSurvey() {
   request.post(
     "https://dev.mnemosyne.co.kr/api/crawler/setSurvey",
@@ -53,6 +63,19 @@ function setSurvey() {
         area: "서울특별시",
         age: 2,
         confirm: 1,
+      },
+    },
+    (error, response, body) => {
+      log(body);
+    }
+  );
+}
+function getPenaltyLink() {
+  request.post(
+    "https://dev.mnemosyne.co.kr/api/crawler/getPenaltyLink",
+    {
+      json: {
+        golf_club_id: "e0ab88a4-ee25-11ec-a93e-0242ac11000a",
       },
     },
     (error, response, body) => {
@@ -73,27 +96,6 @@ function getWarning() {
     }
   );
 }
-=======
-/* const query = gf("sql/login.sql");
-const result = {};
-const dbconn = jp(gf("db.json"));
-const connection = mysql.createConnection(dbconn);
-connection.connect();
-connection.query(
-  "select * from golf_club order by created_at desc;",
-  (err, rows, fields) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    rows.forEach((row) => {
-      log(row);
-    });
-  }
-);
-connection.end(); */
-
->>>>>>> 44cac62891ee6f1b9f5b0c1c6768a3e21a7d5511
 function getDoneClubs() {
   const query = gf("sql/done_clubs.sql");
   const result = {};
@@ -161,8 +163,8 @@ function getSearchScript() {
   request.post(
     //,
     flg
-      ? "https://op.mnemosyne.co.kr/api/crawler/searchbot"
-      : "https://op.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
+      ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
+      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
     {
       json: {
         club: golf_club_eng_name,
@@ -279,9 +281,10 @@ function getLoginScript() {
     });
     log(result[golf_club_eng_name]);
     request.post(
-      "https://op.mnemosyne.co.kr/api/crawler/" + golf_club_eng_name,
+      "https://dev.mnemosyne.co.kr/api/crawler/" + golf_club_eng_name,
       //"http://op.mnemosyne.co.kr:1009/" + golf_club_eng_name,
-      { json: { key: "value" } },
+      "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
+      { json: { key: "value", clubIds: [golf_club_eng_name] } },
       function (error, response, body) {
         if (!error && response.statusCode == 200) {
           log(golf_club_eng_name);
@@ -290,7 +293,8 @@ function getLoginScript() {
             login_password:
               result[golf_club_eng_name].golf_club_login_url_admin_pw,
           };
-          fs.writeFileSync("result/loginResult", body.script.dp(param));
+          //fs.writeFileSync("result/loginResult", body.script.dp(param));
+          fs.writeFileSync("result/loginResult", JSON.stringify(body));
         }
       }
     );

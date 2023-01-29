@@ -1,31 +1,31 @@
 function mneCallDetail(arrDate) {
-  const [date, option] = arrDate;
+  const fCall = { post, get };
+  const [date, sign, gb] = arrDate;
+  const addr = "/m/getTeeOffTime.asp";
+  const method = "post";
   const param = {
-    book_date_bd: date,
-    book_date_be: "",
-    book_crs: "",
-    book_crs_name: "",
-    book_time: "",
+    rProductSelectedType: "GO",
+    rRoundDate: date,
   };
   const dictCourse = {
-    1: "다산",
-    2: "베아채",
-    3: "장보고",
+    1: "선셋",
+    2: "선라이즈",
   };
-  post("/html/reserve/reserve01.asp", param, {}, (data) => {
+
+  fCall[method](addr, param, {}, (data) => {
     const ifr = doc.clm("div");
     ifr.innerHTML = data;
 
-    const attr = "onclick";
-    const els = ifr.gba(attr, "JavaScript:Book_Confirm1", true);
-    Array.from(els).forEach((el, i) => {
-      let [date, course, time] = el.attr(attr).inparen();
-      const fee = el.nm(2, 4).str().rm(",") * 1;
-      const hole = el.nm(2, 3).str().ct(1);
-      course = dictCourse[course];
-
-      let fee_normal = fee * 1;
-      let fee_discount = fee * 1;
+    const attr = "href";
+    const els = ifr.gba("name", "TeeOffTime");
+    Array.from(els).forEach((el) => {
+      const value = el.attr("value");
+      const date = value.gh(8);
+      const course = dictCourse[value.ch(8).gh(1)];
+      const time = value.gt(4);
+      const hole = 18;
+      const fee_normal = 400000;
+      const fee_discount = 400000;
 
       golf_schedule.push({
         golf_club_id: clubId,
