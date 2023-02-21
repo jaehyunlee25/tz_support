@@ -3,14 +3,13 @@ javascript: (() => {
   const dir = console.dir;
   const doc = document;
   const ls = localStorage;
-  const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
+  const OUTER_ADDR_HEADER = "${apiHeader}";
   const LOGID = new Date().getTime();
   const logParam = {
     type: "command",
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "${golfClubId}",
     message: "",
     parameter: JSON.stringify({ LOGID }),
   };
@@ -52,6 +51,7 @@ javascript: (() => {
   function EXTZLOG(subtype, message, param) {
     logParam.sub_type = subtype;
     logParam.message = message;
+    logParam.timestamp = new Date().getTime();
     if (param) logParam.parameter = JSON.stringify(param);
     TZLOG(logParam);
   }
@@ -85,6 +85,7 @@ javascript: (() => {
     var PARAM;
     var HEADER;
     this.jAjax = function (address, header) {
+      j.address = address;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
       j.xmlHttp.onerror = onError;
@@ -98,6 +99,7 @@ javascript: (() => {
       j.xmlHttp.send(null);
     };
     this.post = function (addr, prm, header) {
+      j.address = addr;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
       j.xmlHttp.onerror = onError;
@@ -128,6 +130,7 @@ javascript: (() => {
       j.xmlHttp.send(prm);
     };
     this.file = function (addr, prm) {
+      j.address = addr;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
       j.xmlHttp.open("POST", addr, true);
@@ -138,10 +141,49 @@ javascript: (() => {
       if (j.xmlHttp.readyState == 4) {
         if (j.xmlHttp.status == 200) {
           var data = j.xmlHttp.responseText;
-          j.ajaxcallback(data);
+          try {
+            j.ajaxcallback(data);
+          } catch (e) {
+            SENDAC(e, data);
+            SENDMQTT("script_error_in_ajax_callback", j.address, e, data);
+            /* EXTZLOG("search", [
+                "script_error_in_ajax_callback",
+                j.address,
+                e.stack,
+              ]); */
+          }
         } else {
         }
       }
+    }
+  }
+  function SENDMQTT(subtype, addr, e, data) {
+    const WS_HEADER = "wss://dev.mnemosyne.co.kr/wss";
+    const socket = new WebSocket(WS_HEADER);
+    logParam.sub_type = subtype;
+    logParam.timestamp = new Date().getTime();
+    logParam.messasge = [addr, e.stack];
+    logParam.responseText = data;
+    socket.onopen = function () {
+      socket.send(
+        JSON.stringify({
+          topic: "TZLOG",
+          command: "publish",
+          message: JSON.stringify(logParam),
+        })
+      );
+    };
+  }
+  function SENDAC(e, data) {
+    if (ac) {
+      const param = {
+        command: "SCRIPT_ERROR_IN_AJAX_CALLBACK",
+        LOGID,
+        timestamp: new Date().getTime(),
+      };
+      const strPrm = JSON.stringify(param);
+      ac.message(strPrm);
+      lsc();
     }
   }
   function lsg(str) {
@@ -431,365 +473,15 @@ javascript: (() => {
   /* 이 부분 자리 옮기지 마시오.*/
   console.clear();
 
-  const dict = {
-    "http://www.sscc.co.kr/mobile/login.asp": funcLogin,
-    "http://www.sscc.co.kr/mobile/reservation_date.asp": funcReserve,
-  };
-
-  function precheck() {}
-  function funcLogin() {
-    EXTZLOG("search", "funcLogin");
-
-    const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
-    if (!chk) {
-      EXTZLOG("search", "funcLogin Timein ERROR");
-      location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
-      return;
-    }
-
-    var tLoginCount = 0;
-    log("tLoginCount", tLoginCount);
-    const tLogin = setInterval(timeraction, 1000);
-    timeraction();
-    function timeraction() {
-      if (!window["ms_id"]) {
-        tLoginCount++;
-        log("tLoginCount", tLoginCount);
-        if (tLoginCount > 4) clearInterval(tLogin);
-        return;
-      }
-      clearInterval(tLogin);
-      if (precheck()) return;
-      ms_id.value = "${login_id}";
-      ms_password.value = "${login_password}";
-      fnLogin();
-    }
-
-    return;
-  }
-
-  /* begin blocking infinite call */
-  let TZ_BOT_SAFETY = true;
-  let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
-  let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
-  let curTimeforVisit = new Date().getTime();
-
-  EXTZLOG("search", [visitNumber, visitNumber == null].join(", "), {
-    LOGID,
-    step: "IC_CHK",
+  get("https://www.yna.co.kr/sports/golf/1", {}, {}, (data) => {
+    const ifr = doc.clm("div");
+    ifr.innerHTML = data;
+    const attr = "class";
+    const els = ifr.gcn("section01")[0].gba(attr, "tit-news", true);
+    const res = [];
+    els.forEach((el) => {
+      res.push(["[연합뉴스]", el.str(), el.nm(3, 0, 1).str()].join(" "));
+    });
+    log(res.join("\n"));
   });
-  if (lsg("TZ_ADMIN_BLOCK_IC") != null) {
-    if (curTimeforVisit - lastVistTime < 1000 * 15) {
-      if (visitNumber > 9) {
-        if (ac) ac.message(JSON.stringify({ command: "TZ_MSG_IC" }));
-        TZ_BOT_SAFETY = false;
-        /* 초기화 */
-        visitNumber = 0;
-        lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-        /* 로그아웃 */
-        if (LOGOUT) LOGOUT();
-      }
-    } else {
-      visitNumber = 0;
-      lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-    }
-  } else {
-    visitNumber = 0;
-    lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-  }
-  visitNumber++;
-  lss("TZ_ADMIN_BLOCK_IC", visitNumber);
-  EXTZLOG(
-    "search",
-    [
-      "TZ_ADMIN_BLOCK_IC",
-      lsg("TZ_ADMIN_BLOCK_IC"),
-      lsg("TZ_ADMIN_BLOCK_IC_TIME"),
-    ].join(", "),
-    { LOGID, step: "IC_CHK" }
-  );
-  /* end blocking infinite call */
-
-  let global_param = {};
-  const COMMAND = "GET_DATE";
-  const clubId = "da04c980-cdce-11ec-a93e-0242ac11000a";
-  const courses = {
-    Lake: "ffc933a6-cdce-11ec-a93e-0242ac11000a",
-    Mountain: "ffc9359a-cdce-11ec-a93e-0242ac11000a",
-  };
-  EXTZLOG("search", ["start search", COMMAND].join(", "), {
-    LOGID,
-    step: "IC_CHK",
-  });
-  const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
-  const header = { "Content-Type": "application/json" };
-
-  const now = new Date();
-  const thisyear = now.getFullYear() + "";
-  const thismonth = ("0" + (1 + now.getMonth())).slice(-2);
-  const thisdate = thisyear + thismonth;
-
-  now.setDate(28);
-  now.setMonth(now.getMonth() + 1);
-  const nextyear = now.getFullYear() + "";
-  const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
-  const nextdate = nextyear + nextmonth;
-
-  EXTZLOG("search", [thisdate, nextdate].join(", "), {
-    LOGID,
-    step: "EXEC",
-  });
-
-  let dates = [];
-  const result = [];
-  const golf_schedule = [];
-  let lmt;
-  function procDate() {
-    const LOG_PRM = {
-      LOGID,
-      step: "procDate",
-    };
-    if (lmt === undefined && dates.length == 0) {
-      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
-    }
-
-    if (COMMAND == "GET_DATE") {
-      const golf_date = [];
-      dates.forEach(([date]) => {
-        EXTZLOG("search", [date, typeof date].join(", "), LOG_PRM);
-        golf_date.push(date.datify("-"));
-      });
-      const acParam = {};
-      if (golf_date.length == 0) {
-        acParam.command = "NONE_OF_GET_DATE";
-      } else {
-        acParam.command = "SUCCESS_OF_GET_DATE";
-        acParam.content = golf_date;
-      }
-      if (ac) {
-        ac.message(JSON.stringify(acParam));
-        lsc();
-      }
-      return;
-    }
-
-    if (COMMAND == "GET_TIME") {
-      EXTZLOG(
-        "search",
-        ["target date", "${TARGET_DATE}", dates.length].join(", "),
-        LOG_PRM
-      );
-
-      const result = [];
-      dates.every((arr) => {
-        const [date] = arr;
-        if (date == "${TARGET_DATE}") {
-          result.push(arr);
-          /* return false; */
-        }
-        return true;
-      });
-      dates = result;
-    }
-
-    if (lmt === undefined) lmt = dates.length - 1;
-    const order = lmt - dates.length + 1;
-    const arrDate = dates.shift();
-    if (arrDate) {
-      EXTZLOG(
-        "search",
-        ["수집하기", order + "/" + lmt, arrDate[0]].join(", "),
-        LOG_PRM
-      );
-      EXTZLOG(
-        "search",
-        ["TZ_PROGRESS," + order + "," + lmt + "," + arrDate[0]].join(", "),
-        LOG_PRM
-      );
-      mneCallDetail(arrDate);
-    } else {
-      procGolfSchedule();
-    }
-  }
-  function procGolfSchedule() {
-    const LOG_PRM = {
-      LOGID,
-      step: "procGolfSchedule",
-    };
-    golf_schedule.forEach((obj) => {
-      obj.golf_course_name = obj.golf_course_id;
-      let course_id = courses[obj.golf_course_id];
-      if (!course_id && Object.keys(courses).length === 1)
-        course_id = courses[Object.keys(courses)[0]];
-      obj.golf_course_id = course_id;
-      obj.date =
-        obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
-      if (obj.time.indexOf(":") == -1)
-        obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
-    });
-
-    EXTZLOG(
-      "search",
-      ["golf_schedule", golf_schedule, typeof golf_schedule].join(", "),
-      LOG_PRM
-    );
-    const acParam = {};
-    if (golf_schedule.length == 0) {
-      EXTZLOG("search", "예약가능한 시간이 없습니다.", LOG_PRM);
-      acParam.command = "NONE_OF_GET_SCHEDULE";
-    } else {
-      acParam.command = "end of procGolfSchedule!";
-      acParam.content = golf_schedule;
-    }
-    if (ac) {
-      ac.message(JSON.stringify(acParam));
-      lsc();
-    }
-  }
-  function mneCall(date, callback) {
-    const opt = date == thisdate ? 0 : 1;
-    const param = { cal_month: opt };
-    get("reservation_date.asp", param, {}, (data) => {
-      const ifr = document.createElement("div");
-      ifr.innerHTML = data;
-
-      const tds = Array.from(ifr.getElementsByClassName("possible"));
-      tds.forEach((td) => {
-        const str = td.innerText.addzero();
-        const strDate = date + str;
-        dates.push([strDate, 0]);
-      });
-      callback();
-    });
-  }
-
-  function mneCallDetail(arrDate) {
-    EXTZLOG("search", "mneCallDetail", { LOGID, step: "mneCallDetail" });
-    const fCall = { post, get };
-    const [date, sign, gb] = arrDate;
-    const addr = "/mobile/reservation_time.asp";
-    const method = "post";
-    const param = {
-      submitDate: date,
-    };
-    const dictCourse = {
-      레이크: "Lake",
-      마운틴: "Mountain",
-    };
-
-    EXTZLOG("search", "mneCallDetail pre ajax", {
-      LOGID,
-      step: "pre mneCallDetail",
-    });
-    fCall[method](addr, param, {}, (data) => {
-      EXTZLOG("search", data.length, { LOGID, step: "mneCallDetail ajax" });
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
-
-      const attr = "href";
-      const els = ifr.gba(attr, "JavaScript:onclick=diChk", true);
-      EXTZLOG("search", data.length, { LOGID, step: "mneCallDetail ajax" });
-      Array.from(els).forEach((el) => {
-        const time = el.nm(2, 0).innerHTML.split("<br>")[0].rm(":");
-        const hole = el.nm(2, 0, 1, 0).str().ct(1);
-        const course = dictCourse[el.nm(2, 1).str()];
-        const fee = el.nm(2, 2).str().split("\n");
-        const fee_normal = el.nm(2, 2).innerHTML.split("<br>")[0].rm(",") * 1;
-        const fee_discount = el.nm(2, 2, 1, 0).str().rm(",") * 1;
-
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole + "홀",
-        });
-      });
-      EXTZLOG("search", data, { LOGID, step: "pre procDate" });
-      procDate();
-    });
-  }
-
-  function LOGOUT() {
-    log("LOGOUT");
-    location.href = "javascript:()=>{}";
-  }
-
-  function main() {
-    EXTZLOG("search", "main");
-
-    if (!TZ_BOT_SAFETY) {
-      EXTZLOG("search", "stopped by Infinite Call");
-      return;
-    }
-
-    const func = dict[addr];
-    if (!func) funcOther();
-    else func();
-  }
-
-  function funcList() {
-    EXTZLOG("search", "funcList");
-    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
-    return;
-  }
-  function funcMain() {
-    EXTZLOG("search", "funcMain");
-
-    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
-    EXTZLOG("search", ["timeout chk", chk].join(", "));
-
-    if (!chk) {
-      EXTZLOG("search", "funcMain Timein ERROR");
-      return;
-    }
-
-    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
-    return;
-  }
-  function funcOut() {
-    EXTZLOG("search", "funcOut");
-
-    funcEnd();
-
-    return;
-  }
-  function funcOther() {
-    EXTZLOG("search", "funcOther");
-
-    const chk = LSCHK("TZ_SEARCH_OTHER" + clubId, 10);
-    EXTZLOG("search", ["timeout chk", chk]);
-    if (!chk) {
-      log("funcOther Timein ERROR");
-      return;
-    }
-
-    location.href = "http://www.sscc.co.kr/mobile/reservation_date.asp";
-
-    return;
-  }
-  function funcReserve() {
-    EXTZLOG("search", "funcSearch");
-
-    if (location.href == addr) {
-      const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
-      EXTZLOG("search", ["timeout chk", chk]);
-      if (!chk) {
-        EXTZLOG("search", "funcSearch Timein ERROR");
-        return;
-      }
-    }
-
-    mneCall(thisdate, () => {
-      mneCall(nextdate, procDate);
-    });
-
-    return;
-  }
-
-  main();
 })();

@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "southsprings";
+const golf_club_eng_name = "interbulgo_kyungsan";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -15,7 +15,7 @@ const golf_club_eng_name = "southsprings";
 ); */
 //getDoneClubs();
 //getLoginScript();
-getSearchScript();
+//getSearchScript();
 //getReserveScript();
 //setSurvey();
 //getPenaltyLink();
@@ -25,23 +25,21 @@ getSearchScript();
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
-/*
+
 request.post(
-  "https://dev.mnemosyne.co.kr/api/webview/getGolfClubList",
-  //"http://dev.mnemosyne.co.kr:1006/api/reservation/getGolfClubs",
-  // "http://localhost:8080/control",
-  // { clubId: "053d7baf-ce10-11ec-a93e-0242ac11000a" },
+  //"https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
+  "http://localhost:8080/getGolfLinkScript",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
-      keyword: "아크로",
+      links: ["yonhapnews", "golfjournal"],
     },
   },
   (err, resp, body) => {
-    log(body);
+    fs.writeFileSync("result/searchResult.js", body.scripts[0]);
   }
 );
-*/
+
 /*
 request.post(
   "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
@@ -159,7 +157,6 @@ function getReserveScript() {
 }
 function getSearchScript() {
   const flg = false;
-  log(flg);
   request.post(
     //,
     flg
@@ -283,7 +280,7 @@ function getLoginScript() {
     request.post(
       "https://dev.mnemosyne.co.kr/api/crawler/" + golf_club_eng_name,
       //"http://op.mnemosyne.co.kr:1009/" + golf_club_eng_name,
-      "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
+      //"https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
       { json: { key: "value", clubIds: [golf_club_eng_name] } },
       function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -293,8 +290,8 @@ function getLoginScript() {
             login_password:
               result[golf_club_eng_name].golf_club_login_url_admin_pw,
           };
-          //fs.writeFileSync("result/loginResult", body.script.dp(param));
-          fs.writeFileSync("result/loginResult", JSON.stringify(body));
+          fs.writeFileSync("result/loginResult", body.script.dp(param));
+          //fs.writeFileSync("result/loginResult.js", JSON.stringify(body));
         }
       }
     );

@@ -2,12 +2,57 @@ const log = console.log;
 const dir = console.dir;
 const doc = document;
 const ls = localStorage;
-const OUTER_ADDR_HEADER = "https://dev.mnemosyne.co.kr";
+const OUTER_ADDR_HEADER = "${apiHeader}";
+const LOGID = new Date().getTime();
+const logParam = {
+  type: "command",
+  sub_type: "",
+  device_id: "${deviceId}",
+  device_token: "${deviceToken}",
+  golf_club_id: "${golfClubId}",
+  message: "",
+  parameter: JSON.stringify({ LOGID }),
+};
+let ac = false;
+try {
+  ac = window.AndroidController || window.webkit.messageHandlers.iosController;
+  ac.message =
+    ac.message || window.webkit.messageHandlers.iosController.postMessage;
+} catch (e) {
+  ac = false;
+}
+
+const splitter = location.href.indexOf("?") == -1 ? "#" : "?";
+const aDDr = location.href.split(splitter)[0];
+const suffix = location.href.split(splitter)[1];
+const dictSplitter = { "#": "?", "?": "#" };
+let addr = aDDr;
+if (aDDr.indexOf(dictSplitter[splitter]) != -1)
+  addr = aDDr.split(dictSplitter[splitter])[0];
+
+EXTZLOG("url", "raw addr :: " + location.href);
+EXTZLOG("url", "aDDr :: " + aDDr);
+EXTZLOG("url", "addr :: " + addr);
+
+function LSCHK(str, sec) {
+  const tag = lsg(str);
+  log("time check", new Date().getTime() - tag, 1000 * sec);
+  if (tag && new Date().getTime() - tag < 1000 * sec) return false;
+  lss(str, new Date().getTime());
+  return true;
+}
 function TZLOG(param, callback) {
   const addr = OUTER_ADDR_HEADER + "/api/reservation/newLog";
   post(addr, param, { "Content-Type": "application/json" }, (data) => {
-    callback(data);
+    if (callback) callback(data);
   });
+}
+function EXTZLOG(subtype, message, param) {
+  logParam.sub_type = subtype;
+  logParam.message = message;
+  logParam.timestamp = new Date().getTime();
+  if (param) logParam.parameter = JSON.stringify(param);
+  TZLOG(logParam);
 }
 function post(addr, param, header, callback) {
   var a = new ajaxcallforgeneral(),
@@ -39,6 +84,7 @@ function ajaxcallforgeneral() {
   var PARAM;
   var HEADER;
   this.jAjax = function (address, header) {
+    j.address = address;
     j.xmlHttp = new XMLHttpRequest();
     j.xmlHttp.onreadystatechange = on_ReadyStateChange;
     j.xmlHttp.onerror = onError;
@@ -52,6 +98,7 @@ function ajaxcallforgeneral() {
     j.xmlHttp.send(null);
   };
   this.post = function (addr, prm, header) {
+    j.address = addr;
     j.xmlHttp = new XMLHttpRequest();
     j.xmlHttp.onreadystatechange = on_ReadyStateChange;
     j.xmlHttp.onerror = onError;
@@ -82,6 +129,7 @@ function ajaxcallforgeneral() {
     j.xmlHttp.send(prm);
   };
   this.file = function (addr, prm) {
+    j.address = addr;
     j.xmlHttp = new XMLHttpRequest();
     j.xmlHttp.onreadystatechange = on_ReadyStateChange;
     j.xmlHttp.open("POST", addr, true);
@@ -92,10 +140,50 @@ function ajaxcallforgeneral() {
     if (j.xmlHttp.readyState == 4) {
       if (j.xmlHttp.status == 200) {
         var data = j.xmlHttp.responseText;
-        j.ajaxcallback(data);
+        try {
+          j.ajaxcallback(data);
+        } catch (e) {
+          log(e);
+          SENDAC(e, data);
+          SENDMQTT("script_error_in_ajax_callback", j.address, e, data);
+          /* EXTZLOG("search", [
+            "script_error_in_ajax_callback",
+            j.address,
+            e.stack,
+          ]); */
+        }
       } else {
       }
     }
+  }
+}
+function SENDMQTT(subtype, addr, e, data) {
+  const WS_HEADER = "wss://dev.mnemosyne.co.kr/wss";
+  const socket = new WebSocket(WS_HEADER);
+  logParam.sub_type = subtype;
+  logParam.timestamp = new Date().getTime();
+  logParam.messasge = [addr, e.stack];
+  logParam.responseText = data;
+  socket.onopen = function () {
+    socket.send(
+      JSON.stringify({
+        topic: "TZLOG",
+        command: "publish",
+        message: JSON.stringify(logParam),
+      })
+    );
+  };
+}
+function SENDAC(e, data) {
+  if (ac) {
+    const param = {
+      command: "SCRIPT_ERROR_IN_AJAX_CALLBACK",
+      LOGID,
+      timestamp: new Date().getTime(),
+    };
+    const strPrm = JSON.stringify(param);
+    ac.message(strPrm);
+    lsc();
   }
 }
 function lsg(str) {
@@ -108,7 +196,11 @@ function lsr(str) {
   return localStorage.removeItem(str);
 }
 function lsc() {
-  return localStorage.clear();
+  const keys = Object.keys(localStorage);
+  keys.forEach((key) => {
+    if (key.indexOf("TZ_") == -1) return;
+    lsr(key);
+  });
 }
 String.prototype.gt = function (num) {
   return this.substring(this.length - num, this.length);
@@ -223,6 +315,65 @@ String.prototype.gup = function () {
     });
   return param;
 };
+String.prototype.sort = function () {
+  return Array.from(this).sort().join("");
+};
+String.prototype.vector = function () {
+  /* 정렬한 뒤, 겹치는 글자는 뺀다. */
+  const res = {};
+  Array.from(this)
+    .sort()
+    .forEach((chr) => (res[chr] = true));
+  return Object.keys(res).join("");
+};
+String.prototype.comp = function (str) {
+  let a = Array.from(this);
+  let b = Array.from(str);
+  let c;
+  if (b.length > a.length) {
+    c = a;
+    a = b;
+    b = c;
+    c = undefined;
+  }
+
+  const res = [];
+
+  exec();
+
+  function exec() {
+    let flg = false;
+    let cur = b.shift();
+    let tmp = [];
+    a.forEach((chr) => {
+      if (chr == cur) {
+        flg = true;
+        tmp.push(cur);
+        cur = b.shift();
+      } else {
+        if (flg) {
+          flg = false;
+          if (tmp.length > 0) {
+            res.push(tmp);
+            tmp = [];
+          }
+          if (cur != undefined) {
+            b.unshift(cur);
+            exec();
+          }
+        }
+      }
+    });
+    if (tmp.length > 0) {
+      res.push(tmp);
+      if (cur != undefined) {
+        b.unshift(cur);
+        exec();
+      }
+    }
+  }
+  return res;
+};
 HTMLElement.prototype.str = function () {
   return this.innerText;
 };
@@ -319,4 +470,5 @@ document.gba = function (attr, val, opt) {
 window.timer = function (time, callback) {
   setTimeout(callback, time);
 };
+/* 이 부분 자리 옮기지 마시오.*/
 console.clear();
