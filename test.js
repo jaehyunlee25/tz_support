@@ -1,46 +1,68 @@
-function mneCallDetail(arrDate) {
-  const fCall = { post, get };
-  const [date, sign, gb] = arrDate;
-  const addr = "/_mobile/golfRes/real_time_list.asp";
-  const method = "post";
-  const param = {
-    pointdate: date,
-    dategbn: gb,
-    openyn: sign,
-    agent_code: "",
-    currentdate: "",
-  };
-  const dictCourse = {
-    1: "Hill",
-    2: "Lake",
-    3: "Valley",
-  };
-
-  fCall[method](addr, param, {}, (data) => {
-    const ifr = doc.clm("div");
-    ifr.innerHTML = data;
-
-    const attr = "onclick";
-    const els = ifr.gba(attr, "goSend(", true);
-    Array.from(els).forEach((el) => {
-      let [, course, time] = el.attr(attr).inparen(true);
-      course = dictCourse[course];
-      hole = 18;
-      fee_normal = 200000;
-      fee_discount = 200000;
-
-      golf_schedule.push({
-        golf_club_id: clubId,
-        golf_course_id: course,
-        date,
-        time,
-        in_out: "",
-        persons: "",
-        fee_normal,
-        fee_discount,
-        others: hole + "홀",
-      });
+function mneCall(date, callback) {
+  EXTZLOG("search", "mneCall");
+  let count = 0;
+  const mneT = setInterval(funcInterval, 500);
+  const intvEl = doc.gcn("month1").length == 2;
+  const logPrm = { LOGID, step: "mneCall_interval" };
+  function funcInterval() {
+    if (!intvEl) {
+      EXTZLOG("search", ["interval count", count].join(", "), logPrm);
+      count++;
+      if (count > 10) {
+        EXTZLOG("search", ["interval count out", count].join(", "), logPrm);
+        clearInterval(mneT);
+        callback();
+      }
+      return;
+    }
+    clearInterval(mneT);
+    exec();
+  }
+  function exec() {
+    const res = {};
+    let els = doc.gcn("valid");
+    Array.from(els).forEach((el, i) => {
+      if (el.children.length == 0) return;
+      const time = el.attr("time") * 1;
+      const day = new Date(time);
+      const year = day.getFullYear();
+      const month = (day.getMonth() + 1 + "").addzero();
+      const dt = (day.getDate() + "").addzero();
+      res[[year, month, dt].join("")] = true;
     });
-    procDate();
-  });
+    doc.gcn("btn_calendar_next")[0].click();
+    els = doc.gcn("valid");
+    Array.from(els).forEach((el, i) => {
+      if (el.children.length == 0) return;
+      const time = el.attr("time") * 1;
+      const day = new Date(time);
+      const year = day.getFullYear();
+      const month = (day.getMonth() + 1 + "").addzero();
+      const dt = (day.getDate() + "").addzero();
+      res[[year, month, dt].join("")] = true;
+    });
+    Object.keys(res).forEach((date) => {
+      dates.push([date, ""]);
+    });
+    doc.gcn("btn_calendar_next")[0].click();
+    els = doc.gcn("valid");
+    Array.from(els).forEach((el, i) => {
+      if (el.children.length == 0) return;
+      const time = el.attr("time") * 1;
+      const day = new Date(time);
+      const year = day.getFullYear();
+      const month = (day.getMonth() + 1 + "").addzero();
+      const dt = (day.getDate() + "").addzero();
+      res[[year, month, dt].join("")] = true;
+    });
+    EXTZLOG("search", Object.keys(res).length);
+    const distinct = {};
+    Object.keys(res).forEach((date) => {
+      if (distinct[date]) return;
+      distinct[date] = true;
+      EXTZLOG("search", date);
+      dates.push([date, ""]);
+    });
+    callback();
+  }
 }

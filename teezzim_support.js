@@ -5,7 +5,7 @@ const { getgroups } = require("process");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "interbulgo_kyungsan";
+const golf_club_eng_name = "bettinardi";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -25,32 +25,49 @@ const golf_club_eng_name = "interbulgo_kyungsan";
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
-
+/*
 request.post(
   //"https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
   "http://localhost:8080/getGolfLinkScript",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
-      links: ["yonhapnews", "golfjournal"],
+      links: [
+        "yonhapnews",
+        "golfhankook",
+        "golfforwomen",
+        "golfdigest",
+        "wolgangolf",
+        "golfeconomy",
+        "hankookleisure",
+        "golfsanup",
+        "golfjournal",
+      ],
     },
   },
   (err, resp, body) => {
-    fs.writeFileSync("result/searchResult.js", body.scripts[0]);
-  }
-);
-
-/*
-request.post(
-  "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
-  //{ json: { key: "value", clubIds: ["014bf8de-ef2b-11ec-a93e-0242ac11000a"] } },
-  { json: { key: "value", clubIds: ["a36815be-707a-11ed-9c7a-0242ac110007"] } },
-  function (error, response, body) {
-    log(body);
-    //fs.writeFileSync("result/loginResult", JSON.stringify(body));
+    fs.writeFileSync("result/searchResult.js", body.scripts[1]);
   }
 );
 */
+
+request.post(
+  //"https://dev.mnemosyne.co.kr/api/crawler/login_link",
+  "http://localhost:8080/login_link",
+  //{ json: { key: "value", clubIds: ["014bf8de-ef2b-11ec-a93e-0242ac11000a"] } },
+  { json: { link_eng_id: "vivid" } },
+  function (error, response, body) {
+    if (error) log(error);
+    fs.writeFileSync(
+      "result/loginResult",
+      body.script.dp({
+        login_id: "jhlee25",
+        login_password: "ya2ssarama!",
+      })
+    );
+  }
+);
+
 function setSurvey() {
   request.post(
     "https://dev.mnemosyne.co.kr/api/crawler/setSurvey",
@@ -161,7 +178,8 @@ function getSearchScript() {
     //,
     flg
       ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
-      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
+      : // : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
+        "http://localhost:8080/searchbots_date_admin",
     {
       json: {
         club: golf_club_eng_name,
