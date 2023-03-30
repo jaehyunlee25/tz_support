@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const fs = require("fs");
 const request = require("request");
 const { getgroups } = require("process");
+const ogs = require("open-graph-scraper");
 const log = console.log;
 const dir = console.dir;
 
@@ -25,10 +26,36 @@ const golf_club_eng_name = "bettinardi";
 // getGolfClubInfo();
 // getGolfClubInfoEx();
 // getCoreScript();
+//getOpenGraph();
+
+request.post(
+  "https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
+  //"http://localhost:8080/getGolfLinkScript",
+  {
+    json: {
+      // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
+      links: [
+        /*"yonhapnews",
+        "golfhankook",
+        "golfforwomen",
+        "golfdigest",
+        "wolgangolf",
+        "hankookleisure",
+        "golfjournal",
+        "golfsanup", */
+        "golfeconomy",
+      ],
+    },
+  },
+  (err, resp, body) => {
+    fs.writeFileSync("result/searchResult.js", body.scripts[0], "utf-8");
+  }
+);
+
 /*
 request.post(
-  //"https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
-  "http://localhost:8080/getGolfLinkScript",
+  "https://dev.mnemosyne.co.kr/api/crawler/getGolfYoutubeHotClip",
+  //"http://localhost:8080/getGolfLessonMenu",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
@@ -46,11 +73,12 @@ request.post(
     },
   },
   (err, resp, body) => {
-    fs.writeFileSync("result/searchResult.js", body.scripts[1]);
+    // fs.writeFileSync("result/searchResult.js", body);
+    log(body.data);
   }
 );
 */
-
+/*
 request.post(
   //"https://dev.mnemosyne.co.kr/api/crawler/login_link",
   "http://localhost:8080/login_link",
@@ -67,7 +95,25 @@ request.post(
     );
   }
 );
+*/
 
+function getOpenGraph() {
+  request.post(
+    "https://dev.mnemosyne.co.kr/api/crawler/getOpenGraphInfo",
+    //"http://localhost:8080/getOpenGraphInfo",
+    //{ json: { key: "value", clubIds: ["014bf8de-ef2b-11ec-a93e-0242ac11000a"] } },
+    { json: { url: "https://www.daum.net/?t__nil_top=refresh" } },
+    (error, response, body) => {
+      if (error) log(error);
+      log(body);
+    }
+  );
+  /* ogs({ url: "https://www.daum.net/?t__nil_top=refresh" }).then((data) => {
+    const { error, result, response } = data;
+    if (error) log(error);
+    log(result);
+  }); */
+}
 function setSurvey() {
   request.post(
     "https://dev.mnemosyne.co.kr/api/crawler/setSurvey",

@@ -14,7 +14,14 @@ javascript: (() => {
     message: "",
     parameter: JSON.stringify({ LOGID }),
   };
+  const INTV_TIME = 1000;
+  const INTV_COUNT = 20;
+  let intvEl = doc.body;
   let ac = false;
+  const acParam = {
+    LOGID,
+    timestamp: new Date().getTime(),
+  };
   try {
     ac =
       window.AndroidController || window.webkit.messageHandlers.iosController;
@@ -36,6 +43,15 @@ javascript: (() => {
   EXTZLOG("url", "aDDr :: " + aDDr);
   EXTZLOG("url", "addr :: " + addr);
 
+  function REGNEWS(res, callback) {
+    const addr = OUTER_ADDR_HEADER + "/api/crawler/newGolfNews";
+    const param = {
+      news: res,
+    };
+    post(addr, param, { "Content-Type": "application/json" }, (data) => {
+      if (callback) callback(data);
+    });
+  }
   function LSCHK(str, sec) {
     const tag = lsg(str);
     log("time check", new Date().getTime() - tag, 1000 * sec);
@@ -145,8 +161,7 @@ javascript: (() => {
           try {
             j.ajaxcallback(data);
           } catch (e) {
-            SENDAC(e, data);
-            SENDMQTT("script_error_in_ajax_callback", j.address, e, data);
+            log(e);
             /* EXTZLOG("search", [
             "script_error_in_ajax_callback",
             j.address,
@@ -178,7 +193,7 @@ javascript: (() => {
   function SENDAC(e, data) {
     if (ac) {
       const param = {
-        command: "SCRIPT_ERROR_IN_AJAX_CALLBACK",
+        command: "SCRIPT_ERROR_LINK",
         LOGID,
         timestamp: new Date().getTime(),
       };
@@ -474,398 +489,35 @@ javascript: (() => {
   /* 이 부분 자리 옮기지 마시오.*/
   console.clear();
 
-  const dict = {
-    "https://www.midasgolf.co.kr/Member/Login": funcLogin,
-    "https://www.midasgolf.co.kr/Reservation/ReservCalendar?lgubun=160":
-      funcReserve,
-    "https://www.midasgolf.co.kr/Reservation/ReservCalendar": funcReserve,
-    "https://www.midasgolf.co.kr/Member/Logout": funcOut,
-  };
-
-  function precheck() {}
-  function funcLogin() {
-    EXTZLOG("search", "funcLogin");
-
-    const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
-    if (!chk) {
-      EXTZLOG("search", "funcLogin Timein ERROR");
-      location.href =
-        "https://www.midasgolf.co.kr/Reservation/ReservCalendar?lgubun=160";
-      return;
-    }
-
-    var tLoginCount = 0;
-    log("tLoginCount", tLoginCount);
-    const tLogin = setInterval(timeraction, 1000);
-    timeraction();
-    function timeraction() {
-      if (!window["user_id"]) {
-        tLoginCount++;
-        log("tLoginCount", tLoginCount);
-        if (tLoginCount > 4) clearInterval(tLogin);
-        return;
-      }
-      clearInterval(tLogin);
-      if (precheck()) return;
-      user_id.value = "${login_id}";
-      user_pwd.value = "${login_password}";
-      login();
-    }
-
-    return;
-  }
-
-  /* begin blocking infinite call */
-  let TZ_BOT_SAFETY = true;
-  let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
-  let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
-  let curTimeforVisit = new Date().getTime();
-
-  EXTZLOG("search", [visitNumber, visitNumber == null].join(", "), {
-    LOGID,
-    step: "IC_CHK",
-  });
-  if (lsg("TZ_ADMIN_BLOCK_IC") != null) {
-    if (curTimeforVisit - lastVistTime < 1000 * 15) {
-      if (visitNumber > 9) {
-        if (ac) ac.message(JSON.stringify({ command: "TZ_MSG_IC" }));
-        TZ_BOT_SAFETY = false;
-        /* 초기화 */
-        visitNumber = 0;
-        lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-        /* 로그아웃 */
-        if (LOGOUT) LOGOUT();
-      }
-    } else {
-      visitNumber = 0;
-      lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-    }
-  } else {
-    visitNumber = 0;
-    lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
-  }
-  visitNumber++;
-  lss("TZ_ADMIN_BLOCK_IC", visitNumber);
-  EXTZLOG(
-    "search",
-    [
-      "TZ_ADMIN_BLOCK_IC",
-      lsg("TZ_ADMIN_BLOCK_IC"),
-      lsg("TZ_ADMIN_BLOCK_IC_TIME"),
-    ].join(", "),
-    { LOGID, step: "IC_CHK" }
-  );
-  /* end blocking infinite call */
-
-  let global_param = {};
-  const COMMAND = "GET_DATE";
-  const clubId = "746d2c27-ce12-11ec-a93e-0242ac11000a";
-  const courses = {
-    구미: "a0bae129-ce12-11ec-a93e-0242ac11000a",
-  };
-  EXTZLOG("search", ["start search", COMMAND].join(", "), {
-    LOGID,
-    step: "IC_CHK",
-  });
-  const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
-  const header = { "Content-Type": "application/json" };
-
-  const now = new Date();
-  const thisyear = now.getFullYear() + "";
-  const thismonth = ("0" + (1 + now.getMonth())).slice(-2);
-  const thisdate = thisyear + thismonth;
-
-  now.setDate(28);
-  now.setMonth(now.getMonth() + 1);
-  const nextyear = now.getFullYear() + "";
-  const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
-  const nextdate = nextyear + nextmonth;
-
-  EXTZLOG("search", [thisdate, nextdate].join(", "), {
-    LOGID,
-    step: "EXEC",
-  });
-
-  let dates = [];
-  const result = [];
-  const golf_schedule = [];
-  let lmt;
-  function procDate() {
-    const LOG_PRM = {
-      LOGID,
-      step: "procDate",
-    };
-    if (lmt === undefined && dates.length == 0) {
-      if (COMMAND == "GET_TIME") dates.push(["${TARGET_DATE}", 0]);
-    }
-
-    if (COMMAND == "GET_DATE") {
-      let golf_date = [];
-      dates.forEach(([date]) => {
-        EXTZLOG("search", [date, typeof date].join(", "), LOG_PRM);
-        golf_date.push(date.datify("-"));
-      });
-      const acParam = {
-        LOGID,
-        timestamp: new Date().getTime(),
-      };
-      if (golf_date.length == 0) {
-        acParam.command = "NONE_OF_GET_DATE";
-      } else {
-        acParam.command = "SUCCESS_OF_GET_DATE";
-        acParam.content = golf_date;
-      }
-      if (ac) {
-        ac.message(JSON.stringify(acParam));
-        lsc();
-      }
-      return;
-    }
-
-    if (COMMAND == "GET_TIME") {
-      EXTZLOG(
-        "search",
-        ["target date", "${TARGET_DATE}", dates.length].join(", "),
-        LOG_PRM
-      );
-
-      const result = [];
-      dates.every((arr) => {
-        const [date] = arr;
-        if (date == "${TARGET_DATE}") {
-          result.push(arr);
-          /* return false; */
-        }
-        return true;
-      });
-      dates = result;
-    }
-
-    if (lmt === undefined) lmt = dates.length - 1;
-    const order = lmt - dates.length + 1;
-    const arrDate = dates.shift();
-    if (arrDate) {
-      EXTZLOG(
-        "search",
-        ["수집하기", order + "/" + lmt, arrDate[0]].join(", "),
-        LOG_PRM
-      );
-      EXTZLOG(
-        "search",
-        ["TZ_PROGRESS," + order + "," + lmt + "," + arrDate[0]].join(", "),
-        LOG_PRM
-      );
-      mneCallDetail(arrDate);
-    } else {
-      procGolfSchedule();
-    }
-  }
-  function procGolfSchedule() {
-    const LOG_PRM = {
-      LOGID,
-      step: "procGolfSchedule",
-    };
-    golf_schedule.forEach((obj) => {
-      obj.golf_course_name = obj.golf_course_id;
-      let course_id = courses[obj.golf_course_id];
-      if (!course_id && Object.keys(courses).length === 1)
-        course_id = courses[Object.keys(courses)[0]];
-      obj.golf_course_id = course_id;
-      obj.date =
-        obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
-      if (obj.time.indexOf(":") == -1)
-        obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
-    });
-
-    EXTZLOG(
-      "search",
-      ["golf_schedule", golf_schedule, typeof golf_schedule].join(", "),
-      LOG_PRM
-    );
-    const acParam = {
-      LOGID,
-      timestamp: new Date().getTime(),
-    };
-    if (golf_schedule.length == 0) {
-      EXTZLOG("search", "예약가능한 시간이 없습니다.", LOG_PRM);
-      acParam.command = "NONE_OF_GET_SCHEDULE";
-    } else {
-      acParam.command = "end of procGolfSchedule!";
-      acParam.content = golf_schedule;
-    }
-    if (ac) {
-      ac.message(JSON.stringify(acParam));
-      lsc();
-    }
-  }
-  function mneCall(date, callback) {
-    intvEl = window["golf_calendar"];
-    EXTZLOG("search", "mneCall");
-    let count = 0;
-    const mneT = setInterval(funcInterval, INTV_TIME);
-    const logPrm = { LOGID, step: "mneCall_interval" };
-    function funcInterval() {
-      if (!intvEl) {
-        EXTZLOG("search", ["interval count", count].join(", "), logPrm);
-        count++;
-        if (count > INTV_COUNT) {
-          EXTZLOG("search", ["interval count out", count].join(", "), logPrm);
-          clearInterval(mneT);
-          callback();
-        }
-        return;
-      }
-      clearInterval(mneT);
-      exec();
-    }
-
-    function exec() {
-      const els = doc.gtn("td");
-      const tds = [];
-      Array.from(els).forEach((el) => {
-        const tee = el.attr("data-cnt");
-        if (!tee || tee == 0) return;
-        tds.push(el);
-      });
-
-      tds.forEach((td) => {
-        const strDate = td.attr("data-day");
-        dates.push([strDate, 0]);
-      });
-
-      callback();
-    }
-  }
-
-  function mneCallDetail(arrDate) {
-    const [date] = arrDate;
-    const param = {
-      lgubun: "160",
-      date: date,
-      changeDate: "",
-      changeSeq: "",
-    };
-    post("/Reservation/AjaxTimeList", param, {}, (data) => {
-      const ifr = document.createElement("div");
+  get(
+    "http://www.golfbiz.co.kr/news/articleList.html?sc_sub_section_code=S2N25&view_type=sm",
+    {},
+    {},
+    (data) => {
+      log(data);
+      const ifr = doc.clm("div");
       ifr.innerHTML = data;
-
-      const trs = ifr.getElementsByTagName("tr");
-      const obTeams = {};
-      Array.from(trs).forEach((tr, i) => {
-        if (i === 0) return;
-
-        const course = tr.getAttribute("data-coursekor");
-        const time = tr.children[1].innerHTML;
-        const fee_normal =
-          tr.children[2].innerHTML.ct(1).replace(/\,/g, "") * 1;
-        const fee_discount =
-          tr.children[2].innerHTML.ct(1).replace(/\,/g, "") * 1;
-        const slot = time.gh(2);
-
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: "9홀",
+      const attr = "class";
+      const els = ifr.gba(attr, "list-titles", true);
+      const res = [];
+      els.forEach((el, i) => {
+        res.push({
+          link_round: "undefined",
+          link_number: i,
+          link_address:
+            "http://www.golfbiz.co.kr/news/articleList.html?sc_sub_section_code=S2N25&view_type=sm",
+          link_name: "golfeconomy",
+          link_content: el.nm(0, 1, 0).str(),
+          link_datetime: el.nm(1, 1, 1).str().split(" | ")[1],
         });
       });
-      procDate();
-    });
-  }
-
-  function LOGOUT() {
-    log("LOGOUT");
-    location.href = "javascript:()=>{}";
-  }
-
-  function main() {
-    EXTZLOG("search", "main");
-
-    if (!TZ_BOT_SAFETY) {
-      EXTZLOG("search", "stopped by Infinite Call");
-      return;
+      REGNEWS(res, (data) => {
+        acParam.command = "SUCCESS_OF_GET_LINK";
+        acParam.eng_id = "golfeconomy";
+        if (ac) {
+          ac.message(JSON.stringify(acParam));
+        }
+      });
     }
-
-    const func = dict[addr];
-    if (!func) funcOther();
-    else func();
-  }
-
-  function funcList() {
-    EXTZLOG("search", "funcList");
-    location.href =
-      "https://www.midasgolf.co.kr/Reservation/ReservCalendar?lgubun=160";
-    return;
-  }
-  function funcMain() {
-    EXTZLOG("search", "funcMain");
-
-    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
-    EXTZLOG("search", ["timeout chk", chk].join(", "));
-
-    if (!chk) {
-      EXTZLOG("search", "funcMain Timein ERROR");
-      return;
-    }
-
-    location.href =
-      "https://www.midasgolf.co.kr/Reservation/ReservCalendar?lgubun=160";
-    return;
-  }
-  function funcOut() {
-    EXTZLOG("search", "funcOut");
-
-    funcEnd();
-
-    return;
-  }
-  function funcOther() {
-    EXTZLOG("search", "funcOther");
-    SENDMQTT(
-      "script_error_in_system",
-      addr,
-      { stack: "link address error" },
-      addr
-    );
-
-    const chk = LSCHK("TZ_SEARCH_OTHER" + clubId, 10);
-    EXTZLOG("search", ["timeout chk", chk]);
-    if (!chk) {
-      log("funcOther Timein ERROR");
-      return;
-    }
-
-    location.href =
-      "https://www.midasgolf.co.kr/Reservation/ReservCalendar?lgubun=160";
-
-    return;
-  }
-  function funcReserve() {
-    EXTZLOG("search", "funcSearch");
-
-    if (location.href == addr) {
-      const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
-      EXTZLOG("search", ["timeout chk", chk]);
-      if (!chk) {
-        EXTZLOG("search", "funcSearch Timein ERROR");
-        return;
-      }
-    }
-
-    mneCall(thisdate, procDate);
-
-    return;
-  }
-
-  try {
-    main();
-  } catch (e) {
-    SENDAC(e, "");
-    SENDMQTT("script_error_in_system", "", e, "");
-  }
+  );
 })();
