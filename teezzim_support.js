@@ -29,8 +29,8 @@ const golf_club_eng_name = "bettinardi";
 //getOpenGraph();
 
 request.post(
-  // "https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
-  "http://localhost:8080/getLeaderBoardInfo",
+  // "https://dev.mnemosyne.co.kr/api/crawler/getLogList",
+  "http://localhost:8080/getLogList",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
