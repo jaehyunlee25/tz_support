@@ -489,35 +489,31 @@ javascript: (() => {
   /* 이 부분 자리 옮기지 마시오.*/
   console.clear();
 
-  get(
-    "http://www.golfbiz.co.kr/news/articleList.html?sc_sub_section_code=S2N25&view_type=sm",
-    {},
-    {},
-    (data) => {
-      log(data);
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
-      const attr = "class";
-      const els = ifr.gba(attr, "list-titles", true);
-      const res = [];
-      els.forEach((el, i) => {
-        res.push({
-          link_round: "undefined",
-          link_number: i,
-          link_address:
-            "http://www.golfbiz.co.kr/news/articleList.html?sc_sub_section_code=S2N25&view_type=sm",
-          link_name: "golfeconomy",
-          link_content: el.nm(0, 1, 0).str(),
-          link_datetime: el.nm(1, 1, 1).str().split(" | ")[1],
-        });
-      });
-      REGNEWS(res, (data) => {
-        acParam.command = "SUCCESS_OF_GET_LINK";
-        acParam.eng_id = "golfeconomy";
-        if (ac) {
-          ac.message(JSON.stringify(acParam));
-        }
-      });
-    }
+  document.head.children[0].setAttribute(
+    "content",
+    "text/html; charset=utf-8;"
   );
+  const attr = "class";
+  const els = doc.gba(attr, "titles", true);
+  const res = [];
+  els.forEach((el, i) => {
+    if (i > 4) return;
+    if (!el.children[0]) return;
+    res.push({
+      link_round: "undefined",
+      link_number: i,
+      link_address:
+        "https://golfhankook.hankooki.com/news/articleList.html?sc_sub_section_code=S2N1&view_type=sm",
+      link_name: "golfhankook",
+      link_content: el.children[0].str(),
+      link_datetime: el.nm(1, 2, 0).str(0),
+    });
+  });
+  REGNEWS(res, (data) => {
+    acParam.command = "SUCCESS_OF_GET_LINK";
+    acParam.eng_id = "golfhankook";
+    if (ac) {
+      ac.message(JSON.stringify(acParam));
+    }
+  });
 })();

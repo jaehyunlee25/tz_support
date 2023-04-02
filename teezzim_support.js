@@ -29,21 +29,46 @@ const golf_club_eng_name = "bettinardi";
 //getOpenGraph();
 
 request.post(
+  // "https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
+  "http://localhost:8080/getLeaderBoardInfo",
+  {
+    json: {
+      // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
+      links: [
+        "yonhapnews",
+        "golfforwomen",
+        "golfdigest",
+        "hankookleisure",
+        "golfjournal",
+        "wolgangolf",
+        "golfeconomy",
+        "golfsanup",
+        "golfhankook",
+      ],
+    },
+  },
+  (err, resp, body) => {
+    log(body.data);
+  }
+);
+
+/*
+request.post(
   "https://dev.mnemosyne.co.kr/api/crawler/getGolfLinkScript",
   //"http://localhost:8080/getGolfLinkScript",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
       links: [
-        /*"yonhapnews",
-        "golfhankook",
+        "yonhapnews",
         "golfforwomen",
         "golfdigest",
-        "wolgangolf",
         "hankookleisure",
         "golfjournal",
-        "golfsanup", */
+        "wolgangolf",
         "golfeconomy",
+        "golfsanup",
+        "golfhankook",
       ],
     },
   },
@@ -51,11 +76,11 @@ request.post(
     fs.writeFileSync("result/searchResult.js", body.scripts[0], "utf-8");
   }
 );
-
+*/
 /*
 request.post(
-  "https://dev.mnemosyne.co.kr/api/crawler/getGolfYoutubeHotClip",
-  //"http://localhost:8080/getGolfLessonMenu",
+  "https://dev.mnemosyne.co.kr/api/crawler/getGolfNews",
+  //"http://localhost:8080/getGolfNews",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
