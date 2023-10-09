@@ -6,7 +6,8 @@ const ogs = require("open-graph-scraper");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "bettinardi";
+const golf_club_eng_name = "gzc_ora";
+const golf_club_id = "213ea85e-efc6-11ec-a93e-0242ac11000a";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -16,7 +17,7 @@ const golf_club_eng_name = "bettinardi";
 ); */
 //getDoneClubs();
 //getLoginScript();
-//getSearchScript();
+getSearchScript();
 //getReserveScript();
 //setSurvey();
 //getPenaltyLink();
@@ -28,29 +29,36 @@ const golf_club_eng_name = "bettinardi";
 // getCoreScript();
 //getOpenGraph();
 
-request.post(
-  // "https://dev.mnemosyne.co.kr/api/crawler/getLogList",
-  "http://localhost:8080/getLogList",
+/* request.post(
+  // "https://dev.mnemosyne.co.kr/monitor/login",
+  "http://localhost:8080/login",
+  {
+    json: {
+      clubId: golf_club_id,
+      type: "login",
+    },
+  },
+  (err, resp, body) => {
+    log(body);
+  }
+); */
+
+/* request.post(
+  // "https://dev.mnemosyne.co.kr/api/crawler/getSearchDateResult",
+  "http://localhost:8080/getSearchDateResult",
   {
     json: {
       // club_id: "48681b19-f05f-11ec-a93e-0242ac11000b"
-      links: [
-        "yonhapnews",
-        "golfforwomen",
-        "golfdigest",
-        "hankookleisure",
-        "golfjournal",
-        "wolgangolf",
-        "golfeconomy",
-        "golfsanup",
-        "golfhankook",
+      golfClubIds: [
+        "b8802aa3-cdb5-11ec-a93e-0242ac11000a",
+        "b617c527-ee1e-11ec-a93e-0242ac11000a",
       ],
     },
   },
   (err, resp, body) => {
     log(body.data);
   }
-);
+); */
 
 /*
 request.post(
@@ -249,8 +257,8 @@ function getSearchScript() {
     //,
     flg
       ? "https://dev.mnemosyne.co.kr/api/crawler/searchbot"
-      : // : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
-        "http://localhost:8080/searchbots_date_admin",
+      : "https://dev.mnemosyne.co.kr/api/crawler/searchbots_date_admin",
+    // "http://localhost:8080/searchbots_date_admin",
     {
       json: {
         club: golf_club_eng_name,
@@ -367,19 +375,21 @@ function getLoginScript() {
     });
     log(result[golf_club_eng_name]);
     request.post(
-      "https://dev.mnemosyne.co.kr/api/crawler/" + golf_club_eng_name,
-      //"http://op.mnemosyne.co.kr:1009/" + golf_club_eng_name,
-      //"https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
-      { json: { key: "value", clubIds: [golf_club_eng_name] } },
+      // "https://dev.mnemosyne.co.kr/api/crawler/" + golf_club_eng_name,
+      // "http://op.mnemosyne.co.kr:1009/" + golf_club_eng_name,
+      "https://dev.mnemosyne.co.kr/api/crawler/loginScripts",
+      { json: { clubIds: [golf_club_id] } },
       function (error, response, body) {
         if (!error && response.statusCode == 200) {
-          log(golf_club_eng_name);
           const param = {
             login_id: result[golf_club_eng_name].golf_club_login_url_admin_id,
             login_password:
               result[golf_club_eng_name].golf_club_login_url_admin_pw,
           };
-          fs.writeFileSync("result/loginResult", body.script.dp(param));
+          fs.writeFileSync(
+            "result/loginResult",
+            body.scripts[golf_club_id].dp(param)
+          );
           //fs.writeFileSync("result/loginResult.js", JSON.stringify(body));
         }
       }

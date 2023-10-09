@@ -1,5 +1,14 @@
 javascript: (() => {
-  const log = console.log;
+  let log = console.log;
+  if (
+    window.webkit &&
+    window.webkit.messageHandlers &&
+    window.webkit.messageHandlers.iosController
+  ) {
+    log = function (message) {
+      window.webkit.messageHandlers.iosController.postMessage(message);
+    };
+  }
   const dir = console.dir;
   const doc = document;
   const ls = localStorage;
@@ -11,17 +20,14 @@ javascript: (() => {
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
     golf_club_id: "${golfClubId}",
+    fragment_id: "${fragment_id}",
     message: "",
-    parameter: JSON.stringify({ LOGID }),
+    parameter: { LOGID },
   };
   const INTV_TIME = 1000;
   const INTV_COUNT = 20;
   let intvEl = doc.body;
   let ac = false;
-  const acParam = {
-    LOGID,
-    timestamp: new Date().getTime(),
-  };
   try {
     ac =
       window.AndroidController || window.webkit.messageHandlers.iosController;
@@ -39,22 +45,12 @@ javascript: (() => {
   if (aDDr.indexOf(dictSplitter[splitter]) != -1)
     addr = aDDr.split(dictSplitter[splitter])[0];
 
-  EXTZLOG("url", "raw addr :: " + location.href);
-  EXTZLOG("url", "aDDr :: " + aDDr);
-  EXTZLOG("url", "addr :: " + addr);
+  /* EXTZLOG("url", "rawAddr:" + location.href);
+EXTZLOG("url", "aDDr:" + aDDr);
+EXTZLOG("url", "addr:" + addr); */
 
-  function REGNEWS(res, callback) {
-    const addr = OUTER_ADDR_HEADER + "/api/crawler/newGolfNews";
-    const param = {
-      news: res,
-    };
-    post(addr, param, { "Content-Type": "application/json" }, (data) => {
-      if (callback) callback(data);
-    });
-  }
   function LSCHK(str, sec) {
     const tag = lsg(str);
-    log("time check", new Date().getTime() - tag, 1000 * sec);
     if (tag && new Date().getTime() - tag < 1000 * sec) return false;
     lss(str, new Date().getTime());
     return true;
@@ -67,10 +63,11 @@ javascript: (() => {
   }
   function EXTZLOG(subtype, message, param) {
     logParam.sub_type = subtype;
-    logParam.message = message;
+    logParam.message = "script log: " + message;
     logParam.timestamp = new Date().getTime();
-    if (param) logParam.parameter = JSON.stringify(param);
-    TZLOG(logParam);
+    if (param) logParam.parameter = param;
+
+    log(JSON.stringify(logParam));
   }
   function post(addr, param, header, callback) {
     var a = new ajaxcallforgeneral(),
@@ -101,7 +98,18 @@ javascript: (() => {
     var ADDR;
     var PARAM;
     var HEADER;
+    const rs = [
+      "요청이 초기화되지 않은 상태",
+      "서버 연결이 이루어지지 않음",
+      "요청이 수신된 상태",
+      "요청을 처리중인 상태",
+      "요청의 처리가 종료되고, 응답이 준비된 상태",
+    ];
     this.jAjax = function (address, header) {
+      /* const cp = JSON.parse(JSON.stringify(logParam));
+    cp.parameter = { LOGID };
+    log(JSON.stringify(cp)); */
+
       j.address = address;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
@@ -116,6 +124,10 @@ javascript: (() => {
       j.xmlHttp.send(null);
     };
     this.post = function (addr, prm, header) {
+      /* const cp = JSON.parse(JSON.stringify(logParam));
+    cp.parameter = { LOGID };
+    log(JSON.stringify(cp)); */
+
       j.address = addr;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
@@ -155,20 +167,20 @@ javascript: (() => {
     };
     function onError() {}
     function on_ReadyStateChange() {
-      if (j.xmlHttp.readyState == 4) {
+      const rsnum = j.xmlHttp.readyState;
+      EXTZLOG("ajax", "readyState" + rsnum + "," + rs[rsnum]);
+      if (rsnum == 4) {
         if (j.xmlHttp.status == 200) {
+          EXTZLOG("ajax", "status," + j.xmlHttp.status);
           var data = j.xmlHttp.responseText;
           try {
+            EXTZLOG("ajax", "ajax_callback," + j.address);
             j.ajaxcallback(data);
           } catch (e) {
-            log(e);
-            /* EXTZLOG("search", [
-            "script_error_in_ajax_callback",
-            j.address,
-            e.stack,
-          ]); */
+            EXTZLOG("ajax", "script_error_in_ajax_callback," + e.stack);
           }
         } else {
+          EXTZLOG("ajax", "ajax status error," + j.xmlHttp.status);
         }
       }
     }
@@ -178,7 +190,7 @@ javascript: (() => {
     const socket = new WebSocket(WS_HEADER);
     logParam.sub_type = subtype;
     logParam.timestamp = new Date().getTime();
-    logParam.messasge = [addr, e.stack];
+    logParam.message = [addr, e.stack];
     logParam.responseText = data;
     socket.onopen = function () {
       socket.send(
@@ -193,7 +205,7 @@ javascript: (() => {
   function SENDAC(e, data) {
     if (ac) {
       const param = {
-        command: "SCRIPT_ERROR_LINK",
+        command: "SCRIPT_ERROR_IN_AJAX_CALLBACK",
         LOGID,
         timestamp: new Date().getTime(),
       };
@@ -342,6 +354,21 @@ javascript: (() => {
       .forEach((chr) => (res[chr] = true));
     return Object.keys(res).join("");
   };
+  String.prototype.getGet = function () {
+    var url = this.toString(),
+      u = url.split("?")[1],
+      a = {};
+    if (u) {
+      var arr = u.split("&");
+      arr.forEach((d, n) => {
+        var t = d.split("=");
+        a[t[0]] = t[1];
+      });
+    } else {
+      return false;
+    }
+    return a;
+  };
   String.prototype.comp = function (str) {
     let a = Array.from(this);
     let b = Array.from(str);
@@ -489,31 +516,387 @@ javascript: (() => {
   /* 이 부분 자리 옮기지 마시오.*/
   console.clear();
 
-  document.head.children[0].setAttribute(
-    "content",
-    "text/html; charset=utf-8;"
-  );
-  const attr = "class";
-  const els = doc.gba(attr, "titles", true);
-  const res = [];
-  els.forEach((el, i) => {
-    if (i > 4) return;
-    if (!el.children[0]) return;
-    res.push({
-      link_round: "undefined",
-      link_number: i,
-      link_address:
-        "https://golfhankook.hankooki.com/news/articleList.html?sc_sub_section_code=S2N1&view_type=sm",
-      link_name: "golfhankook",
-      link_content: el.children[0].str(),
-      link_datetime: el.nm(1, 2, 0).str(0),
-    });
-  });
-  REGNEWS(res, (data) => {
-    acParam.command = "SUCCESS_OF_GET_LINK";
-    acParam.eng_id = "golfhankook";
-    if (ac) {
-      ac.message(JSON.stringify(acParam));
+  const dict = {
+    "https://m.golfzoncounty.com/member/login": funcLogin,
+    "http://www.golfzoncounty.com/member/login": funcLogin,
+    "http://www.golfzoncounty.com/reserve/main": funcReserve,
+  };
+
+  function precheck() {}
+  function funcLogin() {
+    EXTZLOG("search", "funcLogin");
+
+    const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
+    if (!chk) {
+      EXTZLOG("search", "funcLogin Timein ERROR");
+      location.href =
+        "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+      return;
     }
+
+    var tLoginCount = 0;
+    log("tLoginCount", tLoginCount);
+    const tLogin = setInterval(timeraction, 1000);
+    timeraction();
+    function timeraction() {
+      if (!window["loginID"]) {
+        tLoginCount++;
+        log("tLoginCount", tLoginCount);
+        if (tLoginCount > 4) clearInterval(tLogin);
+        return;
+      }
+      clearInterval(tLogin);
+      if (precheck()) return;
+      loginID.value = "${login_id}";
+      loginPW.value = "${login_password}";
+      doc.gcn("login")[1].click();
+    }
+
+    return;
+  }
+
+  /* begin blocking infinite call */
+  let TZ_BOT_SAFETY = true;
+  let visitNumber = lsg("TZ_ADMIN_BLOCK_IC") * 1;
+  let lastVistTime = lsg("TZ_ADMIN_BLOCK_IC_TIME") * 1;
+  let curTimeforVisit = new Date().getTime();
+
+  EXTZLOG("search", "IC_CHK:" + [visitNumber, visitNumber == null].join(", "), {
+    LOGID,
+    step: "IC_CHK",
   });
+  if (lsg("TZ_ADMIN_BLOCK_IC") != null) {
+    if (curTimeforVisit - lastVistTime < 1000 * 15) {
+      if (visitNumber > 9) {
+        if (ac) ac.message(JSON.stringify({ command: "TZ_MSG_IC" }));
+        TZ_BOT_SAFETY = false;
+        /* 초기화 */
+        visitNumber = 0;
+        lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+        /* 로그아웃 */
+        if (LOGOUT) LOGOUT();
+      }
+    } else {
+      visitNumber = 0;
+      lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+    }
+  } else {
+    visitNumber = 0;
+    lss("TZ_ADMIN_BLOCK_IC_TIME", new Date().getTime());
+  }
+  visitNumber++;
+  lss("TZ_ADMIN_BLOCK_IC", visitNumber);
+  EXTZLOG(
+    "search",
+    [
+      "TZ_ADMIN_BLOCK_IC",
+      lsg("TZ_ADMIN_BLOCK_IC"),
+      lsg("TZ_ADMIN_BLOCK_IC_TIME"),
+    ].join(", "),
+    { LOGID, step: "IC_CHK" }
+  );
+  /* end blocking infinite call */
+
+  let global_param = {};
+  const COMMAND = "GET_DATE";
+  const clubId = "213ea85e-efc6-11ec-a93e-0242ac11000a";
+  const courses = {
+    동: "21416e13-efc6-11ec-a93e-0242ac11000a",
+    서: "21416ee9-efc6-11ec-a93e-0242ac11000a",
+    남In: "21416f27-efc6-11ec-a93e-0242ac11000a",
+    남Out: "21416f5a-efc6-11ec-a93e-0242ac11000a",
+  };
+  EXTZLOG("search", ["startSearch", COMMAND].join(", "), {
+    LOGID,
+    step: "IC_CHK",
+  });
+  const addrOuter = OUTER_ADDR_HEADER + "/api/reservation/golfSchedule";
+  const header = { "Content-Type": "application/json" };
+
+  const now = new Date();
+  const thisyear = now.getFullYear() + "";
+  const thismonth = ("0" + (1 + now.getMonth())).slice(-2);
+  const thisdate = thisyear + thismonth;
+
+  now.setDate(28);
+  now.setMonth(now.getMonth() + 1);
+  const nextyear = now.getFullYear() + "";
+  const nextmonth = ("0" + (1 + now.getMonth())).slice(-2);
+  const nextdate = nextyear + nextmonth;
+
+  EXTZLOG("search", ["targetMonth", thisdate, nextdate].join(", "), {
+    LOGID,
+    step: "EXEC",
+  });
+
+  let dates = [];
+  const result = [];
+  const golf_schedule = [];
+  let lmt;
+  function procDate() {
+    const LOG_PRM = {
+      LOGID,
+      step: "procDate",
+    };
+    /* date search */
+    if (COMMAND == "GET_DATE") {
+      let golf_date = [];
+      dates.forEach(([date]) => {
+        golf_date.push(date.datify("-"));
+      });
+      EXTZLOG("search", "searchResult", LOG_PRM);
+      const acParam = {
+        LOGID,
+        timestamp: new Date().getTime(),
+      };
+      if (golf_date.length == 0) {
+        acParam.command = "NONE_OF_GET_DATE";
+      } else {
+        acParam.command = "SUCCESS_OF_GET_DATE";
+        acParam.content = golf_date;
+      }
+      EXTZLOG("search", "DATERESULT", JSON.stringify(acParam));
+      if (ac) {
+        EXTZLOG("search", "sendToDevice", LOG_PRM);
+        ac.message(JSON.stringify(acParam));
+        lsc();
+      }
+      return;
+    }
+    /* time search */
+    if (lmt === undefined && dates.length == 0) {
+      dates.push(["${TARGET_DATE}", 0]);
+    }
+
+    EXTZLOG(
+      "search",
+      ["targetDate", "${TARGET_DATE}", dates.length].join(", "),
+      LOG_PRM
+    );
+
+    const result = [];
+    dates.every((arr) => {
+      const [date] = arr;
+      if (date == "${TARGET_DATE}") {
+        result.push(arr);
+      }
+      return true;
+    });
+    dates = result;
+
+    if (lmt === undefined) lmt = dates.length - 1;
+    const arrDate = dates.shift();
+    if (arrDate) {
+      EXTZLOG("search", "mneCallDetail", LOG_PRM);
+      mneCallDetail(arrDate);
+    } else {
+      EXTZLOG("search", "procGolfSchedule", LOG_PRM);
+      procGolfSchedule();
+    }
+  }
+  function procGolfSchedule() {
+    const LOG_PRM = {
+      LOGID,
+      step: "procGolfSchedule",
+    };
+    golf_schedule.forEach((obj) => {
+      obj.golf_course_name = obj.golf_course_id;
+      let course_id = courses[obj.golf_course_id];
+      if (!course_id && Object.keys(courses).length === 1)
+        course_id = courses[Object.keys(courses)[0]];
+      obj.golf_course_id = course_id;
+      obj.date =
+        obj.date.gh(4) + "-" + obj.date.ch(4).gh(2) + "-" + obj.date.gt(2);
+      if (obj.time.indexOf(":") == -1)
+        obj.time = obj.time.gh(2) + ":" + obj.time.gt(2);
+    });
+
+    const acParam = {
+      LOGID,
+      timestamp: new Date().getTime(),
+    };
+    if (golf_schedule.length == 0) {
+      acParam.command = "NONE_OF_GET_SCHEDULE";
+    } else {
+      acParam.command = "end of procGolfSchedule!";
+      acParam.content = golf_schedule;
+    }
+    EXTZLOG("search", "searchResult," + acParam.command, LOG_PRM);
+    if (ac) {
+      EXTZLOG("search", "sendToDevice", LOG_PRM);
+      ac.message(JSON.stringify(acParam));
+      lsc();
+    }
+  }
+  function mneCall(date, callback) {
+    const obj = {};
+    log(location.href);
+    location.href
+      .split("?")[1]
+      .split("&")
+      .forEach((el) => {
+        const [key, val] = el.split("=");
+        obj[key] = val;
+      });
+    const ClubNumber = obj.gc_no;
+    const param = {
+      gc_no: ClubNumber,
+      search_type: "simple",
+      rand: "",
+    };
+    post("/reserve/ajax/commonTeeList", param, {}, (data) => {
+      const json = JSON.parse(data);
+      const els = json.reservePossibleDateMap;
+      Object.keys(els).forEach((date) => {
+        const obj = els[date];
+        if (obj.reserve_possible_cnt == 0) return;
+        dates.push([date, ""]);
+      });
+      callback();
+    });
+  }
+
+  function mneCallDetail(arrDate) {
+    const [date, num] = arrDate;
+    const param = {
+      select_date: date,
+      rand: "",
+    };
+    const dictCourse = {
+      A: "동",
+      B: "서",
+      C: "남In",
+      D: "남Out",
+    };
+
+    const obj = {};
+    location.href
+      .split("?")[1]
+      .split("&")
+      .forEach((el) => {
+        const [key, val] = el.split("=");
+        obj[key] = val;
+      });
+    const ClubNumber = obj.gc_no;
+
+    post("/reserve/ajax/teeList/" + ClubNumber, param, {}, (data) => {
+      const json = JSON.parse(data);
+      const els = json.teeList;
+      Array.from(els).forEach((el) => {
+        let {
+          teeup_time: time,
+          price,
+          dc_price,
+          course_cd: course,
+          time_date: date,
+          bk_round: hole,
+        } = el;
+        course = dictCourse[course];
+        const fee_discount = price - dc_price;
+        const fee_normal = price;
+        hole = hole + "홀";
+
+        golf_schedule.push({
+          golf_club_id: clubId,
+          golf_course_id: course,
+          date,
+          time,
+          in_out: "",
+          persons: "",
+          fee_normal,
+          fee_discount,
+          others: hole,
+        });
+      });
+      procDate();
+    });
+  }
+
+  function LOGOUT() {
+    log("LOGOUT");
+    location.href = "javascript:()=>{}";
+  }
+
+  function main() {
+    EXTZLOG("search", "main");
+
+    if (!TZ_BOT_SAFETY) {
+      EXTZLOG("search", "stopped by Infinite Call");
+      return;
+    }
+
+    const func = dict[addr];
+    if (!func) funcOther();
+    else func();
+  }
+
+  function funcList() {
+    EXTZLOG("search", "funcList");
+    location.href =
+      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+    return;
+  }
+  function funcMain() {
+    EXTZLOG("search", "funcMain");
+
+    const chk = LSCHK("TZ_SEARCH_MAIN" + clubId, 10);
+    EXTZLOG("search", ["timeout chk", chk].join(", "));
+
+    if (!chk) {
+      EXTZLOG("search", "funcMain Timein ERROR");
+      return;
+    }
+
+    location.href =
+      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+    return;
+  }
+  function funcOut() {
+    EXTZLOG("search", "funcOut");
+
+    funcEnd();
+
+    return;
+  }
+  function funcOther() {
+    EXTZLOG("search", "funcOther");
+    /* SENDMQTT("script_error_in_system", addr, {stack: "link address error"}, addr); */
+
+    const chk = LSCHK("TZ_SEARCH_OTHER" + clubId, 10);
+    EXTZLOG("search", ["timeout chk", chk]);
+    if (!chk) {
+      EXTZLOG("search", ["funcOther Timein ERROR"]);
+      return;
+    }
+
+    location.href =
+      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+
+    return;
+  }
+  function funcReserve() {
+    EXTZLOG("search", "funcSearch");
+
+    if (location.href == addr) {
+      const chk = LSCHK("TZ_SEARCH_RESERVE" + clubId, 5);
+      EXTZLOG("search", ["timeout chk", chk].join(","));
+      if (!chk) {
+        EXTZLOG("search", "funcSearch Timein ERROR");
+        return;
+      }
+    }
+
+    mneCall(thisdate, procDate);
+
+    return;
+  }
+
+  try {
+    main();
+  } catch (e) {
+    /* SENDAC(e, "");
+    SENDMQTT("script_error_in_system", "", e, ""); */
+    console.log(e);
+    EXTZLOG("search", "script_error_in_system");
+  }
 })();

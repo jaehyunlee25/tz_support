@@ -1,5 +1,14 @@
 javascript: (() => {
-  const log = console.log;
+  let log = console.log;
+  if (
+    window.webkit &&
+    window.webkit.messageHandlers &&
+    window.webkit.messageHandlers.iosController
+  ) {
+    log = function (message) {
+      window.webkit.messageHandlers.iosController.postMessage(message);
+    };
+  }
   const dir = console.dir;
   const doc = document;
   const ls = localStorage;
@@ -10,9 +19,10 @@ javascript: (() => {
     sub_type: "",
     device_id: "${deviceId}",
     device_token: "${deviceToken}",
-    golf_club_id: "vivid",
+    golf_club_id: "213ea85e-efc6-11ec-a93e-0242ac11000a",
+    fragment_id: "${fragment_id}",
     message: "",
-    parameter: JSON.stringify({ LOGID }),
+    parameter: { LOGID },
   };
   const INTV_TIME = 1000;
   const INTV_COUNT = 20;
@@ -35,13 +45,12 @@ javascript: (() => {
   if (aDDr.indexOf(dictSplitter[splitter]) != -1)
     addr = aDDr.split(dictSplitter[splitter])[0];
 
-  EXTZLOG("url", "raw addr :: " + location.href);
-  EXTZLOG("url", "aDDr :: " + aDDr);
-  EXTZLOG("url", "addr :: " + addr);
+  /* EXTZLOG("url", "rawAddr:" + location.href);
+EXTZLOG("url", "aDDr:" + aDDr);
+EXTZLOG("url", "addr:" + addr); */
 
   function LSCHK(str, sec) {
     const tag = lsg(str);
-    log("time check", new Date().getTime() - tag, 1000 * sec);
     if (tag && new Date().getTime() - tag < 1000 * sec) return false;
     lss(str, new Date().getTime());
     return true;
@@ -54,10 +63,11 @@ javascript: (() => {
   }
   function EXTZLOG(subtype, message, param) {
     logParam.sub_type = subtype;
-    logParam.message = message;
+    logParam.message = "script log: " + message;
     logParam.timestamp = new Date().getTime();
-    if (param) logParam.parameter = JSON.stringify(param);
-    TZLOG(logParam);
+    if (param) logParam.parameter = param;
+
+    log(JSON.stringify(logParam));
   }
   function post(addr, param, header, callback) {
     var a = new ajaxcallforgeneral(),
@@ -88,7 +98,18 @@ javascript: (() => {
     var ADDR;
     var PARAM;
     var HEADER;
+    const rs = [
+      "요청이 초기화되지 않은 상태",
+      "서버 연결이 이루어지지 않음",
+      "요청이 수신된 상태",
+      "요청을 처리중인 상태",
+      "요청의 처리가 종료되고, 응답이 준비된 상태",
+    ];
     this.jAjax = function (address, header) {
+      /* const cp = JSON.parse(JSON.stringify(logParam));
+    cp.parameter = { LOGID };
+    log(JSON.stringify(cp)); */
+
       j.address = address;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
@@ -103,6 +124,10 @@ javascript: (() => {
       j.xmlHttp.send(null);
     };
     this.post = function (addr, prm, header) {
+      /* const cp = JSON.parse(JSON.stringify(logParam));
+    cp.parameter = { LOGID };
+    log(JSON.stringify(cp)); */
+
       j.address = addr;
       j.xmlHttp = new XMLHttpRequest();
       j.xmlHttp.onreadystatechange = on_ReadyStateChange;
@@ -142,21 +167,20 @@ javascript: (() => {
     };
     function onError() {}
     function on_ReadyStateChange() {
-      if (j.xmlHttp.readyState == 4) {
+      const rsnum = j.xmlHttp.readyState;
+      EXTZLOG("ajax", "readyState" + rsnum + "," + rs[rsnum]);
+      if (rsnum == 4) {
         if (j.xmlHttp.status == 200) {
+          EXTZLOG("ajax", "status," + j.xmlHttp.status);
           var data = j.xmlHttp.responseText;
           try {
+            EXTZLOG("ajax", "ajax_callback," + j.address);
             j.ajaxcallback(data);
           } catch (e) {
-            SENDAC(e, data);
-            SENDMQTT("script_error_in_ajax_callback", j.address, e, data);
-            /* EXTZLOG("search", [
-            "script_error_in_ajax_callback",
-            j.address,
-            e.stack,
-          ]); */
+            EXTZLOG("ajax", "script_error_in_ajax_callback," + e.stack);
           }
         } else {
+          EXTZLOG("ajax", "ajax status error," + j.xmlHttp.status);
         }
       }
     }
@@ -166,7 +190,7 @@ javascript: (() => {
     const socket = new WebSocket(WS_HEADER);
     logParam.sub_type = subtype;
     logParam.timestamp = new Date().getTime();
-    logParam.messasge = [addr, e.stack];
+    logParam.message = [addr, e.stack];
     logParam.responseText = data;
     socket.onopen = function () {
       socket.send(
@@ -330,6 +354,21 @@ javascript: (() => {
       .forEach((chr) => (res[chr] = true));
     return Object.keys(res).join("");
   };
+  String.prototype.getGet = function () {
+    var url = this.toString(),
+      u = url.split("?")[1],
+      a = {};
+    if (u) {
+      var arr = u.split("&");
+      arr.forEach((d, n) => {
+        var t = d.split("=");
+        a[t[0]] = t[1];
+      });
+    } else {
+      return false;
+    }
+    return a;
+  };
   String.prototype.comp = function (str) {
     let a = Array.from(this);
     let b = Array.from(str);
@@ -490,7 +529,7 @@ javascript: (() => {
     const tLogin = setInterval(timeraction, 1000);
     timeraction();
     function timeraction() {
-      if (!window["member_id"]) {
+      if (!window["loginID"]) {
         tLoginCount++;
         log("tLoginCount", tLoginCount);
         if (tLoginCount > 4) clearInterval(tLogin);
@@ -498,9 +537,9 @@ javascript: (() => {
       }
       clearInterval(tLogin);
       if (precheck()) return;
-      window["member_id"].value = "jhlee25";
-      window["member_passwd"].value = "ya2ssarama!";
-      doc.gcn("btnSubmit")[0].click();
+      loginID.value = "newrison";
+      loginPW.value = "ilovegolf778";
+      doc.gcn("login")[1].click();
     }
   }
   function precheck() {}
