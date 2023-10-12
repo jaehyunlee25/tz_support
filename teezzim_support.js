@@ -6,8 +6,8 @@ const ogs = require("open-graph-scraper");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "gzc_ora";
-const golf_club_id = "213ea85e-efc6-11ec-a93e-0242ac11000a";
+const golf_club_eng_name = "360cc";
+const golf_club_id = "a7fe6b1d-f05e-11ec-a93e-0242ac11000a";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },

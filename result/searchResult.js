@@ -517,9 +517,11 @@ EXTZLOG("url", "addr:" + addr); */
   console.clear();
 
   const dict = {
-    "https://m.golfzoncounty.com/member/login": funcLogin,
-    "http://www.golfzoncounty.com/member/login": funcLogin,
-    "http://www.golfzoncounty.com/reserve/main": funcReserve,
+    "http://www.360cc.co.kr/mobile/login/login.do": funcLogin,
+    "http://www.360cc.co.kr/mobile/reservation/real_reservation.do":
+      funcReserve,
+    "http://www.360cc.co.kr/mobile/main/mainPage.do": funcMain,
+    "http://www.360cc.co.kr/mobile/user/sign/Logout.do": funcOut,
   };
 
   function precheck() {}
@@ -530,7 +532,7 @@ EXTZLOG("url", "addr:" + addr); */
     if (!chk) {
       EXTZLOG("search", "funcLogin Timein ERROR");
       location.href =
-        "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+        "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
       return;
     }
 
@@ -539,7 +541,7 @@ EXTZLOG("url", "addr:" + addr); */
     const tLogin = setInterval(timeraction, 1000);
     timeraction();
     function timeraction() {
-      if (!window["loginID"]) {
+      if (!window["usrId2"]) {
         tLoginCount++;
         log("tLoginCount", tLoginCount);
         if (tLoginCount > 4) clearInterval(tLogin);
@@ -547,9 +549,22 @@ EXTZLOG("url", "addr:" + addr); */
       }
       clearInterval(tLogin);
       if (precheck()) return;
-      loginID.value = "${login_id}";
-      loginPW.value = "${login_password}";
-      doc.gcn("login")[1].click();
+      usrId2.value = "${login_id}";
+      usrPwd2.value = "${login_password}";
+      fnLogin2();
+
+      /* begin: precheck content */
+      function precheck() {
+        const strLogout = "로그아웃";
+        const str =
+          window["mm-m0-p0"].children[0].children[2].children[0].attr("alt");
+        if (str == strLogout) {
+          if (ac) ac.message("ALREADY_LOGIN");
+          return true;
+        }
+        return false;
+      }
+      /* end: precheck content */
     }
 
     return;
@@ -599,12 +614,10 @@ EXTZLOG("url", "addr:" + addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "213ea85e-efc6-11ec-a93e-0242ac11000a";
+  const clubId = "a7fe6b1d-f05e-11ec-a93e-0242ac11000a";
   const courses = {
-    동: "21416e13-efc6-11ec-a93e-0242ac11000a",
-    서: "21416ee9-efc6-11ec-a93e-0242ac11000a",
-    남In: "21416f27-efc6-11ec-a93e-0242ac11000a",
-    남Out: "21416f5a-efc6-11ec-a93e-0242ac11000a",
+    In: "a8005001-f05e-11ec-a93e-0242ac11000a",
+    Out: "a8005112-f05e-11ec-a93e-0242ac11000a",
   };
   EXTZLOG("search", ["startSearch", COMMAND].join(", "), {
     LOGID,
@@ -729,87 +742,94 @@ EXTZLOG("url", "addr:" + addr); */
     }
   }
   function mneCall(date, callback) {
-    const obj = {};
-    log(location.href);
-    location.href
-      .split("?")[1]
-      .split("&")
-      .forEach((el) => {
-        const [key, val] = el.split("=");
-        obj[key] = val;
-      });
-    const ClubNumber = obj.gc_no;
-    const param = {
-      gc_no: ClubNumber,
-      search_type: "simple",
-      rand: "",
-    };
-    post("/reserve/ajax/commonTeeList", param, {}, (data) => {
-      const json = JSON.parse(data);
-      const els = json.reservePossibleDateMap;
-      Object.keys(els).forEach((date) => {
-        const obj = els[date];
-        if (obj.reserve_possible_cnt == 0) return;
-        dates.push([date, ""]);
+    intvEl = doc.gcn("cm_calender_tbl").length > 0;
+    EXTZLOG("search", "mneCall:" + date);
+    let count = 0;
+    const mneT = setInterval(funcInterval, INTV_TIME);
+    const logPrm = { LOGID, step: "mneCall_interval" };
+    function funcInterval() {
+      intvElcheck();
+      if (!intvEl) {
+        EXTZLOG("search", ["interval count", count].join(", "), logPrm);
+        count++;
+        if (count > INTV_COUNT) {
+          EXTZLOG("search", ["interval count out", count].join(", "), logPrm);
+          clearInterval(mneT);
+          callback();
+        }
+        return;
+      }
+      clearInterval(mneT);
+      EXTZLOG("search", "exec");
+      exec();
+    }
+    function intvElcheck() {}
+
+    function exec() {
+      const param = {};
+      const els = doc.gcn("cal_live");
+      Array.from(els).forEach((el) => {
+        const href = el.attr("href");
+        if (href === "#") return;
+        const full = date + el.str().addzero();
+        dates.push([full, ""]);
       });
       callback();
-    });
+    }
   }
 
   function mneCallDetail(arrDate) {
-    const [date, num] = arrDate;
+    const [date, strParam] = arrDate;
     const param = {
-      select_date: date,
-      rand: "",
+      golfResType: "real",
+      courseId: "0",
+      usrMemCd: "40",
+      pointDate: date,
+      openYn: "1",
+      dateGbn: "3",
+      choiceTime: "00",
+      cssncourseum: "",
+      inputType: "I",
     };
-    const dictCourse = {
-      A: "동",
-      B: "서",
-      C: "남In",
-      D: "남Out",
+    const courseDict = {
+      IN: "In",
+      OUT: "Out",
     };
 
-    const obj = {};
-    location.href
-      .split("?")[1]
-      .split("&")
-      .forEach((el) => {
-        const [key, val] = el.split("=");
-        obj[key] = val;
-      });
-    const ClubNumber = obj.gc_no;
+    post(
+      "/mobile/reservation/list/ajax_real_timeinfo_list.do",
+      param,
+      {},
+      (data) => {
+        const ifr = doc.clm("div");
+        ifr.innerHTML = data;
 
-    post("/reserve/ajax/teeList/" + ClubNumber, param, {}, (data) => {
-      const json = JSON.parse(data);
-      const els = json.teeList;
-      Array.from(els).forEach((el) => {
-        let {
-          teeup_time: time,
-          price,
-          dc_price,
-          course_cd: course,
-          time_date: date,
-          bk_round: hole,
-        } = el;
-        course = dictCourse[course];
-        const fee_discount = price - dc_price;
-        const fee_normal = price;
-        hole = hole + "홀";
+        const tbl = ifr.gcn("cm_time_list_tbl")[0].gtn("tbody")[0];
+        const els = tbl.gtn("tr");
 
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole,
+        const obTeams = {};
+        Array.from(els).forEach((el, i) => {
+          /*if (i === 0) return;*/
+          const course = courseDict[el.children[1].str()];
+          const time = el.children[2].str();
+          const fee_discount = el.children[4].str().split(",").join("") * 1;
+          const fee_normal = el.children[4].str().split(",").join("") * 1;
+
+          golf_schedule.push({
+            golf_club_id: clubId,
+            golf_course_id: course,
+            date,
+            time,
+            in_out: "",
+            persons: "",
+            fee_normal,
+            fee_discount,
+            others: "9홀",
+          });
         });
-      });
-      procDate();
-    });
+        procDate();
+      }
+    );
   }
 
   function LOGOUT() {
@@ -833,7 +853,7 @@ EXTZLOG("url", "addr:" + addr); */
   function funcList() {
     EXTZLOG("search", "funcList");
     location.href =
-      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+      "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
     return;
   }
   function funcMain() {
@@ -848,7 +868,7 @@ EXTZLOG("url", "addr:" + addr); */
     }
 
     location.href =
-      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+      "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
     return;
   }
   function funcOut() {
@@ -870,7 +890,7 @@ EXTZLOG("url", "addr:" + addr); */
     }
 
     location.href =
-      "http://www.golfzoncounty.com/reserve/main?gc_no=125&area_code=1";
+      "http://www.360cc.co.kr/mobile/reservation/real_reservation.do";
 
     return;
   }
@@ -886,7 +906,10 @@ EXTZLOG("url", "addr:" + addr); */
       }
     }
 
-    mneCall(thisdate, procDate);
+    mneCall(thisdate, () => {
+      doc.gcn("right")[1].click();
+      mneCall(nextdate, procDate);
+    });
 
     return;
   }
@@ -896,7 +919,7 @@ EXTZLOG("url", "addr:" + addr); */
   } catch (e) {
     /* SENDAC(e, "");
     SENDMQTT("script_error_in_system", "", e, ""); */
-    console.log(e);
+    console.log(e.toString());
     EXTZLOG("search", "script_error_in_system");
   }
 })();

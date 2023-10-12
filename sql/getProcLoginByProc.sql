@@ -7,4 +7,4 @@ join golf_club_usability on golf_club_usability.golf_club_id = proc_login.id
 WHERE 
 	golf_club_detail.login_script = TRUE
    and golf_club_usability.golf_club_state != -1
-	AND proc = '${proc}';
+	AND proc like '%${proc}%';

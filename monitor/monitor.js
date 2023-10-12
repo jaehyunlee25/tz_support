@@ -52,20 +52,41 @@ String.prototype.write = function (con) {
 String.prototype.append = function (con) {
   fs.appendFileSync(this.toString(), con);
 };
-const logfile = "result/dateSearchResult.log";
-let proc = "redirect";
+const logfile = "result/monitor/result.log";
+let proc = "normal";
 
 main();
 async function main() {
   logfile.write("");
-  const list = await "getProcLoginByProc".query({ proc });
-  /* const list = [
+  // const list = await "getProcLoginByProc".query({ proc });
+  // const list = await "getSafeClubList".query({ proc });
+  // const list = jp(gf("result/monitor/error.log")).timeout;
+  /* const list = await "getClubListNoProc".query({ proc });
+  list.forEach((club) => {
+    club.result = "y";
+    club.proc = "normal";
+  }); */
+  /* const list = await "getClubResultYButNull".query({ proc });
+  list.forEach((club) => {
+    club.result ??= "y";
+    if (club.result == "n") club.result = "y";
+    club.proc ??= "normal";
+    if (
+      club.proc != "redirect" &&
+      club.proc != "alert" &&
+      club.proc != "normal"
+    )
+      club.proc = "normal";
+  }); */
+
+  const list = [
     {
-      id: "213ea85e-efc6-11ec-a93e-0242ac11000a",
-      eng_id: "gzc_ora",
-      proc: "redirect",
+      id: "5ab61e1a-f0ae-11ec-a93e-0242ac11000a",
+      eng_id: "changpyung",
+      proc: "unable",
     },
-  ]; */
+  ];
+
   await loginSearch(list);
 }
 async function loginSearch(list) {

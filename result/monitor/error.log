@@ -1,0 +1,667 @@
+{
+    "timeout": [
+        {
+            "id": "99e5d135-f138-11ec-a93e-0242ac11000a",
+            "eng_id": "123golfclub",
+            "proc": "normal"
+        },
+        {
+            "id": "05607bee-ef75-11ec-a93e-0242ac11000a",
+            "eng_id": "ananti",
+            "proc": "normal"
+        },
+        {
+            "id": "a391da03-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "andong",
+            "proc": "normal"
+        },
+        {
+            "id": "fff25000-f12a-11ec-a93e-0242ac11000a",
+            "eng_id": "ansung",
+            "proc": "normal"
+        },
+        {
+            "id": "a35cdc1e-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "ansungcc",
+            "proc": "normal"
+        },
+        {
+            "id": "a3e72928-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "anyang",
+            "proc": "normal"
+        },
+        {
+            "id": "f295961d-2a92-11ee-a1bf-f220af5e408d",
+            "eng_id": "ardenhill",
+            "proc": "normal"
+        },
+        {
+            "id": "9cfba8c3-eec9-11ec-a93e-0242ac11000a",
+            "eng_id": "arumdaun",
+            "proc": "redirect"
+        },
+        {
+            "id": "a3d8b648-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "awon",
+            "proc": "normal"
+        },
+        {
+            "id": "e2c00a4f-f128-11ec-a93e-0242ac11000a",
+            "eng_id": "balios",
+            "proc": "normal"
+        },
+        {
+            "id": "da680bd7-a385-11ed-a1bf-f220af5e408d",
+            "eng_id": "bavista_public",
+            "proc": "normal"
+        },
+        {
+            "id": "126fd385-ee24-11ec-a93e-0242ac11000a",
+            "eng_id": "bearcreek",
+            "proc": "normal"
+        },
+        {
+            "id": "e0ab88a4-ee25-11ec-a93e-0242ac11000a",
+            "eng_id": "bearcreek_chuncheon",
+            "proc": "normal"
+        },
+        {
+            "id": "4f44a7e1-7c51-11ec-b15c-0242ac110005",
+            "eng_id": "bearsbest",
+            "proc": "normal"
+        },
+        {
+            "id": "a34026db-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "birchhill",
+            "proc": "normal"
+        },
+        {
+            "id": "48a0dd19-f05c-11ec-a93e-0242ac11000a",
+            "eng_id": "blackstonebelleforet",
+            "proc": "normal"
+        },
+        {
+            "id": "84962a8c-ef9c-11ec-a93e-0242ac11000a",
+            "eng_id": "blueone_sangju",
+            "proc": "redirect"
+        },
+        {
+            "id": "db280bad-f129-11ec-a93e-0242ac11000a",
+            "eng_id": "blueone_yongin",
+            "proc": "redirect"
+        },
+        {
+            "id": "a3865e43-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "bugok",
+            "proc": "normal"
+        },
+        {
+            "id": "5ab61e1a-f0ae-11ec-a93e-0242ac11000a",
+            "eng_id": "changpyung",
+            "proc": "normal"
+        },
+        {
+            "id": "a3961a69-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "changwon",
+            "proc": "normal"
+        },
+        {
+            "id": "895b95ac-f065-11ec-a93e-0242ac11000a",
+            "eng_id": "charmvalley",
+            "proc": "alert"
+        },
+        {
+            "id": "a39f50e7-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "debeach",
+            "proc": "normal"
+        },
+        {
+            "id": "a376d322-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "dogo",
+            "proc": "normal"
+        },
+        {
+            "id": "88475b10-7c43-11ec-b15c-0242ac110005",
+            "eng_id": "dongchon",
+            "proc": "normal"
+        },
+        {
+            "id": "a3f7981d-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "dongrae_benest",
+            "proc": "normal"
+        },
+        {
+            "id": "6a14685d-f08c-11ec-a93e-0242ac11000a",
+            "eng_id": "eastern",
+            "proc": "normal"
+        },
+        {
+            "id": "6877e8c5-8be2-11ed-9c7a-0242ac110007",
+            "eng_id": "easysky",
+            "proc": "normal"
+        },
+        {
+            "id": "a34e717f-f088-11ec-a93e-0242ac11000a",
+            "eng_id": "ecolian_guchang",
+            "proc": "normal"
+        },
+        {
+            "id": "9dd4988a-f110-11ec-a93e-0242ac11000a",
+            "eng_id": "ecolian_jechun",
+            "proc": "normal"
+        },
+        {
+            "id": "c1af0ef7-f0ab-11ec-a93e-0242ac11000a",
+            "eng_id": "ecolian_youngwang",
+            "proc": "normal"
+        },
+        {
+            "id": "a3b35226-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "eliche",
+            "proc": "normal"
+        },
+        {
+            "id": "2ec1a5c2-e3eb-11ec-a93e-0242ac11000a",
+            "eng_id": "eodeungsan",
+            "proc": "normal"
+        },
+        {
+            "id": "a36128b9-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "eunhwasam",
+            "proc": "normal"
+        },
+        {
+            "id": "a15be503-f05d-11ec-a93e-0242ac11000a",
+            "eng_id": "evendale",
+            "proc": "alert"
+        },
+        {
+            "id": "6877f89c-ef26-11ec-a93e-0242ac11000a",
+            "eng_id": "foresthill",
+            "proc": "normal"
+        },
+        {
+            "id": "a426147b-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "fourizon",
+            "proc": "normal"
+        },
+        {
+            "id": "a3f2b1a3-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "gapeong_benest",
+            "proc": "normal"
+        },
+        {
+            "id": "1f574db0-f112-11ec-a93e-0242ac11000a",
+            "eng_id": "glenrose",
+            "proc": "normal"
+        },
+        {
+            "id": "a4113806-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "gold",
+            "proc": "normal"
+        },
+        {
+            "id": "a3dd5cc1-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "gosungnobel",
+            "proc": "normal"
+        },
+        {
+            "id": "a41bbf5b-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "grand",
+            "proc": "normal"
+        },
+        {
+            "id": "a34b081b-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "greenhill",
+            "proc": "normal"
+        },
+        {
+            "id": "c9537df4-e3db-11ec-a93e-0242ac11000a",
+            "eng_id": "gs_ecolian",
+            "proc": "normal"
+        },
+        {
+            "id": "2b89c763-f135-11ec-a93e-0242ac11000a",
+            "eng_id": "gzc_hanlimansung",
+            "proc": "normal"
+        },
+        {
+            "id": "24bb897e-eecb-11ec-a93e-0242ac11000a",
+            "eng_id": "gzc_jinchun",
+            "proc": "normal"
+        },
+        {
+            "id": "a08e2da4-ee44-11ec-a93e-0242ac11000a",
+            "eng_id": "gzc_mudeungsan",
+            "proc": "redirect"
+        },
+        {
+            "id": "7f0b5384-efcf-11ec-a93e-0242ac11000a",
+            "eng_id": "haevichi",
+            "proc": "normal"
+        },
+        {
+            "id": "a3cd88dc-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "haewundae",
+            "proc": "normal"
+        },
+        {
+            "id": "958c57dd-ef9e-11ec-a93e-0242ac11000a",
+            "eng_id": "hanmac",
+            "proc": "redirect"
+        },
+        {
+            "id": "a37c18dd-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "hanwon",
+            "proc": "normal"
+        },
+        {
+            "id": "c4c4d24a-f136-11ec-a93e-0242ac11000a",
+            "eng_id": "hwaseong",
+            "proc": "normal"
+        },
+        {
+            "id": "a42389aa-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "hwasun",
+            "proc": "normal"
+        },
+        {
+            "id": "681cc316-8be0-11ed-9c7a-0242ac110007",
+            "eng_id": "illite",
+            "proc": "normal"
+        },
+        {
+            "id": "a37ffe56-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "incheonairport",
+            "proc": "normal"
+        },
+        {
+            "id": "a43dd80a-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "interbulgo_kyungsan",
+            "proc": "normal"
+        },
+        {
+            "id": "a36815be-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "ipocc",
+            "proc": "normal"
+        },
+        {
+            "id": "a4026f14-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "jayu",
+            "proc": "normal"
+        },
+        {
+            "id": "e51e3d83-f12b-11ec-a93e-0242ac11000a",
+            "eng_id": "jisan",
+            "proc": "normal"
+        },
+        {
+            "id": "a364e759-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "jungbu",
+            "proc": "normal"
+        },
+        {
+            "id": "ceb08d81-efcd-11ec-a93e-0242ac11000a",
+            "eng_id": "jungmungolf",
+            "proc": "normal"
+        },
+        {
+            "id": "a3d1b7a1-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "jungsan",
+            "proc": "normal"
+        },
+        {
+            "id": "22a08c4a-f126-11ec-a93e-0242ac11000a",
+            "eng_id": "kccgolf",
+            "proc": "normal"
+        },
+        {
+            "id": "08a1b0ce-f0ad-11ec-a93e-0242ac11000a",
+            "eng_id": "kian",
+            "proc": "normal"
+        },
+        {
+            "id": "191202c1-f08d-11ec-a93e-0242ac11000a",
+            "eng_id": "kolongarden",
+            "proc": "normal"
+        },
+        {
+            "id": "a4162255-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "korea",
+            "proc": "normal"
+        },
+        {
+            "id": "a43a52c5-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "kwangju",
+            "proc": "normal"
+        },
+        {
+            "id": "efa9a4a3-e3d4-11ec-a93e-0242ac11000a",
+            "eng_id": "kyongju",
+            "proc": "normal"
+        },
+        {
+            "id": "a351e25d-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "ladena",
+            "proc": "normal"
+        },
+        {
+            "id": "6cdeee13-8724-11ec-b15c-0242ac110005",
+            "eng_id": "lakeside",
+            "proc": "normal"
+        },
+        {
+            "id": "d998cdb1-8832-11ed-9c7a-0242ac110007",
+            "eng_id": "lavieestbelle_dunes",
+            "proc": "normal"
+        },
+        {
+            "id": "855b7032-eee4-11ec-a93e-0242ac11000a",
+            "eng_id": "leenlee",
+            "proc": "normal"
+        },
+        {
+            "id": "7e9452b3-ef25-11ec-a93e-0242ac11000a",
+            "eng_id": "luna-x",
+            "proc": "normal"
+        },
+        {
+            "id": "5cdcf758-ef27-11ec-a93e-0242ac11000a",
+            "eng_id": "maplebeach",
+            "proc": "normal"
+        },
+        {
+            "id": "053d7baf-ce10-11ec-a93e-0242ac11000a",
+            "eng_id": "midas_valley",
+            "proc": "redirect"
+        },
+        {
+            "id": "a38e95ee-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "miuna",
+            "proc": "normal"
+        },
+        {
+            "id": "1b3bd777-f092-11ec-a93e-0242ac11000a",
+            "eng_id": "najucc",
+            "proc": "alert"
+        },
+        {
+            "id": "51283fa9-f092-11ec-a93e-0242ac11000a",
+            "eng_id": "najuhills",
+            "proc": "normal"
+        },
+        {
+            "id": "ca2c06b1-7f4f-11ed-9c7a-0242ac110007",
+            "eng_id": "namchon",
+            "proc": "normal"
+        },
+        {
+            "id": "ca84d3a7-cdb8-11ec-a93e-0242ac11000a",
+            "eng_id": "namyeoju",
+            "proc": "alert"
+        },
+        {
+            "id": "280d5dd6-707b-11ed-9c7a-0242ac110007",
+            "eng_id": "oceanhills_youngcheon",
+            "proc": "normal"
+        },
+        {
+            "id": "f7ab238b-867d-11ed-9c7a-0242ac110007",
+            "eng_id": "ophel_yc",
+            "proc": "normal"
+        },
+        {
+            "id": "f0f62823-ef26-11ec-a93e-0242ac11000a",
+            "eng_id": "orangedunesyj",
+            "proc": "normal"
+        },
+        {
+            "id": "a3835a03-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "palgong",
+            "proc": "normal"
+        },
+        {
+            "id": "a3fb4799-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "palmyhills",
+            "proc": "normal"
+        },
+        {
+            "id": "a359379f-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "phoenix",
+            "proc": "normal"
+        },
+        {
+            "id": "7892f895-ef22-11ec-a93e-0242ac11000a",
+            "eng_id": "pinecreek",
+            "proc": "normal"
+        },
+        {
+            "id": "014bf8de-ef2b-11ec-a93e-0242ac11000a",
+            "eng_id": "pinevalley",
+            "proc": "normal"
+        },
+        {
+            "id": "1133010b-f10d-11ec-a93e-0242ac11000a",
+            "eng_id": "pinx",
+            "proc": "normal"
+        },
+        {
+            "id": "29d04ae6-ef9d-11ec-a93e-0242ac11000a",
+            "eng_id": "pohang",
+            "proc": "alert"
+        },
+        {
+            "id": "0b007235-f137-11ec-a93e-0242ac11000a",
+            "eng_id": "respia",
+            "proc": "normal"
+        },
+        {
+            "id": "a34d9bdc-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "rivera",
+            "proc": "normal"
+        },
+        {
+            "id": "cb2cfcf7-f127-11ec-a93e-0242ac11000a",
+            "eng_id": "rockgarden",
+            "proc": "normal"
+        },
+        {
+            "id": "998966e2-f063-11ec-a93e-0242ac11000a",
+            "eng_id": "saltbay",
+            "proc": "normal"
+        },
+        {
+            "id": "3a4be011-f088-11ec-a93e-0242ac11000a",
+            "eng_id": "samsam",
+            "proc": "normal"
+        },
+        {
+            "id": "d7fb9bde-707c-11ed-9c7a-0242ac110007",
+            "eng_id": "sandpine",
+            "proc": "normal"
+        },
+        {
+            "id": "a373ec74-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "seaside",
+            "proc": "normal"
+        },
+        {
+            "id": "6214db39-f063-11ec-a93e-0242ac11000a",
+            "eng_id": "sehyeon",
+            "proc": "normal"
+        },
+        {
+            "id": "ae5f3366-ee1d-11ec-a93e-0242ac11000a",
+            "eng_id": "seolhaeone",
+            "proc": "normal"
+        },
+        {
+            "id": "a36bb8e0-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "seoseoul",
+            "proc": "normal"
+        },
+        {
+            "id": "a3aa9bff-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "serenity",
+            "proc": "normal"
+        },
+        {
+            "id": "d22c0c61-ef9c-11ec-a93e-0242ac11000a",
+            "eng_id": "sevenvalley",
+            "proc": "alert"
+        },
+        {
+            "id": "25a74f6f-e3d3-11ec-a93e-0242ac11000a",
+            "eng_id": "siena",
+            "proc": "normal"
+        },
+        {
+            "id": "a3ff3850-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "sillacc",
+            "proc": "normal"
+        },
+        {
+            "id": "8a4409c5-ef7b-11ec-a93e-0242ac11000a",
+            "eng_id": "skyview",
+            "proc": "normal"
+        },
+        {
+            "id": "a4071a71-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "solmoro",
+            "proc": "normal"
+        },
+        {
+            "id": "17cc8c7d-8bd4-11ed-9c7a-0242ac110007",
+            "eng_id": "southcape",
+            "proc": "normal"
+        },
+        {
+            "id": "3604da8e-efc1-11ec-a93e-0242ac11000a",
+            "eng_id": "spahills",
+            "proc": "normal"
+        },
+        {
+            "id": "aa196279-f12b-11ec-a93e-0242ac11000a",
+            "eng_id": "springhills",
+            "proc": "alert"
+        },
+        {
+            "id": "f31cb619-efc0-11ec-a93e-0242ac11000a",
+            "eng_id": "sukjunghill",
+            "proc": "normal"
+        },
+        {
+            "id": "8e2743df-f0af-11ec-a93e-0242ac11000a",
+            "eng_id": "sunchang",
+            "proc": "normal"
+        },
+        {
+            "id": "820da347-cdb6-11ec-a93e-0242ac11000a",
+            "eng_id": "sunhill",
+            "proc": "normal"
+        },
+        {
+            "id": "c067c142-f086-11ec-a93e-0242ac11000a",
+            "eng_id": "taegisan",
+            "proc": "normal"
+        },
+        {
+            "id": "83b37798-f10e-11ec-a93e-0242ac11000a",
+            "eng_id": "thehill",
+            "proc": "normal"
+        },
+        {
+            "id": "fc679464-f065-11ec-a93e-0242ac11000a",
+            "eng_id": "tiger",
+            "proc": "normal"
+        },
+        {
+            "id": "37b8448b-7b88-11ed-9c7a-0242ac110007",
+            "eng_id": "tongdopinest",
+            "proc": "normal"
+        },
+        {
+            "id": "57c662c5-f089-11ec-a93e-0242ac11000a",
+            "eng_id": "uiryeong",
+            "proc": "alert"
+        },
+        {
+            "id": "34579172-f08c-11ec-a93e-0242ac11000a",
+            "eng_id": "urigolfclub",
+            "proc": "normal"
+        },
+        {
+            "id": "4aa6f95d-f075-11ec-a93e-0242ac11000a",
+            "eng_id": "wellihillipark",
+            "proc": "normal"
+        },
+        {
+            "id": "a6d07e37-f092-11ec-a93e-0242ac11000a",
+            "eng_id": "woori",
+            "proc": "normal"
+        },
+        {
+            "id": "a3706038-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "yangju",
+            "proc": "normal"
+        },
+        {
+            "id": "a3e44677-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "yeojoo",
+            "proc": "normal"
+        },
+        {
+            "id": "a3465996-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "yongpyong",
+            "proc": "normal"
+        },
+        {
+            "id": "a3d491a7-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "yongwon",
+            "proc": "normal"
+        },
+        {
+            "id": "a3a74d81-707a-11ed-9c7a-0242ac110007",
+            "eng_id": "yusung",
+            "proc": "normal"
+        }
+    ],
+    "redirect overflow": [
+        {
+            "id": "a43babed-ef28-11ec-a93e-0242ac11000a",
+            "eng_id": "alpensia"
+        },
+        {
+            "id": "712d75fd-f137-11ec-a93e-0242ac11000a",
+            "eng_id": "cistar"
+        },
+        {
+            "id": "7a364cdc-f093-11ec-a93e-0242ac11000a",
+            "eng_id": "edencc"
+        },
+        {
+            "id": "df58de90-efc8-11ec-a93e-0242ac11000a",
+            "eng_id": "elysian_jeju"
+        },
+        {
+            "id": "e54cf324-ef73-11ec-a93e-0242ac11000a",
+            "eng_id": "high1"
+        },
+        {
+            "id": "daa48212-e3d6-11ec-a93e-0242ac11000a",
+            "eng_id": "jnj"
+        },
+        {
+            "id": "03d50cc7-f08c-11ec-a93e-0242ac11000a",
+            "eng_id": "oceanhills_pohang"
+        },
+        {
+            "id": "ae0b0349-7dce-11ec-b15c-0242ac110005",
+            "eng_id": "paju_KMH"
+        },
+        {
+            "id": "2d8d6527-eeb2-11ec-a93e-0242ac11000a",
+            "eng_id": "stfour"
+        }
+    ]
+}
