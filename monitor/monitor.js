@@ -60,37 +60,31 @@ async function main() {
   logfile.write("");
   // const list = await "getProcLoginByProc".query({ proc });
   // const list = await "getSafeClubList".query({ proc });
-  // const list = jp(gf("result/monitor/error.log")).timeout;
+  const list = jp(gf("result/monitor/error.log"))[
+    "search script injection error"
+  ];
+  list.forEach((club) => {
+    club.proc = "redirect";
+  });
   /* const list = await "getClubListNoProc".query({ proc });
   list.forEach((club) => {
     club.result = "y";
     club.proc = "normal";
   }); */
-  /* const list = await "getClubResultYButNull".query({ proc });
-  list.forEach((club) => {
-    club.result ??= "y";
-    if (club.result == "n") club.result = "y";
-    club.proc ??= "normal";
-    if (
-      club.proc != "redirect" &&
-      club.proc != "alert" &&
-      club.proc != "normal"
-    )
-      club.proc = "normal";
-  }); */
-
-  const list = [
+  //const list = await "getClubResultYButNull".query({ proc });
+  /* const list = [
     {
-      id: "5ab61e1a-f0ae-11ec-a93e-0242ac11000a",
-      eng_id: "changpyung",
-      proc: "unable",
+      id: "df58de90-efc8-11ec-a93e-0242ac11000a",
+      eng_id: "elysian_jeju",
+      proc: "normal",
     },
-  ];
-
+  ]; */
+  /* const list = await "getClubPass".query({ proc }); */
   await loginSearch(list);
 }
 async function loginSearch(list) {
   const club = list.shift();
+  log(club);
   if (!club) {
     log("the end of work!!");
     return;
