@@ -19,7 +19,7 @@ const logParam = {
   sub_type: "",
   device_id: "${deviceId}",
   device_token: "${deviceToken}",
-  golf_club_id: "5ab61e1a-f0ae-11ec-a93e-0242ac11000a",
+  golf_club_id: "c6e03d0d-e3e5-11ec-a93e-0242ac11000a",
   fragment_id: "${fragment_id}",
   message: "",
   parameter: { LOGID },
@@ -529,7 +529,7 @@ log("tLoginCount", tLoginCount);
 const tLogin = setInterval(timeraction, 1000);
 timeraction();
 function timeraction() {
-  if (!window["wid"]) {
+  if (!window["ms_id"]) {
     tLoginCount++;
     log("tLoginCount", tLoginCount);
     if (tLoginCount > 4) clearInterval(tLogin);
@@ -537,9 +537,9 @@ function timeraction() {
   }
   clearInterval(tLogin);
   if (precheck()) return;
-  wid.value = "newrison";
-  wpwd.value = "!ilovegolf7";
-  doc.gcn("ui-btn ui-icon-plus ui-btn-icon-left")[0].click();
+  ms_id.value = "newrison";
+  ms_password.value = "ilovegolf778";
+  fnLogin();
 }
 
 };

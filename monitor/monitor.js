@@ -60,26 +60,28 @@ async function main() {
   logfile.write("");
   // const list = await "getProcLoginByProc".query({ proc });
   // const list = await "getSafeClubList".query({ proc });
-  const list = jp(gf("result/monitor/error.log"))[
+  /* const list = jp(gf("result/monitor/error.log"))[
     "search script injection error"
   ];
   list.forEach((club) => {
     club.proc = "redirect";
-  });
+  }); */
   /* const list = await "getClubListNoProc".query({ proc });
   list.forEach((club) => {
     club.result = "y";
     club.proc = "normal";
   }); */
   //const list = await "getClubResultYButNull".query({ proc });
-  /* const list = [
+  const list = [
     {
-      id: "df58de90-efc8-11ec-a93e-0242ac11000a",
-      eng_id: "elysian_jeju",
-      proc: "normal",
+      id: "dd17c84a-eec9-11ec-a93e-0242ac11000a",
+      eng_id: "goldenbay",
+      proc: "alert",
     },
-  ]; */
+  ];
+
   /* const list = await "getClubPass".query({ proc }); */
+
   await loginSearch(list);
 }
 async function loginSearch(list) {
