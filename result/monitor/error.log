@@ -1,43 +1,33 @@
 {
-    "login script injection error": [
+    "login_url error": [
         {
-            "id": "3a264e34-ef9f-11ec-a93e-0242ac11000a",
-            "eng_id": "andonglake",
-            "proc": "redirect"
-        }
-    ],
-    "redirect overflow": [
-        {
-            "id": "54dc9b4b-ce15-11ec-a93e-0242ac11000a",
-            "eng_id": "smartku",
-            "proc": "redirect"
+            "id": "20e579ca-cdb8-11ec-a93e-0242ac11000a",
+            "eng_id": "parkvalley",
+            "proc": "alert"
         }
     ],
     "timeout": [
         {
-            "id": "5d8163d1-cd85-11ec-a93e-0242ac11000a",
-            "eng_id": "delphino",
-            "proc": "normal"
+            "id": "26e86f63-ef9c-11ec-a93e-0242ac11000a",
+            "eng_id": "bomun",
+            "proc": "redirect"
         },
         {
-            "id": "dd17c84a-eec9-11ec-a93e-0242ac11000a",
-            "eng_id": "goldenbay",
-            "proc": "alert"
-        },
-        {
-            "id": "dd3200eb-cd85-11ec-a93e-0242ac11000a",
-            "eng_id": "vivaldi_mountain",
-            "proc": "normal"
-        },
-        {
-            "id": "ef2fd07b-cd84-11ec-a93e-0242ac11000a",
-            "eng_id": "vivaldi_west",
+            "id": "85cb4d86-ee27-11ec-a93e-0242ac11000a",
+            "eng_id": "inseoul27",
             "proc": "normal"
         },
         {
             "id": "fb6bccf0-f10b-11ec-a93e-0242ac11000a",
             "eng_id": "everis",
             "proc": "normal"
+        }
+    ],
+    "login script injection error": [
+        {
+            "id": "fa11e3d6-f05b-11ec-a93e-0242ac11000a",
+            "eng_id": "clubd_boeun",
+            "proc": "redirect"
         }
     ]
 }

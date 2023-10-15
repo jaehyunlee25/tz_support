@@ -74,9 +74,9 @@ async function main() {
   //const list = await "getClubResultYButNull".query({ proc });
   const list = [
     {
-      id: "dd17c84a-eec9-11ec-a93e-0242ac11000a",
-      eng_id: "goldenbay",
-      proc: "alert",
+      id: "85cb4d86-ee27-11ec-a93e-0242ac11000a",
+      eng_id: "inseoul27",
+      proc: "normal",
     },
   ];
 
