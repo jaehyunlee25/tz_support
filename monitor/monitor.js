@@ -7,7 +7,7 @@ const dir = console.dir;
 const golf_club_eng_name = "goldlake";
 const golf_club_id = "55b1a0bd-efbc-11ec-a93e-0242ac11000a";
 
-const localMode = true;
+const localMode = false;
 const addr = localMode
   ? "http://localhost:8080/"
   : "https://dev.mnemosyne.co.kr/monitor/";
@@ -74,9 +74,9 @@ async function main() {
   //const list = await "getClubResultYButNull".query({ proc });
   const list = [
     {
-      id: "85cb4d86-ee27-11ec-a93e-0242ac11000a",
-      eng_id: "inseoul27",
-      proc: "normal",
+      id: "015b8b96-ee18-11ec-a93e-0242ac11000a",
+      eng_id: "bitgoeul",
+      proc: "redirect",
     },
   ];
 
