@@ -7,10 +7,10 @@ const dir = console.dir;
 const golf_club_eng_name = "goldlake";
 const golf_club_id = "55b1a0bd-efbc-11ec-a93e-0242ac11000a";
 
-const localMode = false;
+const localMode = true;
 const addr = localMode
   ? "http://localhost:8080/"
-  : "https://dev.mnemosyne.co.kr/monitor/";
+  : "https://monitor.mnemosyne.co.kr/monitor/1/";
 
 String.prototype.query = function (param) {
   if (!param) param = {};
@@ -74,9 +74,9 @@ async function main() {
   //const list = await "getClubResultYButNull".query({ proc });
   const list = [
     {
-      id: "015b8b96-ee18-11ec-a93e-0242ac11000a",
-      eng_id: "bitgoeul",
-      proc: "redirect",
+      id: "11c1f932-ee3d-11ec-a93e-0242ac11000a",
+      eng_id: "leaders",
+      proc: "alert",
     },
   ];
 
@@ -94,9 +94,8 @@ async function loginSearch(list) {
 
   logfile.append(club.id + "::" + club.eng_id);
   logfile.append("\r\n");
-  const param = { clubId: club.id };
-  if (club.proc) proc = club.proc;
-  const body = await proc.api(param);
+  const param = { clubId: club.id, proc: club.proc };
+  const body = await "datesearch".api(param);
 
   logfile.append(JSON.stringify(body));
   logfile.append("\r\n\r\n");
