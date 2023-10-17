@@ -6,8 +6,8 @@ const ogs = require("open-graph-scraper");
 const log = console.log;
 const dir = console.dir;
 
-const golf_club_eng_name = "gaya";
-const golf_club_id = "09f30e23-f087-11ec-a93e-0242ac11000a";
+const golf_club_eng_name = "sky72_lake";
+const golf_club_id = "43a084ba-8806-11ed-9c7a-0242ac110007";
 /* request.post(
     "http://dev.mnemosyne.co.kr:1009/delDeviceRecord",
   { json: { deviceId: '9283dbbd-2a61-11ed-a93e-0242ac11000a' } },
@@ -16,8 +16,8 @@ const golf_club_id = "09f30e23-f087-11ec-a93e-0242ac11000a";
   }
 ); */
 //getDoneClubs();
-getLoginScript();
-//getSearchScript();
+//getLoginScript();
+getSearchScript();
 //getReserveScript();
 //setSurvey();
 //getPenaltyLink();

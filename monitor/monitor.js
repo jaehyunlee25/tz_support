@@ -72,17 +72,47 @@ async function main() {
     club.proc = "normal";
   }); */
   //const list = await "getClubResultYButNull".query({ proc });
-  const list = [
+  /* const list = [
+    {
+      id: "5a2e3107-cd84-11ec-a93e-0242ac11000a",
+      eng_id: "vivaldi_east",
+      proc: "normal",
+    },
+    {
+      id: "cb2cfcf7-f127-11ec-a93e-0242ac11000a",
+      eng_id: "rockgarden",
+      proc: "unable",
+    },
+    {
+      id: "f9564a68-eecb-11ec-a93e-0242ac11000a",
+      eng_id: "dyhills",
+      proc: "alert",
+    },
     {
       id: "11c1f932-ee3d-11ec-a93e-0242ac11000a",
       eng_id: "leaders",
       proc: "alert",
     },
-  ];
+    {
+      id: "133afbd9-eee5-11ec-a93e-0242ac11000a",
+      eng_id: "ariji",
+      proc: "redirect",
+    },
+    {
+      id: "83ef6bb6-f090-11ec-a93e-0242ac11000a",
+      eng_id: "science_daeduk",
+      proc: "redirect",
+    },
+  ]; */
 
-  /* const list = await "getClubPass".query({ proc }); */
+  const list = await "getClubPass".query({ proc });
 
   await loginSearch(list);
+
+  /* const club = list[0];
+  const param = { clubId: club.id, proc: club.proc };
+  const body = await "forcdn".api(param);
+  log(body); */
 }
 async function loginSearch(list) {
   const club = list.shift();

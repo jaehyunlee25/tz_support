@@ -517,8 +517,9 @@ EXTZLOG("url", "addr:" + addr); */
   console.clear();
 
   const dict = {
-    "https://bitgoeulcc.co.kr/user/member/login.do?tiles=web": funcLogin,
-    "https://bitgoeulcc.co.kr/web/reg/reserve.do": funcReserve,
+    "https://onetheclub.com/member/login": funcLogin,
+    "https://onetheclub.com/reservation/golf": funcReserve,
+    "https://onetheclub.com/reservation/golf": funcReserve,
   };
 
   function precheck() {}
@@ -528,7 +529,7 @@ EXTZLOG("url", "addr:" + addr); */
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       EXTZLOG("search", "funcLogin Timein ERROR");
-      location.href = "https://bitgoeulcc.co.kr/web/reg/reserve.do";
+      location.href = "https://onetheclub.com/reservation/golf?sel=D01";
       return;
     }
 
@@ -537,7 +538,7 @@ EXTZLOG("url", "addr:" + addr); */
     const tLogin = setInterval(timeraction, 1000);
     timeraction();
     function timeraction() {
-      if (!window["securedUsername"]) {
+      if (!window["usrId"]) {
         tLoginCount++;
         log("tLoginCount", tLoginCount);
         if (tLoginCount > 4) clearInterval(tLogin);
@@ -545,9 +546,15 @@ EXTZLOG("url", "addr:" + addr); */
       }
       clearInterval(tLogin);
       if (precheck()) return;
-      securedUsername.value = "${login_id}";
-      securedPassword.value = "${login_password}";
-      doc.gcn("btn btn_login")[0].click();
+      usrId.value = "${login_id}";
+      usrPwd.value = "${login_password}";
+      fnLogin.click();
+      let count = 0;
+      const t = setInterval(() => {
+        count++;
+        if (count > 50) clearInterval(t);
+        if (window["popupAlert_btn"]) window["popupAlert_btn"].click();
+      }, 100);
     }
 
     return;
@@ -597,9 +604,10 @@ EXTZLOG("url", "addr:" + addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "015b8b96-ee18-11ec-a93e-0242ac11000a";
+  const clubId = "43a084ba-8806-11ed-9c7a-0242ac110007";
   const courses = {
-    단일: "015e6de3-ee18-11ec-a93e-0242ac11000a",
+    OUT: "a3c4af6e-d1e3-11ed-a1bf-f220af5e408d",
+    IN: "43b38d79-8806-11ed-9c7a-0242ac110007",
   };
   EXTZLOG("search", ["startSearch", COMMAND].join(", "), {
     LOGID,
@@ -724,56 +732,156 @@ EXTZLOG("url", "addr:" + addr); */
     }
   }
   function mneCall(date, callback) {
-    const dt = date + "01";
-    const param = {
-      holidayType: "W",
-      nowStD: (date + "01").datify(),
-      nowEnD: (date + "31").datify(),
-    };
-    post("/web/function/internetReservationAjax.do", param, {}, (data) => {
-      const json = data.jp();
-      const els = json.reservationList;
-      Array.from(els).forEach((el) => {
-        const { GM_DATE: date, teamCount: opt } = el;
-        if (opt == 0) return;
-        dates.push([date.rm("-"), ""]);
+    intvEl = window["calendar_view_ajax_1"];
+    let count = 0;
+    const mneT = setInterval(funcInterval, INTV_TIME);
+    const logPrm = { LOGID, step: "mneCall_interval" };
+    function funcInterval() {
+      intvElcheck();
+      if (!intvEl) {
+        EXTZLOG("search", ["interval count", count].join(", "), logPrm);
+        count++;
+        if (count > INTV_COUNT) {
+          EXTZLOG("search", ["interval count out", count].join(", "), logPrm);
+          clearInterval(mneT);
+          callback();
+        }
+        return;
+      }
+      clearInterval(mneT);
+      EXTZLOG("search", "exec");
+      exec();
+    }
+    function intvElcheck() {}
+
+    function intvElcheck() {
+      intvEl = window["calendar_view_ajax_1"];
+    }
+    function exec() {
+      const compSign = "D01";
+      const param = {
+        companyCd: "",
+        clickTdId: "",
+        clickTdClass: "",
+        workMonth: date,
+        workDate: date + "01",
+        bookgDate: "",
+        bookgTime: "",
+        bookgCourse: "",
+        searchTime: "",
+        selfTYn: "",
+        temp001: "",
+        bookgComment: "",
+        temp007: "",
+        certSeq: "",
+        selectTime: "",
+        payGubun: "",
+        payAmt: "",
+        eventYn: "",
+        eventGubun: "",
+        cponYn: "",
+        eventYn: "",
+        tabSessionId: "",
+        joinYn: "",
+        flagCd: "",
+        cartAvlYn: "",
+        timeOpenYn: "N",
+        companyOpenYn: "N",
+        selCompany: compSign,
+        delegYn: "",
+        agencyReservationYn: "",
+        selectMember: selectMember.value,
+        selectCompany: compSign,
+        agencyBookgName: "",
+        agencyHp1: "010",
+        agencyHp2: "",
+        agencyHp3: "",
+        certNoChk: "",
+      };
+      post("/reservation/ajax/golfCalendar", param, {}, (data) => {
+        const ifr = doc.clm("div");
+        ifr.innerHTML = data;
+
+        const attr = "onclick";
+        const els = ifr.gba(attr, "clickCal(", true);
+        Array.from(els).forEach((el) => {
+          const [sign, gb, fulldate, opt] = el
+            .attr(attr)
+            .split(";")[0]
+            .inparen();
+          if (opt != "OPEN") return;
+          dates.push([fulldate, sign, gb]);
+        });
+        callback();
       });
-      callback();
-    });
+    }
   }
 
   function mneCallDetail(arrDate) {
     const fCall = { post, get };
     const [date, sign, gb] = arrDate;
-    const addr = "/web/function/internetReservationListAjax.do";
+    const addr = "/reservation/ajax/golfTimeList";
     const method = "post";
+    const compSign = "D01";
     const param = {
-      GM_DATE: date.datify(),
+      companyCd: "",
+      clickTdId: "A" + date,
+      clickTdClass: "",
+      workMonth: date.ct(2),
+      workDate: date,
+      bookgDate: "",
+      bookgTime: "",
+      bookgCourse: "ALL",
+      searchTime: "",
+      selfTYn: "",
+      temp001: "",
+      bookgComment: "",
+      temp007: "",
+      certSeq: "",
+      selectTime: "",
+      payGubun: "",
+      payAmt: "",
+      eventYn: "",
+      eventGubun: "",
+      cponYn: "",
+      eventYn: "",
+      tabSessionId: "",
+      joinYn: "",
+      flagCd: "",
+      cartAvlYn: "",
+      timeOpenYn: "N",
+      companyOpenYn: "N",
+      selCompany: compSign,
+      delegYn: "",
+      agencyReservationYn: "",
+      selectMember: selectMember.value,
+      selectCompany: compSign,
+      agencyBookgName: "",
+      agencyHp1: "010",
+      agencyHp2: "",
+      agencyHp3: "",
+      certNoChk: "",
     };
     const dictCourse = {
-      1: "단일",
+      1: "OUT",
+      2: "IN",
     };
 
     fCall[method](addr, param, {}, (data) => {
       const ifr = doc.clm("div");
       ifr.innerHTML = data;
 
-      const els = ifr.gba("onclick", "pf_selectMember", true);
+      const attr = "onclick";
+      const els = ifr.gba(attr, "golfConfirm(", true);
       Array.from(els).forEach((el) => {
-        let [, , , date, time, hole] = el.attr("onclick").inparen(true);
-        date = date.rm("-");
-        time = time.replace(/\s/g, "").rm(":");
+        let [type, , date, time, course, , , hole, fee_normal, fee_discount] =
+          el.attr(attr).replace(/\s/g, "").inparen(true);
+        if (type != "J57") return;
+        if (course != 1 && course != 2) return;
+        course = dictCourse[course];
         hole = hole.ct(1);
-        course = dictCourse[1];
-        const fee = el.nm(2, 2).str().replace(/\s/g, "").ct(1).rm(",") * 1;
-        fee_normal = fee;
-        fee_discount = fee;
-
-        let flg = true;
-        golf_schedule.forEach((ob) => {
-          if (ob.date == date && ob.time == time) flg = false;
-        });
-        if (!flg) return;
+        fee_normal = fee_normal.rm(",") * 1;
+        fee_discount = fee_discount.rm(",") * 1;
 
         golf_schedule.push({
           golf_club_id: clubId,
@@ -811,7 +919,7 @@ EXTZLOG("url", "addr:" + addr); */
 
   function funcList() {
     EXTZLOG("search", "funcList");
-    location.href = "https://bitgoeulcc.co.kr/web/reg/reserve.do";
+    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
     return;
   }
   function funcMain() {
@@ -825,7 +933,7 @@ EXTZLOG("url", "addr:" + addr); */
       return;
     }
 
-    location.href = "https://bitgoeulcc.co.kr/web/reg/reserve.do";
+    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
     return;
   }
   function funcOut() {
@@ -846,7 +954,7 @@ EXTZLOG("url", "addr:" + addr); */
       return;
     }
 
-    location.href = "https://bitgoeulcc.co.kr/web/reg/reserve.do";
+    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
 
     return;
   }
