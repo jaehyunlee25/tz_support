@@ -72,40 +72,15 @@ async function main() {
     club.proc = "normal";
   }); */
   //const list = await "getClubResultYButNull".query({ proc });
-  /* const list = [
+  const list = [
     {
-      id: "5a2e3107-cd84-11ec-a93e-0242ac11000a",
-      eng_id: "vivaldi_east",
-      proc: "normal",
-    },
-    {
-      id: "cb2cfcf7-f127-11ec-a93e-0242ac11000a",
-      eng_id: "rockgarden",
-      proc: "unable",
-    },
-    {
-      id: "f9564a68-eecb-11ec-a93e-0242ac11000a",
-      eng_id: "dyhills",
+      id: "1502b62e-85a9-11ec-b15c-0242ac110005",
+      eng_id: "uni_island",
       proc: "alert",
     },
-    {
-      id: "11c1f932-ee3d-11ec-a93e-0242ac11000a",
-      eng_id: "leaders",
-      proc: "alert",
-    },
-    {
-      id: "133afbd9-eee5-11ec-a93e-0242ac11000a",
-      eng_id: "ariji",
-      proc: "redirect",
-    },
-    {
-      id: "83ef6bb6-f090-11ec-a93e-0242ac11000a",
-      eng_id: "science_daeduk",
-      proc: "redirect",
-    },
-  ]; */
+  ];
 
-  const list = await "getClubPass".query({ proc });
+  /* const list = await "getClubPass".query({ proc }); */
 
   await loginSearch(list);
 
