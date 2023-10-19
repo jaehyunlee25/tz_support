@@ -74,13 +74,14 @@ async function main() {
   //const list = await "getClubResultYButNull".query({ proc });
   const list = [
     {
-      id: "1502b62e-85a9-11ec-b15c-0242ac110005",
-      eng_id: "uni_island",
-      proc: "alert",
+      id: "c4c4d24a-f136-11ec-a93e-0242ac11000a",
+      eng_id: "hwaseong",
+      proc: "normal",
     },
   ];
 
   /* const list = await "getClubPass".query({ proc }); */
+  /* const list = await "getNotTested".query({ proc }); */
 
   await loginSearch(list);
 
