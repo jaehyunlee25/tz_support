@@ -517,9 +517,8 @@ EXTZLOG("url", "addr:" + addr); */
   console.clear();
 
   const dict = {
-    "https://onetheclub.com/member/login": funcLogin,
-    "https://onetheclub.com/reservation/golf": funcReserve,
-    "https://onetheclub.com/reservation/golf": funcReserve,
+    "https://www.respia.com/#/login": funcLogin,
+    "https://www.respia.com/#/": funcReserve,
   };
 
   function precheck() {}
@@ -529,7 +528,7 @@ EXTZLOG("url", "addr:" + addr); */
     const chk = LSCHK("TZ_SEARCH_LOGIN" + clubId, 5);
     if (!chk) {
       EXTZLOG("search", "funcLogin Timein ERROR");
-      location.href = "https://onetheclub.com/reservation/golf?sel=D01";
+      location.href = "https://www.respia.com/#/";
       return;
     }
 
@@ -538,7 +537,7 @@ EXTZLOG("url", "addr:" + addr); */
     const tLogin = setInterval(timeraction, 1000);
     timeraction();
     function timeraction() {
-      if (!window["usrId"]) {
+      if (doc.gbn("id").length == 0) {
         tLoginCount++;
         log("tLoginCount", tLoginCount);
         if (tLoginCount > 4) clearInterval(tLogin);
@@ -546,15 +545,26 @@ EXTZLOG("url", "addr:" + addr); */
       }
       clearInterval(tLogin);
       if (precheck()) return;
-      usrId.value = "${login_id}";
-      usrPwd.value = "${login_password}";
-      fnLogin.click();
-      let count = 0;
-      const t = setInterval(() => {
-        count++;
-        if (count > 50) clearInterval(t);
-        if (window["popupAlert_btn"]) window["popupAlert_btn"].click();
-      }, 100);
+      const { set } = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      );
+      const event = new Event("input", {
+        bubbles: true,
+        cancelable: true,
+      });
+      const elId = doc.gbn("id")[0];
+      const elPw = doc.gbn("pw")[0];
+      set.call(elId, "${login_id}");
+      elId.dispatchEvent(event);
+
+      set.call(elPw, "${login_password}");
+      elPw.dispatchEvent(event);
+
+      doc.gcn("login_submit")[0].click();
+      /* setTimeout(() => {
+    doc.gcn("login_submit")[0].click();
+  }, 1000); */
     }
 
     return;
@@ -604,10 +614,9 @@ EXTZLOG("url", "addr:" + addr); */
 
   let global_param = {};
   const COMMAND = "GET_DATE";
-  const clubId = "43a084ba-8806-11ed-9c7a-0242ac110007";
+  const clubId = "0b007235-f137-11ec-a93e-0242ac11000a";
   const courses = {
-    OUT: "a3c4af6e-d1e3-11ed-a1bf-f220af5e408d",
-    IN: "43b38d79-8806-11ed-9c7a-0242ac110007",
+    단일: "0b03b115-f137-11ec-a93e-0242ac11000a",
   };
   EXTZLOG("search", ["startSearch", COMMAND].join(", "), {
     LOGID,
@@ -732,171 +741,70 @@ EXTZLOG("url", "addr:" + addr); */
     }
   }
   function mneCall(date, callback) {
-    intvEl = window["calendar_view_ajax_1"];
-    let count = 0;
-    const mneT = setInterval(funcInterval, INTV_TIME);
-    const logPrm = { LOGID, step: "mneCall_interval" };
-    function funcInterval() {
-      intvElcheck();
-      if (!intvEl) {
-        EXTZLOG("search", ["interval count", count].join(", "), logPrm);
-        count++;
-        if (count > INTV_COUNT) {
-          EXTZLOG("search", ["interval count out", count].join(", "), logPrm);
-          clearInterval(mneT);
-          callback();
-        }
-        return;
-      }
-      clearInterval(mneT);
-      EXTZLOG("search", "exec");
-      exec();
-    }
-    function intvElcheck() {}
+    const dt = date + "01";
+    const param = {
+      date: dt,
+    };
+    get("//respiawas.xyz/logic/book/golf/list/monthly", param, {}, (data) => {
+      const json = data.jp();
 
-    function intvElcheck() {
-      intvEl = window["calendar_view_ajax_1"];
-    }
-    function exec() {
-      const compSign = "D01";
-      const param = {
-        companyCd: "",
-        clickTdId: "",
-        clickTdClass: "",
-        workMonth: date,
-        workDate: date + "01",
-        bookgDate: "",
-        bookgTime: "",
-        bookgCourse: "",
-        searchTime: "",
-        selfTYn: "",
-        temp001: "",
-        bookgComment: "",
-        temp007: "",
-        certSeq: "",
-        selectTime: "",
-        payGubun: "",
-        payAmt: "",
-        eventYn: "",
-        eventGubun: "",
-        cponYn: "",
-        eventYn: "",
-        tabSessionId: "",
-        joinYn: "",
-        flagCd: "",
-        cartAvlYn: "",
-        timeOpenYn: "N",
-        companyOpenYn: "N",
-        selCompany: compSign,
-        delegYn: "",
-        agencyReservationYn: "",
-        selectMember: selectMember.value,
-        selectCompany: compSign,
-        agencyBookgName: "",
-        agencyHp1: "010",
-        agencyHp2: "",
-        agencyHp3: "",
-        certNoChk: "",
-      };
-      post("/reservation/ajax/golfCalendar", param, {}, (data) => {
-        const ifr = doc.clm("div");
-        ifr.innerHTML = data;
-
-        const attr = "onclick";
-        const els = ifr.gba(attr, "clickCal(", true);
-        Array.from(els).forEach((el) => {
-          const [sign, gb, fulldate, opt] = el
-            .attr(attr)
-            .split(";")[0]
-            .inparen();
-          if (opt != "OPEN") return;
-          dates.push([fulldate, sign, gb]);
-        });
-        callback();
+      const els = json;
+      Array.from(els).forEach((el) => {
+        const date = el;
+        dates.push([date, ""]);
       });
-    }
+      callback();
+    });
   }
 
   function mneCallDetail(arrDate) {
     const fCall = { post, get };
     const [date, sign, gb] = arrDate;
-    const addr = "/reservation/ajax/golfTimeList";
+    const addr = "//respiawas.xyz/logic/book/golf/list/daily?date=" + date;
     const method = "post";
-    const compSign = "D01";
     const param = {
-      companyCd: "",
-      clickTdId: "A" + date,
-      clickTdClass: "",
-      workMonth: date.ct(2),
-      workDate: date,
-      bookgDate: "",
-      bookgTime: "",
-      bookgCourse: "ALL",
-      searchTime: "",
-      selfTYn: "",
-      temp001: "",
-      bookgComment: "",
-      temp007: "",
-      certSeq: "",
-      selectTime: "",
-      payGubun: "",
-      payAmt: "",
-      eventYn: "",
-      eventGubun: "",
-      cponYn: "",
-      eventYn: "",
-      tabSessionId: "",
-      joinYn: "",
-      flagCd: "",
-      cartAvlYn: "",
-      timeOpenYn: "N",
-      companyOpenYn: "N",
-      selCompany: compSign,
-      delegYn: "",
-      agencyReservationYn: "",
-      selectMember: selectMember.value,
-      selectCompany: compSign,
-      agencyBookgName: "",
-      agencyHp1: "010",
-      agencyHp2: "",
-      agencyHp3: "",
-      certNoChk: "",
+      responseType: "json",
+      headers: {
+        headers: {},
+        lazyUpdate: null,
+        normalizeName: {},
+      },
     };
     const dictCourse = {
-      1: "OUT",
-      2: "IN",
+      1: "단일",
     };
 
-    fCall[method](addr, param, {}, (data) => {
-      const ifr = doc.clm("div");
-      ifr.innerHTML = data;
+    fCall[method](
+      addr,
+      param,
+      { "Content-Type": "application/json" },
+      (data) => {
+        const json = data.jp();
+        const els = json;
+        Array.from(els).forEach((el) => {
+          let { date, hour, minute, course } = el;
+          const time = hour.addzero() + minute.addzero();
+          course = dictCourse[course];
+          hole = 20;
+          const fee = 100000;
+          fee_normal = fee;
+          fee_discount = fee;
 
-      const attr = "onclick";
-      const els = ifr.gba(attr, "golfConfirm(", true);
-      Array.from(els).forEach((el) => {
-        let [type, , date, time, course, , , hole, fee_normal, fee_discount] =
-          el.attr(attr).replace(/\s/g, "").inparen(true);
-        if (type != "J57") return;
-        if (course != 1 && course != 2) return;
-        course = dictCourse[course];
-        hole = hole.ct(1);
-        fee_normal = fee_normal.rm(",") * 1;
-        fee_discount = fee_discount.rm(",") * 1;
-
-        golf_schedule.push({
-          golf_club_id: clubId,
-          golf_course_id: course,
-          date,
-          time,
-          in_out: "",
-          persons: "",
-          fee_normal,
-          fee_discount,
-          others: hole + "홀",
+          golf_schedule.push({
+            golf_club_id: clubId,
+            golf_course_id: course,
+            date,
+            time,
+            in_out: "",
+            persons: "",
+            fee_normal,
+            fee_discount,
+            others: hole + "홀",
+          });
         });
-      });
-      procDate();
-    });
+        procDate();
+      }
+    );
   }
 
   function LOGOUT() {
@@ -913,13 +821,14 @@ EXTZLOG("url", "addr:" + addr); */
     }
 
     const func = dict[addr];
+    log("addr> ", addr);
     if (!func) funcOther();
     else func();
   }
 
   function funcList() {
     EXTZLOG("search", "funcList");
-    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
+    location.href = "https://www.respia.com/#/";
     return;
   }
   function funcMain() {
@@ -933,7 +842,7 @@ EXTZLOG("url", "addr:" + addr); */
       return;
     }
 
-    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
+    location.href = "https://www.respia.com/#/";
     return;
   }
   function funcOut() {
@@ -954,7 +863,7 @@ EXTZLOG("url", "addr:" + addr); */
       return;
     }
 
-    location.href = "https://onetheclub.com/reservation/golf?sel=D01";
+    location.href = "https://www.respia.com/#/";
 
     return;
   }

@@ -1,3 +1,3 @@
-c4c4d24a-f136-11ec-a93e-0242ac11000a::hwaseong
-{"club_id":"c4c4d24a-f136-11ec-a93e-0242ac11000a","message":"timeout","proc":"normal"}
+e46722c6-f07a-11ec-a93e-0242ac11000a::oak_creek
+{"club_id":"e46722c6-f07a-11ec-a93e-0242ac11000a","proc":"normal","message":"redirect overflow","redirectChain":[{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_login.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/golf/g_100.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/golf/g_100.jsp"}]}
 
