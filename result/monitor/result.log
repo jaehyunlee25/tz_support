@@ -1,3 +1,3 @@
-e46722c6-f07a-11ec-a93e-0242ac11000a::oak_creek
-{"club_id":"e46722c6-f07a-11ec-a93e-0242ac11000a","proc":"normal","message":"redirect overflow","redirectChain":[{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_login.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/golf/g_100.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/p_entrance.jsp"},{"url":"https://reservation.oakvalley.co.kr/frontoffice/golf/g_100.jsp"}]}
+a3f2b1a3-707a-11ed-9c7a-0242ac110007::gapeong_benest
+{"club_id":"a3f2b1a3-707a-11ed-9c7a-0242ac110007","club":"gapeong_benest","jsonstr":"{\"club_id\":\"a3f2b1a3-707a-11ed-9c7a-0242ac110007\",\"content\":[]}"}
 
