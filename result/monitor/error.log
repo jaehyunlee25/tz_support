@@ -2,11 +2,6 @@
     "timeout": [],
     "redirect overflow": [
         {
-            "id": "e46722c6-f07a-11ec-a93e-0242ac11000a",
-            "eng_id": "oak_creek",
-            "proc": "normal"
-        },
-        {
             "id": "739f7798-ee3b-11ec-a93e-0242ac11000a",
             "eng_id": "pineridge",
             "proc": "normal"
@@ -15,11 +10,6 @@
             "id": "2d8d6527-eeb2-11ec-a93e-0242ac11000a",
             "eng_id": "stfour",
             "proc": "alert"
-        },
-        {
-            "id": "e5ece764-f8f4-11ec-a93e-0242ac11000a",
-            "eng_id": "sungmunan",
-            "proc": "redirect"
         },
         {
             "id": "24aabbaf-efbe-11ec-a93e-0242ac11000a",

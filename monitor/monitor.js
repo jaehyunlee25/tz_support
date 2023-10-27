@@ -74,9 +74,49 @@ async function main() {
   //const list = await "getClubResultYButNull".query({ proc });
   const list = [
     {
-      id: "e46722c6-f07a-11ec-a93e-0242ac11000a",
-      eng_id: "oak_creek",
-      proc: "normal",
+      id: "133afbd9-eee5-11ec-a93e-0242ac11000a",
+      eng_id: "ariji",
+      proc: "redirect",
+    },
+    {
+      id: "f9564a68-eecb-11ec-a93e-0242ac11000a",
+      eng_id: "dyhills",
+      proc: "alert",
+    },
+    {
+      id: "1f574db0-f112-11ec-a93e-0242ac11000a",
+      eng_id: "glenrose",
+      proc: "unable",
+    },
+    {
+      id: "11c1f932-ee3d-11ec-a93e-0242ac11000a",
+      eng_id: "leaders",
+      proc: "alert",
+    },
+    {
+      id: "cb2cfcf7-f127-11ec-a93e-0242ac11000a",
+      eng_id: "rockgarden",
+      proc: "unable",
+    },
+    {
+      id: "83ef6bb6-f090-11ec-a93e-0242ac11000a",
+      eng_id: "science_daeduk",
+      proc: "redirect",
+    },
+    {
+      id: "a3f2b1a3-707a-11ed-9c7a-0242ac110007",
+      eng_id: "gapeong_benest",
+      proc: "unable",
+    },
+    {
+      id: "a3f7981d-707a-11ed-9c7a-0242ac110007",
+      eng_id: "dongrae_benest",
+      proc: "unable",
+    },
+    {
+      id: "fff25000-f12a-11ec-a93e-0242ac11000a",
+      eng_id: "ansung",
+      proc: "unable",
     },
   ];
 
